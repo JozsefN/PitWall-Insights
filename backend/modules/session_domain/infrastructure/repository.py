@@ -1,27 +1,41 @@
+from sqlalchemy.orm import Session
+
 from modules.session_domain.domain.models import SessionSummary
+from modules.session_domain.infrastructure.db_models import SessionRecord
 
 
 class SessionRepository:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
     def list_sessions(self) -> list[SessionSummary]:
+        records = self.db.query(SessionRecord).order_by(SessionRecord.name.asc()).all()
+
         return [
             SessionSummary(
-                id="session-001",
-                name="FP1 Mock Session",
-                track_code="MONZA",
-                driver_code="DRV_A",
-                lap_count=12,
-            ),
-            SessionSummary(
-                id="session-002",
-                name="Qualifying Mock Session",
-                track_code="SPA",
-                driver_code="DRV_B",
-                lap_count=8,
-            ),
+                id=record.id,
+                name=record.name,
+                track_code=record.track_code,
+                driver_code=record.driver_code,
+                lap_count=record.lap_count,
+            )
+            for record in records
         ]
 
     def get_session(self, session_id: str) -> SessionSummary | None:
-        for session in self.list_sessions():
-            if session.id == session_id:
-                return session
-        return None
+        record = (
+            self.db.query(SessionRecord)
+            .filter(SessionRecord.id == session_id)
+            .first()
+        )
+
+        if record is None:
+            return None
+
+        return SessionSummary(
+            id=record.id,
+            name=record.name,
+            track_code=record.track_code,
+            driver_code=record.driver_code,
+            lap_count=record.lap_count,
+        )

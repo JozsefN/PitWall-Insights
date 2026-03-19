@@ -4,7 +4,6 @@ from modules.storage.infrastructure.db import Database
 router = APIRouter()
 
 db = Database()
-db.connect()
 
 
 @router.get("/health")

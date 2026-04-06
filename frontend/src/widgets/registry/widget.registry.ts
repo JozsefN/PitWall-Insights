@@ -1,6 +1,6 @@
 import type { WidgetDefinition, WidgetId } from "./widget.types";
-import { HealthOverviewWidget } from "../health-overview/HealthOverviewWidget";
-import { SessionsSummaryWidget } from "../sessions-summary/SessionsSummaryWidget";
+import { HealthOverviewWidget } from "../overlays/health-overview/HealthOverviewWidget";
+import { SessionsSummaryWidget } from "../overlays/sessions-summary/SessionsSummaryWidget";
 
 export const widgetRegistry: Record<WidgetId, WidgetDefinition> = {
   "health-overview": {

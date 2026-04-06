@@ -1,14 +1,14 @@
-import { WidgetCard } from "../shared/WidgetCard";
-import { WidgetError, WidgetLoading } from "../shared/WidgetState";
+import { WidgetCard } from "../../shared/WidgetCard";
+import { WidgetError, WidgetLoading } from "../../shared/WidgetState";
 
-import { useApiHealthQuery } from "../../data/queries/health.queries";
-import { useAuthHealthQuery } from "../../data/queries/auth.queries";
+import { useApiHealthQuery } from "../../../data/queries/health.queries";
+import { useAuthHealthQuery } from "../../../data/queries/auth.queries";
 import {
   useIngestionHealthQuery,
   useNormalizationHealthQuery,
-} from "../../data/queries/module-health.queries";
+} from "../../../data/queries/module-health.queries";
 
-import { mapHealthOverview } from "../../data/mappers/health.mapper";
+import { mapHealthOverview } from "../../../data/mappers/health.mapper";
 
 export function HealthOverviewWidget() {
   const api = useApiHealthQuery();

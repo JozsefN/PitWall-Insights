@@ -1,8 +1,8 @@
-import { WidgetCard } from "../shared/WidgetCard";
-import { WidgetError, WidgetLoading } from "../shared/WidgetState";
+import { WidgetCard } from "../../shared/WidgetCard";
+import { WidgetError, WidgetLoading } from "../../shared/WidgetState";
 
-import { useSessionsQuery } from "../../data/queries/sessions.queries";
-import { mapSessionsSummary } from "../../data/mappers/sessions.mapper";
+import { useSessionsQuery } from "../../../data/queries/sessions.queries";
+import { mapSessionsSummary } from "../../../data/mappers/sessions.mapper";
 
 export function SessionsSummaryWidget() {
   const { data, isLoading, isError } = useSessionsQuery();

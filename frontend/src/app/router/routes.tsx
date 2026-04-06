@@ -3,10 +3,10 @@ import { Navigate } from "react-router-dom";
 import { AppLayout } from "../layout/AppLayout";
 
 import { HomePage } from "../../pages/HomePage";
-import { SystemHealthPage } from "../../pages/SystemHealthPage"
+import { SystemHealthPage } from "../../pages/SystemHealthPage";
+import { LoginPage } from "../../pages/LoginPage";
+import { SignupPage } from "../../pages/SignupPage";
 
-// Temporary page placeholders.
-// Replace these imports with real page files as you create them.
 function SessionsPage() {
   return <div className="p-6 text-neutral-200">Sessions page placeholder</div>;
 }
@@ -23,14 +23,6 @@ function ComparePage() {
   return <div className="p-6 text-neutral-200">Compare page placeholder</div>;
 }
 
-function LoginPage() {
-  return <div className="p-6 text-neutral-200">Login page placeholder</div>;
-}
-
-function SignupPage() {
-  return <div className="p-6 text-neutral-200">Signup page placeholder</div>;
-}
-
 export const routes: RouteObject[] = [
   {
     path: "/",
@@ -44,8 +36,7 @@ export const routes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "home", element: <Navigate to="/" replace /> },
-
-       { path: "system/health", element: <SystemHealthPage /> },
+      { path: "system/health", element: <SystemHealthPage /> },
     ],
   },
 ];

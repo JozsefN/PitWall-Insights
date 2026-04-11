@@ -1,18 +1,27 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../data/api/auth.api";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const mutation = useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       localStorage.setItem("auth_token", data.access_token);
+
+      queryClient.setQueryData(["auth-session"], {
+        authenticated: true,
+        user_id: null,
+        email,
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
       navigate("/");
     },
   });
@@ -28,22 +37,23 @@ export function LoginPage() {
       : "Login failed";
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-56px)] max-w-md items-center px-4 py-8">
-      <div className="w-full rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-sm">
-        <h1 className="mb-2 text-2xl font-semibold text-white">Welcome back</h1>
-        <p className="mb-6 text-sm text-neutral-400">
-          Log in to continue to Pitwall Insights.
+    <div className="mx-auto flex min-h-[calc(100vh-72px)] max-w-md items-center px-4 py-10">
+      <div className="surface-card w-full p-8">
+        <span className="ui-pill ui-pill--focus">Member access</span>
+        <h1 className="display-font mt-5 text-[2rem] leading-none text-white">Welcome back</h1>
+        <p className="mt-3 text-sm leading-7 text-[var(--color-text-secondary)]">
+          Sign in to continue into Pitwall Insights.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div>
-            <label htmlFor="login-email" className="mb-1 block text-sm text-neutral-300">
+            <label htmlFor="login-email" className="mb-2 block text-sm text-white/90">
               Email
             </label>
             <input
               id="login-email"
               type="email"
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none transition focus:border-neutral-500"
+              className="w-full rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] px-4 py-3 text-white outline-none transition focus:border-[var(--color-accent-blue)] focus:ring-2 focus:ring-[rgba(30,144,255,0.18)]"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
@@ -53,13 +63,13 @@ export function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="login-password" className="mb-1 block text-sm text-neutral-300">
+            <label htmlFor="login-password" className="mb-2 block text-sm text-white/90">
               Password
             </label>
             <input
               id="login-password"
               type="password"
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none transition focus:border-neutral-500"
+              className="w-full rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] px-4 py-3 text-white outline-none transition focus:border-[var(--color-accent-blue)] focus:ring-2 focus:ring-[rgba(30,144,255,0.18)]"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
@@ -69,21 +79,21 @@ export function LoginPage() {
           </div>
 
           {mutation.isError ? (
-            <div className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-sm text-red-300">
+            <div className="rounded-2xl border border-[rgba(220,38,38,0.38)] bg-[rgba(220,38,38,0.12)] px-4 py-3 text-sm text-red-200">
               {errorMessage}
             </div>
           ) : null}
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-white px-4 py-2 font-medium text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
+            className="button-primary w-full"
             disabled={mutation.isPending}
           >
-            {mutation.isPending ? "Logging in..." : "Login"}
+            {mutation.isPending ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-neutral-400">
+        <p className="mt-5 text-sm text-[var(--color-text-secondary)]">
           Need an account?{" "}
           <Link to="/signup" className="text-white underline underline-offset-4">
             Sign up

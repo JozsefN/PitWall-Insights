@@ -14,10 +14,13 @@
 
 .dashboard__title {
   margin: 0;
-  font-size: 32px;
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 0.98;
   font-weight: 700;
-  color: #f4f7fb;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
 }
 
 .dashboard__subtitle {
@@ -25,7 +28,7 @@
   max-width: 760px;
   font-size: 15px;
   line-height: 1.6;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .dashboard__sections {
@@ -48,15 +51,15 @@
 
 .dashboard-section__title {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: #e5edf8;
+  color: var(--color-text-primary);
 }
 
 .dashboard-section__description {
   margin: 0;
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--color-text-secondary);
 }
 
 .dashboard-section__body {
@@ -141,17 +144,6 @@
 
 .layout-widget--height-fill {
   flex: 1 1 auto;
-}
-
-.widget-card {
-  height: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)),
-    #111827;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
-  padding: 20px;
 }
 
 @media (max-width: 1024px) {

@@ -7,7 +7,7 @@ from alembic import context
 
 from app.config import settings
 from modules.storage.infrastructure.base import Base
-from modules.session_domain.infrastructure.db_models import SessionRecord
+from modules.session_domain.infrastructure import db_models  # noqa: F401
 from modules.identity_auth.infrastructure.db_models import UserRecord
 
 config = context.config

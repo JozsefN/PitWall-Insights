@@ -1,186 +1,171 @@
-# Database & Migrations
+# Database and Migrations
 
-← [Backend Architecture](./02-backend-architecture.md)  
-→ Related: [Session Domain](./modules/session-domain.md)
+Back to [Backend Architecture](./02-backend-architecture.md)
 
----
+Related module docs:
+
+- [Session Domain](../modules/session-domain.md)
+- [Identity Auth](../modules/identity-auth.md)
+- [Ingestion](../modules/ingestion.md)
+- [Normalization](../modules/normalization.md)
 
 ## Purpose
 
-This system uses a relational database (PostgreSQL) with version-controlled schema evolution.
+The database stores:
 
-The goal is to:
+- selected imported sessions
+- normalized session structure
+- user/auth data
+- module-level operational state such as ingestion history
 
-- store structured session and user data
-- evolve schema safely over time
-- keep DB changes reproducible and trackable
-
----
+The current design is not a generic warehouse. It is a relational, entry-centric cache of selected sessions with enough structure to support archive views and future replay/metric work.
 
 ## Stack
 
-- PostgreSQL → actual database
-- SQLAlchemy → Python schema + connection layer
-- Alembic → migration/version control system
+- PostgreSQL
+- SQLAlchemy 2 declarative models
+- Alembic migrations
 
----
+## Shared Database Infrastructure
 
-## Concepts
+Shared infrastructure lives in `backend/modules/storage/infrastructure`.
 
-### SQLAlchemy (schema + connection)
+Important pieces:
 
-SQLAlchemy is used for:
+- `base.py` defines the shared declarative base
+- `db.py` creates the engine and session factory
+- `get_db()` provides a FastAPI dependency for repositories and services
 
-1. **Defining table structure in Python**
-2. **Managing DB connections**
+## Current Schema Groups
 
-Example:
+### Auth tables
 
-```python
-class SessionRecord(Base):
-    __tablename__ = "sessions"
+- `users`
 
-    id = ...
-    name = ...
-```
+Owned by: [Identity Auth](../modules/identity-auth.md)
 
-This defines the database table structure.
+### Session reference tables
 
-→ Used by: [Session Domain](./modules/session-domain.md)
+- `seasons`
+- `event_weekends`
+- `event_sessions`
+- `drivers`
+- `teams`
+- `session_entries`
 
----
+Owned by: [Session Domain](../modules/session-domain.md)
 
-### Alembic (schema evolution)
+These tables define the stable relational backbone of a cached session.
 
-Alembic tracks how the database changes over time.
+### Entry detail tables
 
-It works by creating **migration files**:
+- `entry_results`
+- `entry_laps`
+- `entry_stints`
 
-```
-migrations/versions/
-  create_sessions_table.py
-```
+These tables hold race/session detail attached to one `session_entry`.
 
-Each file represents a change:
+### Session-level event tables
 
-- create table
-- add column
-- modify schema
+- `ingestion_runs`
+- `session_weather_samples`
+- `session_status_events`
+- `session_track_status_events`
+- `session_race_control_messages`
+- `session_ticks`
 
----
+These tables describe what happened across the session as a whole.
 
-### Migrations
+### Telemetry tables
 
-A migration is a Python file with:
+- `car_telemetry_samples`
+- `position_samples`
 
-```python
-def upgrade():
-    # apply change
+These hold raw per-entry telemetry and position series, connected to:
 
-def downgrade():
-    # rollback change
-```
+- the owning `session_entry`
+- the aligned `session_tick`
+- optional `entry_lap`
+- optional `entry_stint`
 
----
+## Important Relationships
 
-## Current State (Week 1)
+The most important relationship chain is:
 
-- PostgreSQL connection working
-- SQLAlchemy engine configured
-- Base model defined
-- One table (`sessions`) defined
-- Alembic initialized
-- First migration created
+`season`
+-> `event_weekend`
+-> `event_session`
+-> `session_entry`
+-> `entry_lap` / `entry_stint` / telemetry samples
 
----
+Important design consequences:
 
-## Workflow
+- every telemetry sample belongs to one session entry
+- every telemetry sample can align to one session-wide tick
+- driver and team identity are resolved through linked reference tables instead of repeated on every row
 
-### 1. Change model
+## Replay-Oriented Storage
 
-Edit SQLAlchemy model:
+`session_ticks` are a key part of the schema.
 
-```python
-SessionRecord
-```
+They provide a session-wide time axis that can align:
 
----
+- telemetry samples
+- lap boundaries
+- weather changes
+- status changes
+- race control events
 
-### 2. Generate migration
+This is what allows future replay and multi-entry comparisons to be built on top of the current relational schema.
 
-```bash
-alembic revision --autogenerate -m "change description"
-```
+## Raw vs Derived Data
 
----
+The current database design deliberately separates:
 
-### 3. Review migration file
+- canonical imported session data
+- future derived metrics
 
-Check:
+Examples:
 
-- correct changes
-- no unintended drops
+- raw FastF1 car channels belong in telemetry tables
+- lap timing and tyre data belong in canonical session tables
+- future values such as acceleration, distance-driven, driver-ahead, or specialized chart series should eventually live in [Feature Metrics](../modules/feature-metrics.md) unless the team explicitly decides to treat them as canonical
 
----
+## Migrations
 
-### 4. Apply migration
+Alembic tracks schema evolution in `backend/migrations/versions`.
 
-```bash
-alembic upgrade head
-```
+Each migration contains:
 
----
+- `upgrade()` to apply schema changes
+- `downgrade()` to roll them back
 
-## Data Flow
+The migration history currently includes:
 
-See: [Data Flow](./04-data-flow.md)
+- initial session table
+- users table
+- expanded entry-centric session cache schema
 
-DB interaction happens here:
+## Standard Workflow
 
-Client  
-→ API  
-→ Application Service  
-→ Repository  
-→ Database  
-→ Response
+1. Change the SQLAlchemy models.
+2. Generate or write the Alembic migration.
+3. Review the migration carefully.
+4. Apply with `alembic upgrade head`.
+5. Test against a real database before assuming the schema is correct.
 
----
+## Practical Rules
 
-## Why this approach is good
+- Never manually patch production schema outside migrations.
+- Review foreign keys and indexes, not just columns.
+- Be careful with destructive migration steps when replacing placeholder tables.
+- Keep table naming consistent with module ownership and query usage.
 
-### 1. Safe evolution
-Schema changes are versioned and reversible
+## Future Database Work
 
-### 2. Reproducibility
-Any environment can recreate DB state
+Likely future additions:
 
-### 3. Separation of concerns
-DB structure is isolated in infrastructure layer
-
-### 4. Future scalability
-Supports large schema growth without chaos
-
----
-
-## Future
-
-### More tables
-
-- users → [Identity Auth](./modules/identity-auth.md)
-- laps → [Session Domain](./modules/session-domain.md)
-- ingestion_runs → [Ingestion](./modules/ingestion.md)
-- normalized_sessions → [Normalization](./modules/normalization.md)
-- metrics → [Feature Metrics](./modules/feature-metrics.md)
-
-### Advanced features
-
-- indexing
-- partitioning (for telemetry scale)
-- analytics queries
-
----
-
-## Key Rule
-
-> Always change models → generate migration → apply migration  
-> Never manually edit production DB schema.
+- feature-metric tables for derived telemetry series
+- better pagination/downsampling support for telemetry-heavy reads
+- partitioning or retention strategies if telemetry volume grows significantly
+- optional job tracking if imports become asynchronous

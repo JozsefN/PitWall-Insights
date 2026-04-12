@@ -1,25 +1,70 @@
 # Overview
 
-← Back to [Architecture Home](./README.md)
+Back to [Architecture Home](./README.md)
 
-## What this system is
+## What PitWall-Insights Is
 
-A modular motorsport data platform.
+PitWall-Insights is a motorsport data platform centered on Formula 1 session exploration, replay-style analysis, and future live-race support.
 
-## Core flow
+The current product direction has four major capabilities:
 
-See: [System Architecture](./01-system-architecture.md)
+- import a selected historical session from FastF1
+- normalize that session into a stable internal schema
+- expose the cached session through backend APIs
+- power archive, telemetry, and future metric-driven frontend surfaces
 
-## Backend structure
+## Core Product Idea
 
-See: [Backend Architecture](./02-backend-architecture.md)
+The project is not trying to be a generic data lake. The current architecture is optimized around one practical workflow:
 
-## Data movement
+1. choose a session
+2. import it on demand
+3. normalize it into an entry-centric schema
+4. query it for archive views, telemetry views, and later replay or analysis widgets
 
-See: [Data Flow](./04-data-flow.md)
+That decision affects almost every layer:
 
-## Modules
+- ingestion is source-aware
+- normalization creates one canonical internal shape
+- storage keeps selected sessions temporarily
+- APIs expose session-focused resources
 
-- [Session Domain](./modules/session-domain.md)
-- [Ingestion](./modules/ingestion.md)
-- [Normalization](./modules/normalization.md)
+## Current State
+
+Today the repository contains:
+
+- a FastAPI backend in `backend/`
+- a React frontend in `frontend/`
+- architecture and module documentation in `docs/`
+- a PostgreSQL schema managed through Alembic
+
+The backend is meaningfully ahead of the frontend at the moment. The backend already includes:
+
+- auth endpoints
+- health endpoints
+- a session catalog/import/cache API
+- a relational schema for sessions, entries, laps, stints, telemetry, and ticks
+
+The frontend currently:
+
+- handles app layout and navigation
+- uses React Query and Axios for API communication
+- consumes auth and basic session APIs
+- still renders many pages as placeholders
+
+## Guiding Architectural Principles
+
+- Prefer explicit module boundaries over shared magic.
+- Keep source-specific logic in ingestion, not spread across the whole backend.
+- Keep canonical session structure in normalization and session-domain storage.
+- Keep future derived metrics separate from raw imported data.
+- Model the driver/car combination as a first-class session entry.
+- Optimize for readability and future change, not the shortest possible implementation.
+
+## Where To Go Next
+
+- [System Architecture](./01-system-architecture.md) for the high-level pipeline
+- [Backend Architecture](./02-backend-architecture.md) for code organization
+- [Data Flow](./04-data-flow.md) for request and import lifecycles
+- [Database and Migrations](./06-database-and-migrations.md) for the current relational model
+- [Session Domain](../modules/session-domain.md) for the core motorsport data model

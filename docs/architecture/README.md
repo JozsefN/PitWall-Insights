@@ -1,37 +1,74 @@
-# Architecture Overview
+# Architecture Home
 
-## Goal
+This folder describes how PitWall-Insights is structured today and where the project is heading next.
 
-This system is a modular motorsport data platform designed to:
+The goal of these docs is practical clarity:
 
-- ingest telemetry/session data
-- normalize it into a canonical model
-- store it
-- compute features and metrics
-- deliver it via APIs
-- render it in a modular frontend
+- explain how the current backend and frontend are organized
+- show how data moves through the system
+- document the current database model and module boundaries
+- make future changes easier to place in the right layer
 
-## Philosophy
+## Recommended Reading Order
 
-The architecture is intentionally **thin and modular**:
+1. [Overview](./00-overview.md)
+2. [System Architecture](./01-system-architecture.md)
+3. [Backend Architecture](./02-backend-architecture.md)
+4. [Frontend Architecture](./03-frontend-architecture.md)
+5. [Data Flow](./04-data-flow.md)
+6. [API Design](./05-api-design.md)
+7. [Database and Migrations](./06-database-and-migrations.md)
 
-- Each module has a clear responsibility
-- HTTP delivery is centralized
-- Domain logic is separated from infrastructure
-- The system can evolve without large rewrites
+## Module Reference
 
-## Current State (Week 1)
+- [Session Domain](../modules/session-domain.md)
+- [Identity Auth](../modules/identity-auth.md)
+- [Ingestion](../modules/ingestion.md)
+- [Normalization](../modules/normalization.md)
+- [Feature Metrics](../modules/feature-metrics.md)
+- [Story Feed](../modules/story-feed.md)
 
-- Backend modules exist with skeleton structure
-- REST API is functional
-- Database connection and migrations are in place
-- Frontend skeleton is not yet complete
-- Most modules return stub/mock data
+## Current Architectural Direction
 
-## Future Direction
+The current architecture is centered on one main workflow:
 
-- ingestion pipeline becomes real (file/API ingestion)
-- normalization builds canonical session schema
-- feature_metrics computes telemetry metrics
-- story_feed generates insights
-- frontend becomes configurable and modular
+1. discover a Formula 1 session
+2. import it from FastF1
+3. normalize it into a canonical internal snapshot
+4. store it in a relational selected-session cache
+5. expose it through API resources for frontend views and future replay-style tooling
+
+This means the most important active modules right now are:
+
+- `ingestion`
+- `normalization`
+- `session_domain`
+- `delivery_api`
+
+`feature_metrics` and `story_feed` are intentionally present early so the eventual architecture has somewhere clean to put derived analysis and editorial insight logic without overloading the canonical session schema.
+
+## What Changed Recently
+
+The backend has moved beyond the original placeholder session model.
+
+It now includes:
+
+- a FastF1-backed ingestion path
+- an entry-centric session model
+- laps, stints, weather, status, and race-control storage
+- per-entry raw telemetry tables
+- session-wide tick alignment for replay-oriented reads
+
+The docs in this folder have been expanded to reflect that newer architecture rather than the original scaffold-only state.
+
+## Documentation Scope
+
+These docs are intentionally architecture-focused.
+
+They do not try to replace:
+
+- endpoint-level API examples in code or OpenAPI
+- inline code comments near tricky implementation details
+- future operational runbooks
+
+Instead, they explain where responsibilities live and why.

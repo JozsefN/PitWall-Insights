@@ -189,12 +189,29 @@ class SessionRepository:
         *,
         offset: int,
         limit: int,
+        lap_number: int | None = None,
+        session_time_from_ms: int | None = None,
+        session_time_to_ms: int | None = None,
     ) -> list[CarTelemetrySampleModel]:
         self._assert_entry_belongs_to_session(session_id, entry_id)
+        query = self.db.query(CarTelemetrySampleRecord).filter(
+            CarTelemetrySampleRecord.session_entry_id == entry_id
+        )
+
+        if lap_number is not None:
+            query = query.join(
+                EntryLapRecord,
+                CarTelemetrySampleRecord.lap_id == EntryLapRecord.id,
+            ).filter(EntryLapRecord.lap_number == lap_number)
+
+        if session_time_from_ms is not None:
+            query = query.filter(CarTelemetrySampleRecord.session_time_ms >= session_time_from_ms)
+
+        if session_time_to_ms is not None:
+            query = query.filter(CarTelemetrySampleRecord.session_time_ms <= session_time_to_ms)
+
         records = (
-            self.db.query(CarTelemetrySampleRecord)
-            .filter(CarTelemetrySampleRecord.session_entry_id == entry_id)
-            .order_by(CarTelemetrySampleRecord.sample_seq.asc())
+            query.order_by(CarTelemetrySampleRecord.sample_seq.asc())
             .offset(offset)
             .limit(limit)
             .all()
@@ -208,12 +225,29 @@ class SessionRepository:
         *,
         offset: int,
         limit: int,
+        lap_number: int | None = None,
+        session_time_from_ms: int | None = None,
+        session_time_to_ms: int | None = None,
     ) -> list[PositionSampleModel]:
         self._assert_entry_belongs_to_session(session_id, entry_id)
+        query = self.db.query(PositionSampleRecord).filter(
+            PositionSampleRecord.session_entry_id == entry_id
+        )
+
+        if lap_number is not None:
+            query = query.join(
+                EntryLapRecord,
+                PositionSampleRecord.lap_id == EntryLapRecord.id,
+            ).filter(EntryLapRecord.lap_number == lap_number)
+
+        if session_time_from_ms is not None:
+            query = query.filter(PositionSampleRecord.session_time_ms >= session_time_from_ms)
+
+        if session_time_to_ms is not None:
+            query = query.filter(PositionSampleRecord.session_time_ms <= session_time_to_ms)
+
         records = (
-            self.db.query(PositionSampleRecord)
-            .filter(PositionSampleRecord.session_entry_id == entry_id)
-            .order_by(PositionSampleRecord.sample_seq.asc())
+            query.order_by(PositionSampleRecord.sample_seq.asc())
             .offset(offset)
             .limit(limit)
             .all()

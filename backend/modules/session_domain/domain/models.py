@@ -26,6 +26,7 @@ class SessionImportRequest(BaseModel):
     season_year: int = Field(ge=2018, le=2100)
     round_number: int = Field(ge=0)
     session_name: str = Field(min_length=1, max_length=128)
+    source_session_key: str | None = Field(default=None, min_length=1, max_length=255)
     force_refresh: bool = False
 
 

@@ -1,7 +1,10 @@
 import { apiClient } from "./client";
-import type { ModuleHealthResponse } from "../contracts/module-health.contracts";
+import type {
+  IngestionHealthDetails,
+  ModuleHealthResponse,
+} from "../contracts/module-health.contracts";
 
-export async function getIngestionHealth(): Promise<ModuleHealthResponse> {
+export async function getIngestionHealth(): Promise<ModuleHealthResponse<IngestionHealthDetails>> {
   const { data } = await apiClient.get("/api/ingestion/health");
   return data;
 }

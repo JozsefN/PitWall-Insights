@@ -21,12 +21,22 @@ The goal of these docs is practical clarity:
 
 ## Module Reference
 
+### Backend Modules
+
 - [Session Domain](../modules/session-domain.md)
 - [Identity Auth](../modules/identity-auth.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
 - [Feature Metrics](../modules/feature-metrics.md)
 - [Story Feed](../modules/story-feed.md)
+
+### Frontend Modules
+
+- [Frontend App Shell](../modules/frontend-app-shell.md)
+- [Frontend Data Layer](../modules/frontend-data-layer.md)
+- [Frontend Auth](../modules/frontend-auth.md)
+- [Frontend Sessions Workspace](../modules/frontend-sessions.md)
+- [Frontend Widget System](../modules/frontend-widget-system.md)
 
 ## Current Architectural Direction
 

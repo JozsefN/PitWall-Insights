@@ -8,6 +8,21 @@ class AuthRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def get_user_by_id(self, user_id: str) -> User | None:
+        record = (
+            self.db.query(UserRecord)
+            .filter(UserRecord.id == user_id)
+            .first()
+        )
+
+        if record is None:
+            return None
+
+        return User(
+            id=record.id,
+            email=record.email,
+        )
+
     def get_user_by_email(self, email: str) -> User | None:
         record = (
             self.db.query(UserRecord)

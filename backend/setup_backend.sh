@@ -3,6 +3,8 @@ set -euo pipefail
 
 SKIP_DOCKER="${SKIP_DOCKER:-0}"
 SKIP_RUN="${SKIP_RUN:-0}"
+DB_READY_ATTEMPTS="${DB_READY_ATTEMPTS:-30}"
+DB_READY_SLEEP_SECONDS="${DB_READY_SLEEP_SECONDS:-2}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
@@ -27,6 +29,29 @@ fi
 
 PYTHON_EXE=".venv/Scripts/python.exe"
 
+check_database_ready() {
+  "$PYTHON_EXE" -c 'from sqlalchemy import create_engine, text; from app.config import settings; engine = create_engine(settings.database_url, future=True, pool_pre_ping=True); connection = engine.connect(); connection.execute(text("SELECT 1")); connection.close(); engine.dispose()' >/dev/null 2>&1
+}
+
+wait_for_database() {
+  echo "==> Waiting for database readiness"
+
+  for ((attempt=1; attempt<=DB_READY_ATTEMPTS; attempt++)); do
+    if check_database_ready; then
+      echo "==> Database is ready"
+      return 0
+    fi
+
+    if [ "$attempt" -lt "$DB_READY_ATTEMPTS" ]; then
+      echo "   Database not ready yet ($attempt/$DB_READY_ATTEMPTS). Retrying in ${DB_READY_SLEEP_SECONDS}s..."
+      sleep "$DB_READY_SLEEP_SECONDS"
+    fi
+  done
+
+  echo "Database did not become ready in time. Check PostgreSQL startup logs and connection settings." >&2
+  return 1
+}
+
 echo "==> Upgrading pip"
 "$PYTHON_EXE" -m pip install --upgrade pip
 
@@ -45,6 +70,7 @@ else
 fi
 
 if [ -f "alembic.ini" ]; then
+  wait_for_database
   echo "==> Running database migrations"
   "$PYTHON_EXE" -m alembic upgrade head
 else

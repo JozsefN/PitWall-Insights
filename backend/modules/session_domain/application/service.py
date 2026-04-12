@@ -70,12 +70,18 @@ class SessionService:
         *,
         offset: int,
         limit: int,
+        lap_number: int | None = None,
+        session_time_from_ms: int | None = None,
+        session_time_to_ms: int | None = None,
     ) -> list[CarTelemetrySampleModel]:
         return self.repository.list_car_telemetry(
             session_id,
             entry_id,
             offset=offset,
             limit=limit,
+            lap_number=lap_number,
+            session_time_from_ms=session_time_from_ms,
+            session_time_to_ms=session_time_to_ms,
         )
 
     def list_position_telemetry(
@@ -85,12 +91,18 @@ class SessionService:
         *,
         offset: int,
         limit: int,
+        lap_number: int | None = None,
+        session_time_from_ms: int | None = None,
+        session_time_to_ms: int | None = None,
     ) -> list[PositionSampleModel]:
         return self.repository.list_position_telemetry(
             session_id,
             entry_id,
             offset=offset,
             limit=limit,
+            lap_number=lap_number,
+            session_time_from_ms=session_time_from_ms,
+            session_time_to_ms=session_time_to_ms,
         )
 
     def list_ticks(

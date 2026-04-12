@@ -108,7 +108,10 @@ def list_car_telemetry(
     session_id: str,
     entry_id: str,
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=500, ge=1, le=5000),
+    limit: int = Query(default=500, ge=1, le=20000),
+    lap_number: int | None = Query(default=None, ge=1),
+    session_time_from_ms: int | None = Query(default=None, ge=0),
+    session_time_to_ms: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     service = build_session_service(db)
@@ -120,6 +123,9 @@ def list_car_telemetry(
                 entry_id,
                 offset=offset,
                 limit=limit,
+                lap_number=lap_number,
+                session_time_from_ms=session_time_from_ms,
+                session_time_to_ms=session_time_to_ms,
             )
         ]
     except ValueError as exc:
@@ -131,7 +137,10 @@ def list_position_telemetry(
     session_id: str,
     entry_id: str,
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=500, ge=1, le=5000),
+    limit: int = Query(default=500, ge=1, le=20000),
+    lap_number: int | None = Query(default=None, ge=1),
+    session_time_from_ms: int | None = Query(default=None, ge=0),
+    session_time_to_ms: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     service = build_session_service(db)
@@ -143,6 +152,9 @@ def list_position_telemetry(
                 entry_id,
                 offset=offset,
                 limit=limit,
+                lap_number=lap_number,
+                session_time_from_ms=session_time_from_ms,
+                session_time_to_ms=session_time_to_ms,
             )
         ]
     except ValueError as exc:
@@ -153,7 +165,7 @@ def list_position_telemetry(
 def list_session_ticks(
     session_id: str,
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=1000, ge=1, le=10000),
+    limit: int = Query(default=5000, ge=1, le=50000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     service = build_session_service(db)

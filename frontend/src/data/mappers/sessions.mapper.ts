@@ -11,6 +11,10 @@ type SessionRecord = {
   health?: string;
 };
 
+type SessionsEnvelope = {
+  items: SessionRecord[];
+};
+
 function normalizeSessions(data: unknown): SessionRecord[] {
   if (Array.isArray(data)) {
     return data as SessionRecord[];
@@ -20,9 +24,9 @@ function normalizeSessions(data: unknown): SessionRecord[] {
     typeof data === "object" &&
     data !== null &&
     "items" in data &&
-    Array.isArray((data as any).items)
+    Array.isArray((data as SessionsEnvelope).items)
   ) {
-    return (data as any).items;
+    return (data as SessionsEnvelope).items;
   }
 
   return [];

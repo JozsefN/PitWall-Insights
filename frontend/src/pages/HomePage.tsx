@@ -88,8 +88,8 @@ const destinations: Destination[] = [
     to: "/sessions",
     action: "Browse sessions",
     pill: "Archive",
-    tone: "soon",
-    highlights: ["Past weekends", "Session detail", "Race recap"],
+    tone: "ready",
+    highlights: ["Session import", "Layout workspace", "Replay mode"],
   },
   {
     title: "Standings",

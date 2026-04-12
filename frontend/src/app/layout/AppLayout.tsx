@@ -14,7 +14,7 @@ export function AppLayout() {
       <div
         className={[
           "min-h-[calc(100vh-72px)]",
-          isMarketingSurface ? "" : "mx-auto flex w-full max-w-[1440px]",
+          isMarketingSurface ? "" : "mx-auto flex w-full max-w-[1680px]",
         ]
           .filter(Boolean)
           .join(" ")}

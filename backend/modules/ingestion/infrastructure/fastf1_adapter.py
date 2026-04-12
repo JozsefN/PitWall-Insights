@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -44,6 +45,14 @@ class FastF1Adapter:
 
         for row in schedule.to_dict(orient="records"):
             event_name = self._as_text(row.get("EventName")) or f"Round {season_year}"
+            round_number = self._as_int(row.get("RoundNumber"))
+            event_reference_date = self._resolve_event_reference_date(row)
+            source_event_key = self._build_event_key(
+                season_year=season_year,
+                round_number=round_number,
+                event_name=event_name,
+                event_date=event_reference_date,
+            )
             session_columns = [
                 key for key in row.keys() if key.startswith("Session") and key[-1:].isdigit()
             ]
@@ -52,23 +61,18 @@ class FastF1Adapter:
                 if not session_name:
                     continue
 
-                session_date = row.get(f"{key}DateUtc") or row.get(f"{key}Date")
+                session_date = self._resolve_session_date(row, key)
                 session_type = row.get(f"{key}Type")
-                round_number = self._as_int(row.get("RoundNumber"))
                 session_key = self._build_session_key(
-                    season_year=season_year,
-                    round_number=round_number,
+                    source_event_key=source_event_key,
                     session_name=session_name,
+                    session_date=session_date,
                 )
 
                 catalog_items.append(
                     SessionCatalogItem(
                         source=self.source_name,
-                        source_event_key=self._build_event_key(
-                            season_year=season_year,
-                            round_number=round_number,
-                            event_name=event_name,
-                        ),
+                        source_event_key=source_event_key,
                         source_session_key=session_key,
                         season_year=season_year,
                         round_number=round_number,
@@ -96,11 +100,7 @@ class FastF1Adapter:
 
     def load_session(self, request: SessionImportRequest) -> SourceSessionBundle:
         fastf1 = self._load_fastf1()
-        session = fastf1.get_session(
-            request.season_year,
-            request.round_number,
-            request.session_name,
-        )
+        session = self._resolve_session(fastf1, request)
         session.load(
             laps=True,
             telemetry=True,
@@ -111,18 +111,22 @@ class FastF1Adapter:
         event = session.event
         event_name = self._as_text(event.get("EventName")) or f"Round {request.round_number}"
         session_display_name = self._as_text(getattr(session, "name", None)) or request.session_name
+        event_reference_date = self._as_datetime(event.get("EventDate")) or self._as_datetime(getattr(session, "date", None))
+        source_event_key = self._build_event_key(
+            season_year=request.season_year,
+            round_number=request.round_number,
+            event_name=event_name,
+            event_date=event_reference_date,
+        )
+        source_session_key = self._build_session_key(
+            source_event_key=source_event_key,
+            session_name=request.session_name,
+            session_date=self._as_datetime(getattr(session, "date", None)),
+        )
         catalog_item = SessionCatalogItem(
             source=self.source_name,
-            source_event_key=self._build_event_key(
-                season_year=request.season_year,
-                round_number=request.round_number,
-                event_name=event_name,
-            ),
-            source_session_key=self._build_session_key(
-                season_year=request.season_year,
-                round_number=request.round_number,
-                session_name=request.session_name,
-            ),
+            source_event_key=source_event_key,
+            source_session_key=source_session_key,
             season_year=request.season_year,
             round_number=request.round_number,
             event_name=event_name,
@@ -172,6 +176,62 @@ class FastF1Adapter:
             position_data=position_data,
             fastf1_version=self._as_text(getattr(fastf1, "__version__", None)),
         )
+
+    def _resolve_session(self, fastf1: Any, request: SessionImportRequest) -> Any:
+        if request.source_session_key:
+            event = self._find_event_by_source_session_key(
+                fastf1,
+                request.season_year,
+                request.source_session_key,
+            )
+            if event is not None:
+                return event.get_session(request.session_name)
+
+        return fastf1.get_session(
+            request.season_year,
+            request.round_number,
+            request.session_name,
+        )
+
+    def _find_event_by_source_session_key(
+        self,
+        fastf1: Any,
+        season_year: int,
+        source_session_key: str,
+    ) -> Any | None:
+        schedule = fastf1.get_event_schedule(season_year)
+        rows = schedule.to_dict(orient="records")
+
+        for index, row in enumerate(rows):
+            event_name = self._as_text(row.get("EventName")) or f"Round {season_year}"
+            round_number = self._as_int(row.get("RoundNumber"))
+            event_reference_date = self._resolve_event_reference_date(row)
+            source_event_key = self._build_event_key(
+                season_year=season_year,
+                round_number=round_number,
+                event_name=event_name,
+                event_date=event_reference_date,
+            )
+            session_columns = [
+                key for key in row.keys() if key.startswith("Session") and key[-1:].isdigit()
+            ]
+
+            for key in sorted(session_columns):
+                session_name = self._as_text(row.get(key))
+                if not session_name:
+                    continue
+
+                session_date = self._resolve_session_date(row, key)
+                candidate_key = self._build_session_key(
+                    source_event_key=source_event_key,
+                    session_name=session_name,
+                    session_date=session_date,
+                )
+
+                if candidate_key == source_session_key:
+                    return schedule.iloc[index]
+
+        return None
 
     def _load_fastf1(self) -> Any:
         if self._fastf1 is None:
@@ -299,11 +359,53 @@ class FastF1Adapter:
         return None
 
     @staticmethod
-    def _build_event_key(season_year: int, round_number: int | None, event_name: str | None) -> str:
-        event_fragment = (event_name or "unknown-event").strip().lower().replace(" ", "-")
-        return f"fastf1:{season_year}:{round_number or 0}:{event_fragment}"
+    def _resolve_event_reference_date(row: dict[str, Any]) -> datetime | None:
+        for key in ("EventDate", "Session1DateUtc", "Session1Date"):
+            value = FastF1Adapter._as_datetime(row.get(key))
+            if value is not None:
+                return value
+        return None
 
     @staticmethod
-    def _build_session_key(season_year: int, round_number: int | None, session_name: str) -> str:
-        session_fragment = session_name.strip().lower().replace(" ", "-")
-        return f"fastf1:{season_year}:{round_number or 0}:{session_fragment}"
+    def _resolve_session_date(row: dict[str, Any], session_column: str) -> datetime | None:
+        return FastF1Adapter._as_datetime(
+            row.get(f"{session_column}DateUtc") or row.get(f"{session_column}Date")
+        )
+
+    @staticmethod
+    def _build_event_key(
+        season_year: int,
+        round_number: int | None,
+        event_name: str | None,
+        event_date: datetime | None,
+    ) -> str:
+        event_fragment = FastF1Adapter._slugify(event_name or "unknown-event")
+        date_fragment = FastF1Adapter._format_key_date(event_date, include_time=False)
+        return f"fastf1:{season_year}:{round_number or 0}:{date_fragment}:{event_fragment}"
+
+    @staticmethod
+    def _build_session_key(
+        source_event_key: str,
+        session_name: str,
+        session_date: datetime | None,
+    ) -> str:
+        session_fragment = FastF1Adapter._slugify(session_name)
+        date_fragment = FastF1Adapter._format_key_date(session_date, include_time=True)
+        return f"{source_event_key}:{date_fragment}:{session_fragment}"
+
+    @staticmethod
+    def _slugify(value: str) -> str:
+        normalized = re.sub(r"[^a-z0-9]+", "-", value.strip().lower()).strip("-")
+        return normalized or "unknown"
+
+    @staticmethod
+    def _format_key_date(value: datetime | None, *, include_time: bool) -> str:
+        if value is None:
+            return "unknown-date"
+
+        if value.tzinfo is None:
+            normalized = value.replace(tzinfo=timezone.utc)
+        else:
+            normalized = value.astimezone(timezone.utc)
+
+        return normalized.strftime("%Y%m%dT%H%M%SZ" if include_time else "%Y%m%d")

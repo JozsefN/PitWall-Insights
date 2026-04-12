@@ -10,20 +10,44 @@ export type HealthOverviewModel = {
   items: HealthItem[];
 };
 
-function normalizeStatus(value: unknown): HealthStatus {
+export function normalizeHealthStatus(value: unknown): HealthStatus {
   if (!value) return "unknown";
 
   if (typeof value === "string") {
     const v = value.toLowerCase();
 
-    if (["ok", "healthy", "up"].includes(v)) return "healthy";
-    if (["degraded", "warning"].includes(v)) return "degraded";
-    if (["down", "error", "failed"].includes(v)) return "down";
+    if (
+      v.startsWith("ready") ||
+      v.startsWith("connected") ||
+      v.startsWith("healthy")
+    ) {
+      return "healthy";
+    }
+
+    if (v.startsWith("error") || v.startsWith("failed") || v.startsWith("disconnected")) {
+      return "down";
+    }
+
+    if (v.startsWith("stub") || v.startsWith("not_implemented")) {
+      return "degraded";
+    }
+
+    if (["ok", "healthy", "up", "connected", "ready", "enabled"].includes(v)) {
+      return "healthy";
+    }
+
+    if (["degraded", "warning", "stub", "not_implemented", "pending"].includes(v)) {
+      return "degraded";
+    }
+
+    if (["down", "error", "failed", "disconnected"].includes(v)) {
+      return "down";
+    }
   }
 
   if (typeof value === "object" && value !== null) {
     if ("status" in value) {
-      return normalizeStatus((value as any).status);
+      return normalizeHealthStatus((value as { status?: unknown }).status);
     }
   }
 
@@ -41,22 +65,22 @@ export function mapHealthOverview(params: {
       {
         key: "api",
         label: "API",
-        status: normalizeStatus(params.api),
+        status: normalizeHealthStatus(params.api),
       },
       {
         key: "auth",
         label: "Auth",
-        status: normalizeStatus(params.auth),
+        status: normalizeHealthStatus(params.auth),
       },
       {
         key: "ingestion",
         label: "Ingestion",
-        status: normalizeStatus(params.ingestion),
+        status: normalizeHealthStatus(params.ingestion),
       },
       {
         key: "normalization",
         label: "Normalization",
-        status: normalizeStatus(params.normalization),
+        status: normalizeHealthStatus(params.normalization),
       },
     ],
   };

@@ -6,6 +6,8 @@ import type {
   LayoutGroupNode,
   LayoutWidgetNode,
 } from "../registry/widget.types";
+import { WidgetCard } from "./WidgetCard";
+import { WidgetError } from "./WidgetState";
 import "./dashboard-renderer.css";
 
 type DashboardRendererProps = {
@@ -82,7 +84,18 @@ function LayoutGroupRenderer({ node }: { node: LayoutGroupNode }) {
 function LayoutWidgetRenderer({ node }: { node: LayoutWidgetNode }) {
   const definition = widgetRegistry[node.widgetId];
 
-  if (!definition) return null;
+  if (!definition) {
+    return (
+      <div className="layout-widget layout-widget--width-fill layout-widget--height-auto">
+        <WidgetCard
+          title="Unavailable Widget"
+          description={`The widget "${node.widgetId}" is not registered in this build.`}
+        >
+          <WidgetError />
+        </WidgetCard>
+      </div>
+    );
+  }
 
   const Component = definition.component;
 
@@ -102,7 +115,7 @@ function LayoutWidgetRenderer({ node }: { node: LayoutWidgetNode }) {
         flexGrow: node.grow ?? 0,
       }}
     >
-      <Component />
+      <Component options={node.options} />
     </div>
   );
 }

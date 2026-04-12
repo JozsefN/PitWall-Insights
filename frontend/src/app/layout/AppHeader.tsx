@@ -41,7 +41,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border-subtle)] bg-[rgba(11,13,18,0.88)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="group flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(225,6,0,0.24)] bg-[rgba(225,6,0,0.1)] shadow-[0_0_24px_rgba(225,6,0,0.18)]">

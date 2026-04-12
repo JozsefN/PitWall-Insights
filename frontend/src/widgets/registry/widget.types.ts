@@ -1,8 +1,23 @@
 import type { ComponentType } from "react";
 
+export type DashboardAudience =
+  | "session-lookback"
+  | "live-race";
+
+export type SessionWorkspaceMode =
+  | "lookback"
+  | "simulation";
+
 export type WidgetId =
   | "health-overview"
-  | "sessions-summary";
+  | "sessions-summary"
+  | "telemetry-line-chart"
+  | "brake-trace-chart"
+  | "lap-time-trend"
+  | "lap-table"
+  | "session-track-map"
+  | "replay-track-map"
+  | "replay-driver-cards";
 
 export type LayoutDirection = "row" | "column";
 
@@ -27,12 +42,14 @@ export type WidgetDefinition = {
   id: WidgetId;
   title: string;
   description?: string;
-  component: ComponentType;
+  supportedAudiences?: DashboardAudience[];
+  component: ComponentType<{ options?: Record<string, unknown> }>;
 };
 
 export type LayoutWidgetNode = {
   type: "widget";
   widgetId: WidgetId;
+  options?: Record<string, unknown>;
   width?: WidthMode;
   height?: HeightMode;
   minHeight?: number;
@@ -62,4 +79,18 @@ export type DashboardConfig = {
   title?: string;
   subtitle?: string;
   sections: DashboardSection[];
+};
+
+export type LayoutSource = "builtin" | "user";
+
+export type LayoutRecord = {
+  id: string;
+  name: string;
+  description?: string | null;
+  source: LayoutSource;
+  audience: DashboardAudience;
+  schemaVersion: number;
+  config: DashboardConfig;
+  updatedAt: string;
+  storageId?: string;
 };

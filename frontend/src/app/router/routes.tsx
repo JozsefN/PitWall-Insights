@@ -7,6 +7,8 @@ import { SystemHealthPage } from "../../pages/SystemHealthPage";
 import { LoginPage } from "../../pages/LoginPage";
 import { SignupPage } from "../../pages/SignupPage";
 import { FeaturePlaceholderPage } from "../../pages/FeaturePlaceholderPage";
+import { SessionsExplorerPage } from "../../pages/SessionsExplorerPage";
+import { SessionWorkspacePage } from "../../pages/SessionWorkspacePage";
 
 export const routes: RouteObject[] = [
   {
@@ -16,53 +18,11 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       {
         path: "sessions",
-        element: (
-          <FeaturePlaceholderPage
-            eyebrow="Sessions surface"
-            title="Sessions Explorer"
-            description="Look back through previous races, qualifying sessions, and full weekends from one archive-focused surface."
-            tone="soon"
-            details={[
-              {
-                title: "Weekend archive",
-                body: "Browse past grands prix and jump into race, qualifying, or practice context without losing the bigger picture.",
-              },
-              {
-                title: "Session jump-in",
-                body: "Open the exact session you want quickly, then keep the rest of the weekend close by.",
-              },
-              {
-                title: "Recap ready",
-                body: "This surface is where past race stories and session breakdowns will start to feel searchable and connected.",
-              },
-            ]}
-          />
-        ),
+        element: <SessionsExplorerPage />,
       },
       {
         path: "sessions/:sessionId",
-        element: (
-          <FeaturePlaceholderPage
-            eyebrow="Session detail"
-            title="Session Detail View"
-            description="One session, one focused view for summary, context, and whatever matters most once you have opened a weekend."
-            tone="focus"
-            details={[
-              {
-                title: "Summary first",
-                body: "The key result, fastest laps, and the shape of the session should be readable at a glance.",
-              },
-              {
-                title: "Context nearby",
-                body: "Weekend placement, track details, and relevant follow-up surfaces should stay within easy reach.",
-              },
-              {
-                title: "Room to expand",
-                body: "This page will eventually host a deeper session breakdown once the archive experience grows.",
-              },
-            ]}
-          />
-        ),
+        element: <SessionWorkspacePage />,
       },
       {
         path: "live",

@@ -7,8 +7,13 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = True
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/pitwall_insights"
-    fastf1_cache_dir: str = ".fastf1-cache"
+    ingestion_source: str = "fastf1"
+    fastf1_cache_dir: str | None = None
     session_cache_ttl_hours: int = 168
+    import_job_retention_hours: int = 168
+    import_job_stale_after_minutes: int = 30
+    import_job_max_attempts: int = 2
+    import_worker_poll_seconds: int = 5
     fastf1_import_timeout: int = 180
     default_season_lookback: int = 1
 
@@ -21,6 +26,13 @@ class Settings(BaseSettings):
                 return False
             if lowered in {"debug", "dev", "development", "true", "1", "yes"}:
                 return True
+        return value
+
+    @field_validator("fastf1_cache_dir", mode="before")
+    @classmethod
+    def parse_optional_path(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
         return value
 
     model_config = SettingsConfigDict(

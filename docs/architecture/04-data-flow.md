@@ -15,22 +15,21 @@ Client
 
 This is intentionally simple. The route layer owns HTTP concerns, the service layer owns orchestration, and the repository owns direct database access.
 
-## Selected-Session Import Flow
+## Synchronous Selected-Session Import Flow
 
-The most important non-trivial flow in the system is session import.
+The synchronous import route still exists for local/dev and simple clients.
 
 ### Step-by-step flow
 
 1. Frontend or client calls `POST /api/sessions/import`.
 2. The session route builds a `SessionService`.
-3. `SessionService` triggers session-cache cleanup for expired sessions.
-4. `IngestionService` calls the FastF1 adapter.
-5. The FastF1 adapter:
+3. `IngestionService` calls the FastF1 adapter.
+4. The FastF1 adapter:
    - lists or loads the selected session
-   - fetches laps, telemetry, weather, and control/status data
+   - fetches the selected import profile
    - converts source objects to plain record-like data
-6. `NormalizationService` builds a canonical `SessionSnapshot`.
-7. The session repository persists the snapshot:
+5. `NormalizationService` builds a canonical `SessionSnapshot`.
+6. The session repository persists the snapshot:
    - reference tables first
    - session row
    - entries
@@ -39,7 +38,41 @@ The most important non-trivial flow in the system is session import.
    - ticks
    - weather/status/control events
    - telemetry samples
-8. The route returns the imported session detail.
+7. The route returns the imported session detail.
+
+## Background Import Job Flow
+
+The preferred deployed flow is job-based:
+
+1. Client calls `POST /api/session-import/jobs`.
+2. The API creates an `import_jobs` row with status `queued`.
+3. A separate worker process runs `backend/app/worker.py`.
+4. The worker claims the oldest queued job.
+5. The worker updates progress through:
+   - `loading_source`
+   - `normalizing`
+   - `persisting`
+   - `completed` or `failed`
+6. The worker loads FastF1 using the job's import profile.
+7. The worker persists canonical session data through `SessionRepository`.
+8. The client polls `GET /api/session-import/jobs/{job_id}` until the job has
+   a terminal status.
+9. On success, the job response contains `session_id`.
+
+This lets the API return quickly while long FastF1 loads continue outside the
+request/response cycle.
+
+## Import Profile Data Shape
+
+`core` imports write session structure without car/position telemetry.
+
+`full` imports write the same structure plus:
+
+- `car_telemetry_samples`
+- `position_samples`
+
+The database records this on `event_sessions.import_profile` and
+`event_sessions.telemetry_status`.
 
 ## Cached Session Read Flow
 
@@ -47,10 +80,11 @@ For normal archive or detail reads:
 
 1. Frontend calls a session endpoint.
 2. Route creates a session service.
-3. Service may clean up expired sessions before reading.
-4. Repository fetches relational data from PostgreSQL.
-5. Domain/Pydantic models shape the response.
-6. Frontend consumes the payload through React Query.
+3. Repository fetches relational data from PostgreSQL.
+4. Domain/Pydantic models shape the response.
+5. Frontend consumes the payload through React Query.
+
+Expired-session cleanup is owned by the worker, not by read requests.
 
 ## Telemetry Flow
 

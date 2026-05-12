@@ -5,6 +5,7 @@ Back to [Backend Architecture](./02-backend-architecture.md)
 Related module docs:
 
 - [Session Domain](../modules/session-domain.md)
+- [Session Import](../modules/session-import.md)
 - [Identity Auth](../modules/identity-auth.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
@@ -16,7 +17,7 @@ The database stores:
 - selected imported sessions
 - normalized session structure
 - user/auth data
-- module-level operational state such as ingestion history
+- module-level operational state such as import jobs and ingestion history
 
 The current design is not a generic warehouse. It is a relational, entry-centric cache of selected sessions with enough structure to support archive views and future replay/metric work.
 
@@ -57,6 +58,13 @@ Owned by: [Session Domain](../modules/session-domain.md)
 
 These tables define the stable relational backbone of a cached session.
 
+`event_sessions` also records the import profile:
+
+- `import_profile`: `core` or `full`
+- `telemetry_status`: `not_loaded` or `loaded`
+- `pinned_at`: future lifecycle override for sessions that should not expire
+- `deleted_at`: reserved lifecycle marker for future soft-delete behavior
+
 ### Entry detail tables
 
 - `entry_results`
@@ -75,6 +83,20 @@ These tables hold race/session detail attached to one `session_entry`.
 - `session_ticks`
 
 These tables describe what happened across the session as a whole.
+
+`ingestion_runs` stores generic source metadata in application code. The
+database column for source version is still named `fastf1_version` until a later
+migration renames it to `source_version`.
+
+### Import job tables
+
+- `import_jobs`
+
+Owned by: [Session Import](../modules/session-import.md)
+
+This table tracks queued/running/completed/failed import requests, their import
+profile, heartbeat, retry count, final `session_id`, `source_version`, and row
+count. It is operational state, not canonical motorsport data.
 
 ### Telemetry tables
 
@@ -145,6 +167,8 @@ The migration history currently includes:
 - initial session table
 - users table
 - expanded entry-centric session cache schema
+- user dashboard layouts
+- import jobs, import profiles, and session lifecycle columns
 
 ## Standard Workflow
 
@@ -168,4 +192,4 @@ Likely future additions:
 - feature-metric tables for derived telemetry series
 - better pagination/downsampling support for telemetry-heavy reads
 - partitioning or retention strategies if telemetry volume grows significantly
-- optional job tracking if imports become asynchronous
+- artifact storage only if PostgreSQL telemetry volume or raw replay needs prove it necessary

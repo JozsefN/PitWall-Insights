@@ -23,6 +23,7 @@ Application bootstrap and configuration:
 Business and delivery logic grouped by feature/module:
 
 - [Session Domain](../modules/session-domain.md)
+- [Session Import](../modules/session-import.md)
 - [Identity Auth](../modules/identity-auth.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
@@ -53,6 +54,7 @@ The main API router includes:
 - health routes
 - auth routes
 - session routes
+- session import job routes
 - module health routes for ingestion, normalization, feature metrics, and story feed
 
 ### Application Layer
@@ -68,6 +70,7 @@ Responsibilities:
 Examples:
 
 - `SessionService`
+- `ImportJobService`
 - `AuthService`
 - `IngestionService`
 - `NormalizationService`
@@ -96,13 +99,19 @@ Responsibilities:
 
 The session import flow is intentionally split across modules:
 
-1. `delivery_api` exposes the import route
-2. `session_domain` application service coordinates the use case
-3. `ingestion` pulls source data from FastF1
-4. `normalization` converts source data into a canonical snapshot
-5. `session_domain` repository persists the snapshot into PostgreSQL
+1. `delivery_api` exposes synchronous import and import-job routes.
+2. `session_import` owns queued jobs, worker progress, retries, and cleanup.
+3. `session_domain` owns canonical session persistence and reads.
+4. `ingestion` pulls source data from FastF1 through a provider port.
+5. `normalization` converts source data into a canonical snapshot.
+6. `session_domain` repository persists the snapshot into PostgreSQL.
 
 This keeps source-specific logic out of the repository and keeps the repository free of FastF1-specific assumptions.
+
+The current strategic choice is to keep telemetry in PostgreSQL and measure
+real import/read pain before adding an artifact store. Import profiles and
+background jobs solve the immediate slowness/observability problem with less
+architecture weight.
 
 ## Storage Infrastructure
 
@@ -115,12 +124,22 @@ It contains:
 - the database health check
 - the `get_db` dependency used by FastAPI routes
 
+## Provider Scratch Storage
+
+External-provider caches are separate from application storage.
+
+FastF1 uses a local scratch cache for HTTP responses and parsed provider data.
+The backend resolves this outside the repository by default and treats it as
+disposable. PostgreSQL remains the application-owned cache for imported
+canonical sessions.
+
 ## Current Backend Module Status
 
 ### Fully active
 
 - `identity_auth`
 - `session_domain`
+- `session_import`
 - `ingestion`
 - `normalization`
 - `delivery_api`

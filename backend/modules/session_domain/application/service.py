@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from app.config import settings
 from modules.ingestion.application.service import IngestionService
 from modules.normalization.application.service import NormalizationService
@@ -30,7 +32,7 @@ class SessionService:
         return self.ingestion_service.list_catalog(season_year)
 
     def import_session(self, request: SessionImportRequest) -> SessionDetail:
-        self.repository.cleanup_expired_sessions()
+        started_at = datetime.now(timezone.utc)
         bundle = self.ingestion_service.load_session(request)
         snapshot = self.normalization_service.build_snapshot(
             bundle=bundle,
@@ -38,8 +40,9 @@ class SessionService:
         )
         session_id = self.repository.import_snapshot(
             snapshot,
-            fastf1_version=bundle.fastf1_version,
+            source_version=bundle.source_version,
             force_refresh=request.force_refresh,
+            started_at=started_at,
         )
         session = self.get_session(session_id)
         if session is None:
@@ -50,14 +53,12 @@ class SessionService:
         return self.repository.delete_session(session_id)
 
     def list_sessions(self) -> list[SessionSummary]:
-        self.repository.cleanup_expired_sessions()
         return self.repository.list_sessions()
 
     def get_session(self, session_id: str) -> SessionDetail | None:
         return self.repository.get_session(session_id)
 
     def list_entries(self, session_id: str) -> list[SessionEntrySummary]:
-        self.repository.cleanup_expired_sessions()
         return self.repository.list_entries(session_id)
 
     def list_entry_laps(self, session_id: str, entry_id: str) -> list[EntryLapModel]:

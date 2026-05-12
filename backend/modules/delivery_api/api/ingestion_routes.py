@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
 from modules.ingestion.application.service import IngestionService
-from modules.ingestion.infrastructure.source_adapter import IngestionSourceAdapter
+from modules.ingestion.infrastructure.provider_registry import build_session_source
 
 router = APIRouter(prefix="/api/ingestion", tags=["ingestion"])
 
-service = IngestionService(source_adapter=IngestionSourceAdapter())
+service = IngestionService(source=build_session_source())
 
 
 @router.get("/health")

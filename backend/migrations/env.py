@@ -8,7 +8,9 @@ from alembic import context
 from app.config import settings
 from modules.storage.infrastructure.base import Base
 from modules.session_domain.infrastructure import db_models  # noqa: F401
+from modules.session_import.infrastructure.db_models import ImportJobRecord  # noqa: F401
 from modules.identity_auth.infrastructure.db_models import UserRecord
+from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord  # noqa: F401
 
 config = context.config
 

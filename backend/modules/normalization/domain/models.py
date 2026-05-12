@@ -5,6 +5,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from modules.session_domain.domain.models import ImportProfile, TelemetryStatus
+
 
 class NormalizationStatus(BaseModel):
     pipeline_name: str
@@ -39,6 +41,8 @@ class SessionPayload:
     source_event_key: str
     session_name: str
     session_type: str | None
+    import_profile: ImportProfile
+    telemetry_status: TelemetryStatus
     meeting_key: str | None
     session_key: str | None
     api_path: str | None

@@ -7,6 +7,7 @@ from typing import Any
 
 from app.config import settings
 from modules.ingestion.domain.models import IngestionSourceStatus, SourceSessionBundle, SourceSessionMetadata
+from modules.ingestion.infrastructure.cache_paths import resolve_provider_cache_dir
 from modules.session_domain.domain.models import SessionCatalogItem, SessionImportRequest
 
 
@@ -14,8 +15,10 @@ class FastF1Adapter:
     source_name = "fastf1"
 
     def __init__(self, cache_dir: str | None = None) -> None:
-        self.cache_dir = Path(cache_dir or settings.fastf1_cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_dir = resolve_provider_cache_dir(
+            self.source_name,
+            cache_dir or settings.fastf1_cache_dir,
+        )
         self._fastf1 = None
 
     def get_status(self) -> IngestionSourceStatus:
@@ -27,6 +30,7 @@ class FastF1Adapter:
                 configured=True,
                 status=f"ready:{version}",
                 cache_dir=str(self.cache_dir),
+                cache_size_bytes=self._cache_size_bytes(self.cache_dir),
                 import_timeout_seconds=settings.fastf1_import_timeout,
             )
         except Exception as exc:
@@ -35,6 +39,7 @@ class FastF1Adapter:
                 configured=False,
                 status=f"error:{exc}",
                 cache_dir=str(self.cache_dir),
+                cache_size_bytes=self._cache_size_bytes(self.cache_dir),
                 import_timeout_seconds=settings.fastf1_import_timeout,
             )
 
@@ -101,9 +106,10 @@ class FastF1Adapter:
     def load_session(self, request: SessionImportRequest) -> SourceSessionBundle:
         fastf1 = self._load_fastf1()
         session = self._resolve_session(fastf1, request)
+        include_telemetry = request.import_profile == "full"
         session.load(
             laps=True,
-            telemetry=True,
+            telemetry=include_telemetry,
             weather=True,
             messages=True,
         )
@@ -158,12 +164,13 @@ class FastF1Adapter:
         session_status = self._to_records(getattr(session, "session_status", None))
         track_status = self._to_records(getattr(session, "track_status", None))
         race_control_messages = self._to_records(getattr(session, "race_control_messages", None))
-        car_telemetry = self._extract_telemetry(session, "car_data")
-        position_data = self._extract_telemetry(session, "pos_data")
+        car_telemetry = self._extract_telemetry(session, "car_data") if include_telemetry else {}
+        position_data = self._extract_telemetry(session, "pos_data") if include_telemetry else {}
 
         return SourceSessionBundle(
             source=self.source_name,
             catalog_item=catalog_item,
+            import_profile=request.import_profile,
             metadata=metadata,
             drivers=drivers,
             results=results,
@@ -174,7 +181,7 @@ class FastF1Adapter:
             race_control_messages=race_control_messages,
             car_telemetry=car_telemetry,
             position_data=position_data,
-            fastf1_version=self._as_text(getattr(fastf1, "__version__", None)),
+            source_version=self._as_text(getattr(fastf1, "__version__", None)),
         )
 
     def _resolve_session(self, fastf1: Any, request: SessionImportRequest) -> Any:
@@ -237,9 +244,19 @@ class FastF1Adapter:
         if self._fastf1 is None:
             import fastf1
 
+            self._ensure_cache_dir()
             fastf1.Cache.enable_cache(str(self.cache_dir))
             self._fastf1 = fastf1
         return self._fastf1
+
+    def _ensure_cache_dir(self) -> None:
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def _cache_size_bytes(cache_dir: Path) -> int:
+        if not cache_dir.exists():
+            return 0
+        return sum(path.stat().st_size for path in cache_dir.rglob("*") if path.is_file())
 
     def _extract_driver_rows(self, session: Any) -> list[dict[str, Any]]:
         driver_rows: list[dict[str, Any]] = []

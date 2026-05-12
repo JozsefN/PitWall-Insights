@@ -82,6 +82,7 @@ export function SessionsExplorerPage() {
         round_number: selectedSession.round_number ?? 0,
         session_name: selectedSession.session_name,
         source_session_key: selectedSession.source_session_key,
+        import_profile: "full",
       },
       {
         onSuccess: (data) => {

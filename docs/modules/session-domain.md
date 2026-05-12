@@ -12,6 +12,7 @@ It is responsible for:
 - storing session structure in PostgreSQL
 - exposing read/query operations for archive-style frontend use
 - acting as the boundary between normalization output and delivery API reads
+- storing whether a cached session has `core` or `full` data
 
 ## Why This Module Is Central
 
@@ -75,7 +76,6 @@ The session-domain application service currently coordinates:
 
 - catalog reads from ingestion
 - selected-session import
-- cache cleanup for expired sessions
 - session list/detail reads
 - entry list reads
 - lap reads
@@ -93,7 +93,8 @@ The repository handles:
 
 - writing a normalized snapshot transactionally
 - upserting shared reference entities
-- deleting expired or removed sessions
+- deleting expired sessions when called by the import worker
+- deleting removed sessions
 - reading session summaries and session details
 - reading entry-scoped laps and telemetry
 - reading replay-alignment ticks
@@ -123,15 +124,20 @@ The session domain is exposed through:
 - selected-session cache lifecycle
 - entry/lap/stint/telemetry persistence
 - session-oriented read models
+- `event_sessions.import_profile` and `event_sessions.telemetry_status`
 
 ### Does not belong here
 
 - direct FastF1 ingestion details
 - source-specific cleanup/parsing rules
+- import job queue state and worker heartbeats
 - advanced derived metrics like acceleration or driver-ahead analytics
 - editorial/story logic
 
-Those concerns belong in ingestion, normalization, feature_metrics, or story_feed.
+Those concerns belong in ingestion, normalization, session_import,
+feature_metrics, or story_feed.
+
+Import job queue state belongs in [Session Import](./session-import.md).
 
 ## Future Work
 

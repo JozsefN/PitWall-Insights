@@ -44,7 +44,10 @@ class SessionRepository:
         now = now or datetime.now(timezone.utc)
         records = (
             self.db.query(EventSessionRecord)
-            .filter(EventSessionRecord.expires_at < now)
+            .filter(
+                EventSessionRecord.expires_at < now,
+                EventSessionRecord.pinned_at.is_(None),
+            )
             .all()
         )
         for record in records:
@@ -57,8 +60,11 @@ class SessionRepository:
         self,
         snapshot: SessionSnapshot,
         *,
-        fastf1_version: str | None,
+        source_version: str | None,
         force_refresh: bool,
+        job_id: str | None = None,
+        started_at: datetime | None = None,
+        duration_ms: int | None = None,
     ) -> str:
         existing = (
             self.db.query(EventSessionRecord)
@@ -69,7 +75,13 @@ class SessionRepository:
             .first()
         )
 
-        if existing is not None and not force_refresh:
+        needs_full_refresh = (
+            snapshot.session.import_profile == "full"
+            and existing is not None
+            and existing.telemetry_status != "loaded"
+        )
+
+        if existing is not None and not force_refresh and not needs_full_refresh:
             existing.last_accessed_at = snapshot.session.last_accessed_at
             existing.expires_at = snapshot.session.expires_at
             self.db.add(existing)
@@ -95,15 +107,23 @@ class SessionRepository:
         tick_id_map = self._create_ticks(snapshot, session.id)
         self._create_session_events(snapshot, session.id, entry_id_map)
         self._create_telemetry(snapshot, entry_id_map, lap_id_map, stint_id_map, tick_id_map)
+        run_started_at = started_at or snapshot.session.imported_at
+        run_finished_at = datetime.now(timezone.utc)
+        run_duration_ms = duration_ms
+        if run_duration_ms is None:
+            run_duration_ms = max(0, int((run_finished_at - run_started_at).total_seconds() * 1000))
 
         self.db.add(
             IngestionRunRecord(
                 session_id=session.id,
+                job_id=job_id,
                 source=snapshot.session.source,
-                fastf1_version=fastf1_version,
+                source_version=source_version,
+                import_profile=snapshot.session.import_profile,
                 status="completed",
-                started_at=snapshot.session.imported_at,
-                finished_at=snapshot.session.imported_at,
+                started_at=run_started_at,
+                finished_at=run_finished_at,
+                duration_ms=run_duration_ms,
                 rows_written=snapshot.total_row_count(),
                 force_refresh=force_refresh,
             )
@@ -308,6 +328,8 @@ class SessionRepository:
             weekend_id=weekend.id,
             session_name=snapshot.session.session_name,
             session_type=snapshot.session.session_type,
+            import_profile=snapshot.session.import_profile,
+            telemetry_status=snapshot.session.telemetry_status,
             meeting_key=snapshot.session.meeting_key,
             session_key=snapshot.session.session_key,
             api_path=snapshot.session.api_path,
@@ -318,6 +340,8 @@ class SessionRepository:
             imported_at=snapshot.session.imported_at,
             last_accessed_at=snapshot.session.last_accessed_at,
             expires_at=snapshot.session.expires_at,
+            pinned_at=None,
+            deleted_at=None,
             error_message=snapshot.session.error_message,
         )
         self.db.add(session)
@@ -633,12 +657,16 @@ class SessionRepository:
             location=weekend.location,
             session_name=record.session_name,
             session_type=record.session_type,
+            import_profile=record.import_profile,
+            telemetry_status=record.telemetry_status,
             scheduled_start_utc=record.scheduled_start_utc,
             actual_start_utc=record.actual_start_utc,
             state=record.state,
             imported_at=record.imported_at,
             last_accessed_at=record.last_accessed_at,
             expires_at=record.expires_at,
+            pinned_at=record.pinned_at,
+            deleted_at=record.deleted_at,
             entry_count=entry_counts.get(record.id, 0),
             tick_count=tick_counts.get(record.id, 0),
         )

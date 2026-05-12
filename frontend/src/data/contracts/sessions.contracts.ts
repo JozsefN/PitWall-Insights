@@ -1,3 +1,6 @@
+export type SessionImportProfile = "core" | "full";
+export type SessionTelemetryStatus = "not_loaded" | "loaded";
+
 export interface SessionCatalogItemDto {
   source: string;
   source_event_key: string;
@@ -20,6 +23,7 @@ export interface SessionImportRequestDto {
   round_number: number;
   session_name: string;
   source_session_key?: string;
+  import_profile?: SessionImportProfile;
   force_refresh?: boolean;
 }
 
@@ -35,12 +39,16 @@ export interface SessionDto {
   location: string | null;
   session_name: string;
   session_type: string | null;
+  import_profile: SessionImportProfile;
+  telemetry_status: SessionTelemetryStatus;
   scheduled_start_utc: string | null;
   actual_start_utc: string | null;
   state: string;
   imported_at: string;
   last_accessed_at: string;
   expires_at: string;
+  pinned_at: string | null;
+  deleted_at: string | null;
   entry_count: number;
   tick_count: number;
   meeting_key?: string | null;

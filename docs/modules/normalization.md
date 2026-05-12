@@ -11,6 +11,7 @@ Its job is not just field renaming. It is where the backend decides:
 - what the internal session model looks like
 - how session entries are identified
 - how laps and stints are shaped
+- whether the session snapshot represents a `core` or `full` import
 - how telemetry attaches to entries and aligns to session ticks
 
 ## Current Responsibilities
@@ -32,9 +33,11 @@ Its job is not just field renaming. It is where the backend decides:
   - car telemetry samples
   - position samples
 
-## SessionSnapshotBuilder
+## Source-Specific Snapshot Builders
 
-The current normalization logic lives in a snapshot builder.
+The current normalization logic lives in `FastF1SessionSnapshotBuilder`.
+`NormalizationService` selects a builder from the source on the incoming
+`SourceSessionBundle`.
 
 Important behaviors:
 
@@ -44,6 +47,11 @@ Important behaviors:
 - stints are derived from lap/stint information
 - telemetry samples are assigned to lap and stint when possible
 - `session_ticks` are built from the union of observed session timestamps
+- `event_sessions.telemetry_status` is set from the import profile
+
+For `core` imports, telemetry row sets are empty and the builder still produces
+the canonical session/lap/event structure. For `full` imports, the same builder
+adds car and position telemetry payloads.
 
 ## Why This Module Exists Separately
 

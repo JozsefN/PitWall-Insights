@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from modules.ingestion.application.service import IngestionService
-from modules.ingestion.infrastructure.source_adapter import IngestionSourceAdapter
+from modules.ingestion.infrastructure.provider_registry import build_session_source
 from modules.normalization.application.service import NormalizationService
 from modules.session_domain.application.service import SessionService
 from modules.session_domain.domain.models import DeleteSessionResponse, SessionImportRequest
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 def build_session_service(db: Session) -> SessionService:
     repository = SessionRepository(db=db)
-    ingestion_service = IngestionService(source_adapter=IngestionSourceAdapter())
+    ingestion_service = IngestionService(source=build_session_source())
     normalization_service = NormalizationService()
     return SessionService(
         repository=repository,

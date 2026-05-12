@@ -9,6 +9,7 @@ export interface IngestionHealthDetails {
   configured: boolean;
   status: string;
   cache_dir?: string | null;
+  cache_size_bytes?: number | null;
   import_timeout_seconds?: number | null;
 }
 

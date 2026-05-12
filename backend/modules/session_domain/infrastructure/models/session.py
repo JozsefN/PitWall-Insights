@@ -14,6 +14,7 @@ class EventSessionRecord(StringIdMixin, Base):
     __table_args__ = (
         UniqueConstraint("source", "source_session_key", name="uq_sessions_source_key"),
         Index("ix_sessions_state_expires", "state", "expires_at"),
+        Index("ix_sessions_deleted_expires", "deleted_at", "expires_at"),
         Index("ix_sessions_weekend_name", "weekend_id", "session_name"),
     )
 
@@ -26,6 +27,8 @@ class EventSessionRecord(StringIdMixin, Base):
     )
     session_name: Mapped[str] = mapped_column(String(128), nullable=False)
     session_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    import_profile: Mapped[str] = mapped_column(String(32), nullable=False, default="core")
+    telemetry_status: Mapped[str] = mapped_column(String(32), nullable=False, default="not_loaded")
     meeting_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
     session_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
     api_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -36,6 +39,8 @@ class EventSessionRecord(StringIdMixin, Base):
     imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     last_accessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    pinned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     weekend: Mapped["WeekendRecord"] = relationship(back_populates="sessions")
@@ -71,18 +76,27 @@ class EventSessionRecord(StringIdMixin, Base):
 
 class IngestionRunRecord(StringIdMixin, Base):
     __tablename__ = "ingestion_runs"
-    __table_args__ = (Index("ix_ingestion_runs_session_started", "session_id", "started_at"),)
+    __table_args__ = (
+        Index("ix_ingestion_runs_session_started", "session_id", "started_at"),
+        Index("ix_ingestion_runs_job_id", "job_id"),
+    )
 
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
+    job_id: Mapped[str | None] = mapped_column(
+        ForeignKey("import_jobs.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     source: Mapped[str] = mapped_column(String(32), nullable=False)
-    fastf1_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    source_version: Mapped[str | None] = mapped_column("fastf1_version", String(32), nullable=True)
+    import_profile: Mapped[str | None] = mapped_column(String(32), nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    duration_ms: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     rows_written: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     force_refresh: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

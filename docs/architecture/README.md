@@ -24,6 +24,7 @@ The goal of these docs is practical clarity:
 ### Backend Modules
 
 - [Session Domain](../modules/session-domain.md)
+- [Session Import](../modules/session-import.md)
 - [Identity Auth](../modules/identity-auth.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
@@ -44,14 +45,16 @@ The current architecture is centered on one main workflow:
 
 1. discover a Formula 1 session
 2. import it from FastF1
-3. normalize it into a canonical internal snapshot
-4. store it in a relational selected-session cache
-5. expose it through API resources for frontend views and future replay-style tooling
+3. optionally run that import through a background job
+4. normalize it into a canonical internal snapshot
+5. store it in a relational selected-session cache
+6. expose it through API resources for frontend views and future replay-style tooling
 
 This means the most important active modules right now are:
 
 - `ingestion`
 - `normalization`
+- `session_import`
 - `session_domain`
 - `delivery_api`
 
@@ -64,6 +67,8 @@ The backend has moved beyond the original placeholder session model.
 It now includes:
 
 - a FastF1-backed ingestion path
+- profile-based `core` and `full` imports
+- import jobs and a worker entrypoint
 - an entry-centric session model
 - laps, stints, weather, status, and race-control storage
 - per-entry raw telemetry tables

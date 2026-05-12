@@ -53,9 +53,21 @@ Purpose:
 Purpose:
 
 - browse available source sessions
-- import one selected session into cache
+- import one selected session into cache synchronously
 - inspect cached sessions
 - read entry-level details and time-series data
+
+### Session Import Jobs
+
+- `POST /api/session-import/jobs`
+- `GET /api/session-import/jobs`
+- `GET /api/session-import/jobs/{job_id}`
+
+Purpose:
+
+- create background imports
+- poll import progress
+- separate slow source loading from normal API request duration
 
 ### Module Health Routes
 
@@ -78,6 +90,9 @@ The frontend already consumes:
 - session detail
 
 The backend exposes more than the frontend currently uses. This is expected at the current stage of the project.
+
+The frontend can keep using `POST /api/sessions/import` while the async flow is
+wired into the product. The job API is ready for the deployed worker model.
 
 ## API Resource Design Notes
 

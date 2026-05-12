@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from modules.session_domain.domain.models import SessionCatalogItem
+from modules.session_domain.domain.models import ImportProfile, SessionCatalogItem
 
 
 class IngestionSourceStatus(BaseModel):
@@ -13,6 +13,7 @@ class IngestionSourceStatus(BaseModel):
     configured: bool
     status: str
     cache_dir: str | None = None
+    cache_size_bytes: int | None = None
     import_timeout_seconds: int | None = None
 
 
@@ -26,8 +27,9 @@ class SourceSessionMetadata(BaseModel):
 
 
 class SourceSessionBundle(BaseModel):
-    source: str = "fastf1"
+    source: str = Field(min_length=1, max_length=32)
     catalog_item: SessionCatalogItem
+    import_profile: ImportProfile = "core"
     metadata: SourceSessionMetadata = Field(default_factory=SourceSessionMetadata)
     drivers: list[dict[str, Any]] = Field(default_factory=list)
     results: list[dict[str, Any]] = Field(default_factory=list)
@@ -38,4 +40,4 @@ class SourceSessionBundle(BaseModel):
     race_control_messages: list[dict[str, Any]] = Field(default_factory=list)
     car_telemetry: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
     position_data: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
-    fastf1_version: str | None = None
+    source_version: str | None = None

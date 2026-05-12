@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
+ImportProfile = Literal["core", "full"]
+TelemetryStatus = Literal["not_loaded", "loaded"]
+
 
 class SessionCatalogItem(BaseModel):
-    source: str = "fastf1"
+    source: str = Field(min_length=1, max_length=32)
     source_event_key: str
     source_session_key: str
     season_year: int
@@ -27,6 +31,7 @@ class SessionImportRequest(BaseModel):
     round_number: int = Field(ge=0)
     session_name: str = Field(min_length=1, max_length=128)
     source_session_key: str | None = Field(default=None, min_length=1, max_length=255)
+    import_profile: ImportProfile = "core"
     force_refresh: bool = False
 
 
@@ -42,12 +47,16 @@ class SessionSummary(BaseModel):
     location: str | None = None
     session_name: str
     session_type: str | None = None
+    import_profile: ImportProfile = "core"
+    telemetry_status: TelemetryStatus = "not_loaded"
     scheduled_start_utc: datetime | None = None
     actual_start_utc: datetime | None = None
     state: str
     imported_at: datetime
     last_accessed_at: datetime
     expires_at: datetime
+    pinned_at: datetime | None = None
+    deleted_at: datetime | None = None
     entry_count: int = 0
     tick_count: int = 0
 

@@ -57,7 +57,9 @@ class _Participant:
     q3_time_ms: int | None = None
 
 
-class SessionSnapshotBuilder:
+class FastF1SessionSnapshotBuilder:
+    source_name = "fastf1"
+
     def build(self, bundle: SourceSessionBundle, ttl_hours: int) -> SessionSnapshot:
         now = datetime.now(timezone.utc)
         participants, participants_by_number, participants_by_abbreviation = self._build_participants(bundle)
@@ -86,6 +88,7 @@ class SessionSnapshotBuilder:
 
         catalog = bundle.catalog_item
         metadata = bundle.metadata
+        telemetry_status = "loaded" if bundle.import_profile == "full" else "not_loaded"
 
         return SessionSnapshot(
             season=SeasonPayload(year=catalog.season_year, display_name=str(catalog.season_year)),
@@ -107,6 +110,8 @@ class SessionSnapshotBuilder:
                 source_event_key=catalog.source_event_key,
                 session_name=catalog.session_name,
                 session_type=catalog.session_type,
+                import_profile=bundle.import_profile,
+                telemetry_status=telemetry_status,
                 meeting_key=metadata.meeting_key,
                 session_key=metadata.session_key,
                 api_path=metadata.api_path,
@@ -118,8 +123,8 @@ class SessionSnapshotBuilder:
                 last_accessed_at=now,
                 expires_at=now + timedelta(hours=ttl_hours),
             ),
-            drivers=self._build_driver_payloads(participants),
-            teams=self._build_team_payloads(participants),
+            drivers=self._build_driver_payloads(bundle.source, participants),
+            teams=self._build_team_payloads(bundle.source, participants),
             entries=self._build_entry_payloads(participants),
             results=self._build_result_payloads(participants),
             laps=laps,
@@ -237,10 +242,10 @@ class SessionSnapshotBuilder:
 
         return None
 
-    def _build_driver_payloads(self, participants: list[_Participant]) -> list[DriverPayload]:
+    def _build_driver_payloads(self, source: str, participants: list[_Participant]) -> list[DriverPayload]:
         return [
             DriverPayload(
-                source="fastf1",
+                source=source,
                 source_driver_key=participant.source_driver_key,
                 driver_number=participant.driver_number,
                 abbreviation=participant.abbreviation,
@@ -253,7 +258,7 @@ class SessionSnapshotBuilder:
             for participant in participants
         ]
 
-    def _build_team_payloads(self, participants: list[_Participant]) -> list[TeamPayload]:
+    def _build_team_payloads(self, source: str, participants: list[_Participant]) -> list[TeamPayload]:
         payloads: list[TeamPayload] = []
         seen: set[str] = set()
         for participant in participants:
@@ -264,7 +269,7 @@ class SessionSnapshotBuilder:
             seen.add(participant.source_team_key)
             payloads.append(
                 TeamPayload(
-                    source="fastf1",
+                    source=source,
                     source_team_key=participant.source_team_key,
                     name=participant.team_name,
                     display_name=participant.team_display_name,
@@ -679,19 +684,22 @@ class SessionSnapshotBuilder:
 
     @staticmethod
     def _telemetry_sort_key(row: dict[str, Any]) -> tuple[int, datetime | None]:
-        return (SessionSnapshotBuilder._extract_session_time_ms(row) or -1, SessionSnapshotBuilder._as_datetime(row.get("Date")))
+        return (
+            FastF1SessionSnapshotBuilder._extract_session_time_ms(row) or -1,
+            FastF1SessionSnapshotBuilder._as_datetime(row.get("Date")),
+        )
 
     @staticmethod
     def _extract_session_time_ms(row: dict[str, Any]) -> int | None:
         for key in ("SessionTime", "Time"):
-            value = SessionSnapshotBuilder._as_duration_ms(row.get(key))
+            value = FastF1SessionSnapshotBuilder._as_duration_ms(row.get(key))
             if value is not None:
                 return value
         return None
 
     @staticmethod
     def _coerce_driver_number(row: dict[str, Any]) -> str | None:
-        return SessionSnapshotBuilder._as_text(row.get("DriverNumber") or row.get("driver_number"))
+        return FastF1SessionSnapshotBuilder._as_text(row.get("DriverNumber") or row.get("driver_number"))
 
     @staticmethod
     def _build_driver_key(driver_number: str) -> str:

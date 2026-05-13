@@ -1,5 +1,5 @@
 export type SessionImportProfile = "core" | "full";
-export type SessionTelemetryStatus = "not_loaded" | "loaded";
+export type SessionTelemetryStatus = "not_loaded" | "loaded" | "partial" | "unavailable";
 
 export interface SessionCatalogItemDto {
   source: string;

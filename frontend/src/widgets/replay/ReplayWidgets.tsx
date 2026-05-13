@@ -1,9 +1,10 @@
-import { useQueries } from "@tanstack/react-query";
-import { listCarTelemetry } from "../../data/api/sessions.api";
 import type { SessionEntryDto } from "../../data/contracts/sessions.contracts";
 import { WidgetCard } from "../shared/WidgetCard";
 import { WidgetEmpty, WidgetError, WidgetLoading } from "../shared/WidgetState";
-import { useAllPositionTelemetryMap } from "../../features/sessions/session-data.hooks";
+import {
+  useWorkspaceCarTelemetryResource,
+  useWorkspacePositionTelemetryResource,
+} from "../../features/sessions/session-data.hooks";
 import { useSessionWorkspace } from "../../features/sessions/SessionWorkspaceContext";
 import {
   buildReplayTrackViewBox,
@@ -24,12 +25,37 @@ export function ReplayTrackMapWidget({
   void options;
 
   const workspace = useSessionWorkspace();
-  const positions = useAllPositionTelemetryMap({ limit: 20000 }, workspace.entries.length > 0);
+  const entryIds =
+    workspace.selectedDriverIds.length > 0
+      ? workspace.selectedDriverIds
+      : workspace.entries.map((entry) => entry.id);
+  const positions = useWorkspacePositionTelemetryResource({
+    entryIds,
+    scope: "session",
+    limit: 20000,
+    enabled: entryIds.length > 0,
+  });
 
   if (workspace.entries.length === 0) {
     return (
       <WidgetCard title="Replay Track Map">
         <WidgetEmpty message="No session entries were available for replay mode." />
+      </WidgetCard>
+    );
+  }
+
+  if (positions.isError) {
+    return (
+      <WidgetCard title="Replay Track Map">
+        <WidgetError />
+      </WidgetCard>
+    );
+  }
+
+  if (!positions.ready) {
+    return (
+      <WidgetCard title="Replay Track Map">
+        <WidgetEmpty message={positions.waitMessage} />
       </WidgetCard>
     );
   }
@@ -50,7 +76,7 @@ export function ReplayTrackMapWidget({
     );
   }
 
-  const traces = workspace.entries.map((entry, index) => ({
+  const traces = positions.entries.map((entry, index) => ({
     entry,
     color: getEntryAccent(entry, index),
     points: downsamplePoints(buildTrackPoints(positions.dataByEntryId[entry.id] ?? []), 220),
@@ -72,7 +98,7 @@ export function ReplayTrackMapWidget({
   return (
     <WidgetCard
       title="Replay Track Map"
-      description={`Current replay time · ${formatSessionClock(workspace.replay.currentTimeMs)}`}
+      description={`Current replay time - ${formatSessionClock(workspace.replay.currentTimeMs)}`}
     >
       <div className="telemetry-chart telemetry-chart--track">
         <svg viewBox={viewBox} className="telemetry-track-map">
@@ -117,39 +143,42 @@ export function ReplayDriverCardsWidget({
   void options;
 
   const workspace = useSessionWorkspace();
-  const entryIds =
-    workspace.selectedDriverIds.length > 0
-      ? workspace.selectedDriverIds
-      : workspace.entries.slice(0, 4).map((entry) => entry.id);
-
-  const telemetryQueries = useQueries({
-    queries: entryIds.map((entryId) => ({
-      queryKey: ["sessions", workspace.sessionId, "entries", entryId, "telemetry", "car", "replay"],
-      queryFn: () => listCarTelemetry(workspace.sessionId, entryId, { limit: 20000 }),
-      enabled: entryIds.length > 0,
-    })),
+  const entryIds = workspace.selectedDriverIds;
+  const telemetry = useWorkspaceCarTelemetryResource({
+    entryIds,
+    scope: "session",
+    limit: 20000,
+    enabled: entryIds.length > 0,
   });
 
   if (entryIds.length === 0) {
     return (
       <WidgetCard title="Replay Driver Cards">
-        <WidgetEmpty message="Choose drivers or import a session with entries to see replay telemetry." />
+        <WidgetEmpty message="Choose one or more drivers in the replay controls to see live-style telemetry cards." />
       </WidgetCard>
     );
   }
 
-  if (telemetryQueries.some((query) => query.isLoading)) {
-    return (
-      <WidgetCard title="Replay Driver Cards">
-        <WidgetLoading />
-      </WidgetCard>
-    );
-  }
-
-  if (telemetryQueries.some((query) => query.isError)) {
+  if (telemetry.isError) {
     return (
       <WidgetCard title="Replay Driver Cards">
         <WidgetError />
+      </WidgetCard>
+    );
+  }
+
+  if (!telemetry.ready) {
+    return (
+      <WidgetCard title="Replay Driver Cards">
+        <WidgetEmpty message={telemetry.waitMessage} />
+      </WidgetCard>
+    );
+  }
+
+  if (telemetry.isLoading) {
+    return (
+      <WidgetCard title="Replay Driver Cards">
+        <WidgetLoading />
       </WidgetCard>
     );
   }
@@ -162,7 +191,7 @@ export function ReplayDriverCardsWidget({
         return null;
       }
 
-      const samples = telemetryQueries[index]?.data ?? [];
+      const samples = telemetry.dataByEntryId[entryId] ?? [];
       const currentSample = findTelemetrySampleAtTime(samples, workspace.replay.currentTimeMs);
 
       return {

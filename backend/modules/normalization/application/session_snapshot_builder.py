@@ -88,7 +88,7 @@ class FastF1SessionSnapshotBuilder:
 
         catalog = bundle.catalog_item
         metadata = bundle.metadata
-        telemetry_status = "loaded" if bundle.import_profile == "full" else "not_loaded"
+        telemetry_status = self._resolve_telemetry_status(bundle)
 
         return SessionSnapshot(
             season=SeasonPayload(year=catalog.season_year, display_name=str(catalog.season_year)),
@@ -187,6 +187,20 @@ class FastF1SessionSnapshotBuilder:
 
         participants = sorted(participants_by_number.values(), key=lambda item: item.car_number)
         return participants, participants_by_number, participants_by_abbreviation
+
+    @staticmethod
+    def _resolve_telemetry_status(bundle: SourceSessionBundle) -> str:
+        if bundle.import_profile != "full":
+            return "not_loaded"
+
+        car_rows = sum(len(rows) for rows in bundle.car_telemetry.values())
+        position_rows = sum(len(rows) for rows in bundle.position_data.values())
+
+        if car_rows > 0 and position_rows > 0:
+            return "loaded"
+        if car_rows > 0 or position_rows > 0:
+            return "partial"
+        return "unavailable"
 
     def _ensure_participant(
         self,

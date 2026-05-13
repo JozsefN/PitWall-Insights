@@ -79,6 +79,7 @@ class ImportJobService:
                 force_refresh=request.force_refresh,
                 job_id=job_id,
                 started_at=started_at,
+                heartbeat=self._build_job_heartbeat(job_id),
             )
 
             return self.job_repository.mark_completed(
@@ -105,9 +106,28 @@ class ImportJobService:
             max_attempts=settings.import_job_max_attempts,
         )
 
-    def cleanup_expired(self) -> dict[str, int]:
+    def cleanup_expired(self, *, include_sessions: bool = True) -> dict[str, int]:
         now = datetime.now(timezone.utc)
-        return {
-            "sessions": self.session_repository.cleanup_expired_sessions(now=now),
+        result = {
             "jobs": self.job_repository.cleanup_expired_jobs(now=now),
+            "sessions": 0,
         }
+        if include_sessions:
+            result["sessions"] = self.session_repository.cleanup_expired_sessions(now=now)
+        return result
+
+    @staticmethod
+    def _build_job_heartbeat(job_id: str):
+        def heartbeat() -> None:
+            from modules.storage.infrastructure.db import SessionLocal
+
+            heartbeat_db = SessionLocal()
+            try:
+                ImportJobRepository(heartbeat_db).touch_heartbeat(
+                    job_id,
+                    now=datetime.now(timezone.utc),
+                )
+            finally:
+                heartbeat_db.close()
+
+        return heartbeat

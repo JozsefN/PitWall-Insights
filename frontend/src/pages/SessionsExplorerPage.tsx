@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageContainer } from "../app/layout/PageContanier";
-import type { SessionCatalogItemDto } from "../data/contracts/sessions.contracts";
+import type { SessionCatalogItemDto, SessionImportRequestDto } from "../data/contracts/sessions.contracts";
 import {
   useImportSessionMutation,
   useSessionCatalogQuery,
@@ -39,7 +39,7 @@ export function SessionsExplorerPage() {
   const [selectedSessionKey, setSelectedSessionKey] = useState<string | null>(null);
 
   const catalogQuery = useSessionCatalogQuery(season);
-  const importMutation = useImportSessionMutation();
+  const coreImportMutation = useImportSessionMutation();
   const storedWorkspace = readStoredSessionWorkspace();
   const resumeHref = buildStoredSessionWorkspaceHref(storedWorkspace);
   const resumeSessionQuery = useSessionQuery(
@@ -62,6 +62,8 @@ export function SessionsExplorerPage() {
   const selectedSession =
     selectedGroup?.sessions.find((item) => item.source_session_key === activeSessionKey) ?? null;
   const showExplorer = searchParams.get("view") === "explorer";
+  const importProgress = getCoreImportProgress();
+  const isImportActive = coreImportMutation.isPending;
 
   useEffect(() => {
     if (!resumeHref || showExplorer || !resumeSessionQuery.data) {
@@ -76,18 +78,21 @@ export function SessionsExplorerPage() {
       return;
     }
 
-    importMutation.mutate(
-      {
-        season_year: selectedSession.season_year,
-        round_number: selectedSession.round_number ?? 0,
-        session_name: selectedSession.session_name,
-        source_session_key: selectedSession.source_session_key,
-        import_profile: "full",
-      },
+    const request: SessionImportRequestDto = {
+      season_year: selectedSession.season_year,
+      round_number: selectedSession.round_number ?? 0,
+      session_name: selectedSession.session_name,
+      source_session_key: selectedSession.source_session_key,
+      import_profile: "core",
+    };
+    const nextMode = mode;
+
+    coreImportMutation.mutate(
+      request,
       {
         onSuccess: (data) => {
           const nextState = {
-            mode,
+            mode: nextMode,
             layoutId: null,
             driverIds: [],
             lap: "all" as const,
@@ -314,15 +319,28 @@ export function SessionsExplorerPage() {
                     type="button"
                     className="button-primary"
                     onClick={handlePrepare}
-                    disabled={importMutation.isPending}
+                    disabled={isImportActive}
                   >
-                    {importMutation.isPending ? "Loading session..." : "Load session"}
+                    {isImportActive ? importProgress.buttonLabel : "Load session"}
                   </button>
                 </div>
 
-                {importMutation.isError ? (
+                {isImportActive ? (
+                  <div className="sessions-import-status">
+                    <div className="sessions-import-status__header">
+                      <span>{importProgress.label}</span>
+                      <strong>{importProgress.percent}%</strong>
+                    </div>
+                    <div className="sessions-import-progress" aria-hidden="true">
+                      <span style={{ width: `${importProgress.percent}%` }} />
+                    </div>
+                    <p>{importProgress.detail}</p>
+                  </div>
+                ) : null}
+
+                {coreImportMutation.isError ? (
                   <div className="sessions-empty-state sessions-empty-state--error">
-                    Import failed. Check backend connectivity and FastF1 availability, then try again.
+                    Core import failed. Check backend connectivity and FastF1 availability, then try again.
                   </div>
                 ) : null}
               </>
@@ -399,5 +417,14 @@ function compareCatalogSessions(
   }
 
   return left.session_name.localeCompare(right.session_name);
+}
+
+function getCoreImportProgress() {
+  return {
+    percent: 55,
+    label: "Opening core session",
+    buttonLabel: "Opening core session...",
+    detail: "Loading the lightweight profile now. Telemetry slices will be cached when widgets request them.",
+  };
 }
 

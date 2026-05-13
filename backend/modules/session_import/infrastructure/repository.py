@@ -84,6 +84,17 @@ class ImportJobRepository:
         self.db.refresh(record)
         return self.to_model(record)
 
+    def touch_heartbeat(self, job_id: str, *, now: datetime) -> ImportJobRead | None:
+        record = self.db.get(ImportJobRecord, job_id)
+        if record is None:
+            return None
+
+        record.heartbeat_at = now
+        self.db.add(record)
+        self.db.commit()
+        self.db.refresh(record)
+        return self.to_model(record)
+
     def mark_completed(
         self,
         job_id: str,

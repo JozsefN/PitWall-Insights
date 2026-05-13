@@ -6,7 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 ImportProfile = Literal["core", "full"]
-TelemetryStatus = Literal["not_loaded", "loaded"]
+TelemetryStatus = Literal["not_loaded", "loaded", "partial", "unavailable"]
 
 
 class SessionCatalogItem(BaseModel):

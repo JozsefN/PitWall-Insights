@@ -58,6 +58,7 @@ Owns:
 - endpoint wrappers
 - TanStack Query hooks
 - small UI-facing mappers
+- typed access to long-running backend jobs, including session import and telemetry materialization
 
 Module reference:
 
@@ -89,6 +90,7 @@ Owns:
 - workspace URL state
 - replay clock state
 - driver, lap, and layout coordination
+- shared widget data resource hooks for laps, car telemetry, and position telemetry
 
 Module reference:
 
@@ -213,6 +215,7 @@ It supports:
 - URL-driven workspace state
 - built-in and user layouts
 - lazy telemetry widget mounting
+- on-demand telemetry materialization for selected drivers, laps, and session scopes
 - lookback controls
 - replay controls for simulation
 
@@ -229,12 +232,16 @@ Important current integration areas:
 - auth session flow
 - backend and module health
 - session catalog and import
+- asynchronous session import jobs
 - session detail and entries
 - lap and telemetry reads
+- telemetry materialization ensure and job polling
 - session replay ticks
 - user layout CRUD
 
 The frontend is intentionally assembled from smaller API resources instead of expecting page-specific mega-payloads.
+
+Telemetry is intentionally not imported as one mandatory full-session payload before the workspace opens. The frontend opens a core session first, then widgets request the telemetry slices they need. The shared session feature hooks ensure those slices exist through the telemetry materialization API before reading the ordinary session telemetry endpoints.
 
 ## Widget-Driven Direction
 
@@ -295,6 +302,7 @@ This is not yet a formal component library, but it already behaves like a lightw
 - domain-specific UI state models
 - shared feature hooks
 - orchestration that is too rich for raw pages but too UI-specific for the data layer
+- widget-facing resource hooks that combine workspace state, materialization readiness, and telemetry reads
 
 ### Widgets should own
 

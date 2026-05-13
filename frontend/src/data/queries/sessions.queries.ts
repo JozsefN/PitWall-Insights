@@ -29,11 +29,16 @@ export function useSessionCatalogQuery(season?: number) {
   });
 }
 
-export function useSessionQuery(sessionId?: string, enabled = true) {
+export function useSessionQuery(
+  sessionId?: string,
+  enabled = true,
+  refetchInterval: number | false = false,
+) {
   return useQuery({
     queryKey: ["sessions", sessionId],
     queryFn: () => getSession(sessionId as string),
     enabled: Boolean(sessionId) && enabled,
+    refetchInterval,
   });
 }
 

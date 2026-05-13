@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from datetime import datetime, timezone
 
-from sqlalchemy import func
+from sqlalchemy import func, insert
 from sqlalchemy.orm import Session, joinedload
 
 from modules.normalization.domain.models import SessionSnapshot
@@ -15,6 +16,7 @@ from modules.session_domain.domain.models import (
     SessionSummary,
     SessionTickModel,
 )
+from modules.session_domain.infrastructure.models.common import generate_uuid
 from modules.session_domain.infrastructure.models import (
     CarTelemetrySampleRecord,
     DriverRecord,
@@ -34,6 +36,8 @@ from modules.session_domain.infrastructure.models import (
     TeamRecord,
     WeekendRecord,
 )
+
+BULK_INSERT_CHUNK_SIZE = 5000
 
 
 class SessionRepository:
@@ -65,6 +69,7 @@ class SessionRepository:
         job_id: str | None = None,
         started_at: datetime | None = None,
         duration_ms: int | None = None,
+        heartbeat: Callable[[], None] | None = None,
     ) -> str:
         existing = (
             self.db.query(EventSessionRecord)
@@ -89,13 +94,14 @@ class SessionRepository:
             self.db.refresh(existing)
             return existing.id
 
+        replacement_session_id = existing.id if existing is not None else None
         if existing is not None:
             self.db.delete(existing)
             self.db.flush()
 
         season = self._upsert_season(snapshot)
         weekend = self._upsert_weekend(snapshot, season)
-        session = self._create_session(snapshot, weekend)
+        session = self._create_session(snapshot, weekend, session_id=replacement_session_id)
         self.db.flush()
 
         driver_id_map = self._upsert_drivers(snapshot)
@@ -106,7 +112,14 @@ class SessionRepository:
         stint_id_map = self._create_stints(snapshot, entry_id_map)
         tick_id_map = self._create_ticks(snapshot, session.id)
         self._create_session_events(snapshot, session.id, entry_id_map)
-        self._create_telemetry(snapshot, entry_id_map, lap_id_map, stint_id_map, tick_id_map)
+        self._create_telemetry(
+            snapshot,
+            entry_id_map,
+            lap_id_map,
+            stint_id_map,
+            tick_id_map,
+            heartbeat=heartbeat,
+        )
         run_started_at = started_at or snapshot.session.imported_at
         run_finished_at = datetime.now(timezone.utc)
         run_duration_ms = duration_ms
@@ -278,7 +291,7 @@ class SessionRepository:
         records = (
             self.db.query(SessionTickRecord)
             .filter(SessionTickRecord.session_id == session_id)
-            .order_by(SessionTickRecord.tick_no.asc())
+            .order_by(SessionTickRecord.session_time_ms.asc(), SessionTickRecord.tick_no.asc())
             .offset(offset)
             .limit(limit)
             .all()
@@ -321,29 +334,38 @@ class SessionRepository:
         self.db.flush()
         return weekend
 
-    def _create_session(self, snapshot: SessionSnapshot, weekend: WeekendRecord) -> EventSessionRecord:
-        session = EventSessionRecord(
-            source=snapshot.session.source,
-            source_session_key=snapshot.session.source_session_key,
-            weekend_id=weekend.id,
-            session_name=snapshot.session.session_name,
-            session_type=snapshot.session.session_type,
-            import_profile=snapshot.session.import_profile,
-            telemetry_status=snapshot.session.telemetry_status,
-            meeting_key=snapshot.session.meeting_key,
-            session_key=snapshot.session.session_key,
-            api_path=snapshot.session.api_path,
-            f1_api_support=snapshot.session.f1_api_support,
-            scheduled_start_utc=snapshot.session.scheduled_start_utc,
-            actual_start_utc=snapshot.session.actual_start_utc,
-            state=snapshot.session.state,
-            imported_at=snapshot.session.imported_at,
-            last_accessed_at=snapshot.session.last_accessed_at,
-            expires_at=snapshot.session.expires_at,
-            pinned_at=None,
-            deleted_at=None,
-            error_message=snapshot.session.error_message,
-        )
+    def _create_session(
+        self,
+        snapshot: SessionSnapshot,
+        weekend: WeekendRecord,
+        *,
+        session_id: str | None = None,
+    ) -> EventSessionRecord:
+        values = {
+            "source": snapshot.session.source,
+            "source_session_key": snapshot.session.source_session_key,
+            "weekend_id": weekend.id,
+            "session_name": snapshot.session.session_name,
+            "session_type": snapshot.session.session_type,
+            "import_profile": snapshot.session.import_profile,
+            "telemetry_status": snapshot.session.telemetry_status,
+            "meeting_key": snapshot.session.meeting_key,
+            "session_key": snapshot.session.session_key,
+            "api_path": snapshot.session.api_path,
+            "f1_api_support": snapshot.session.f1_api_support,
+            "scheduled_start_utc": snapshot.session.scheduled_start_utc,
+            "actual_start_utc": snapshot.session.actual_start_utc,
+            "state": snapshot.session.state,
+            "imported_at": snapshot.session.imported_at,
+            "last_accessed_at": snapshot.session.last_accessed_at,
+            "expires_at": snapshot.session.expires_at,
+            "pinned_at": None,
+            "deleted_at": None,
+            "error_message": snapshot.session.error_message,
+        }
+        if session_id is not None:
+            values["id"] = session_id
+        session = EventSessionRecord(**values)
         self.db.add(session)
         return session
 
@@ -581,43 +603,76 @@ class SessionRepository:
         lap_id_map: dict[tuple[str, int], str],
         stint_id_map: dict[tuple[str, int], str],
         tick_id_map: dict[int, str],
+        *,
+        heartbeat: Callable[[], None] | None = None,
     ) -> None:
-        for payload in snapshot.car_samples:
-            self.db.add(
-                CarTelemetrySampleRecord(
-                    session_entry_id=entry_id_map[payload.source_entry_key],
-                    tick_id=tick_id_map[payload.session_time_ms],
-                    lap_id=lap_id_map.get((payload.source_entry_key, payload.lap_number)) if payload.lap_number else None,
-                    stint_id=stint_id_map.get((payload.source_entry_key, payload.stint_number)) if payload.stint_number else None,
-                    sample_seq=payload.sample_seq,
-                    session_time_ms=payload.session_time_ms,
-                    source_time_utc=payload.source_time_utc,
-                    source=payload.source,
-                    speed_kph=payload.speed_kph,
-                    rpm=payload.rpm,
-                    gear=payload.gear,
-                    throttle_pct=payload.throttle_pct,
-                    brake_on=payload.brake_on,
-                    drs_state=payload.drs_state,
-                )
-            )
-        for payload in snapshot.position_samples:
-            self.db.add(
-                PositionSampleRecord(
-                    session_entry_id=entry_id_map[payload.source_entry_key],
-                    tick_id=tick_id_map[payload.session_time_ms],
-                    lap_id=lap_id_map.get((payload.source_entry_key, payload.lap_number)) if payload.lap_number else None,
-                    stint_id=stint_id_map.get((payload.source_entry_key, payload.stint_number)) if payload.stint_number else None,
-                    sample_seq=payload.sample_seq,
-                    session_time_ms=payload.session_time_ms,
-                    source_time_utc=payload.source_time_utc,
-                    source=payload.source,
-                    x=payload.x,
-                    y=payload.y,
-                    z=payload.z,
-                    track_status=payload.track_status,
-                )
-            )
+        self._bulk_insert(
+            CarTelemetrySampleRecord,
+            (
+                {
+                    "id": generate_uuid(),
+                    "session_entry_id": entry_id_map[payload.source_entry_key],
+                    "tick_id": tick_id_map[payload.session_time_ms],
+                    "lap_id": lap_id_map.get((payload.source_entry_key, payload.lap_number)) if payload.lap_number else None,
+                    "stint_id": stint_id_map.get((payload.source_entry_key, payload.stint_number)) if payload.stint_number else None,
+                    "sample_seq": payload.sample_seq,
+                    "session_time_ms": payload.session_time_ms,
+                    "source_time_utc": payload.source_time_utc,
+                    "source": payload.source,
+                    "speed_kph": payload.speed_kph,
+                    "rpm": payload.rpm,
+                    "gear": payload.gear,
+                    "throttle_pct": payload.throttle_pct,
+                    "brake_on": payload.brake_on,
+                    "drs_state": payload.drs_state,
+                }
+                for payload in snapshot.car_samples
+            ),
+            heartbeat=heartbeat,
+        )
+        self._bulk_insert(
+            PositionSampleRecord,
+            (
+                {
+                    "id": generate_uuid(),
+                    "session_entry_id": entry_id_map[payload.source_entry_key],
+                    "tick_id": tick_id_map[payload.session_time_ms],
+                    "lap_id": lap_id_map.get((payload.source_entry_key, payload.lap_number)) if payload.lap_number else None,
+                    "stint_id": stint_id_map.get((payload.source_entry_key, payload.stint_number)) if payload.stint_number else None,
+                    "sample_seq": payload.sample_seq,
+                    "session_time_ms": payload.session_time_ms,
+                    "source_time_utc": payload.source_time_utc,
+                    "source": payload.source,
+                    "x": payload.x,
+                    "y": payload.y,
+                    "z": payload.z,
+                    "track_status": payload.track_status,
+                }
+                for payload in snapshot.position_samples
+            ),
+            heartbeat=heartbeat,
+        )
+
+    def _bulk_insert(
+        self,
+        model: type,
+        rows: Iterable[dict],
+        *,
+        heartbeat: Callable[[], None] | None = None,
+    ) -> None:
+        batch: list[dict] = []
+        for row in rows:
+            batch.append(row)
+            if len(batch) >= BULK_INSERT_CHUNK_SIZE:
+                self.db.execute(insert(model), batch)
+                batch.clear()
+                if heartbeat is not None:
+                    heartbeat()
+
+        if batch:
+            self.db.execute(insert(model), batch)
+            if heartbeat is not None:
+                heartbeat()
 
     def _assert_entry_belongs_to_session(self, session_id: str, entry_id: str) -> None:
         exists = (

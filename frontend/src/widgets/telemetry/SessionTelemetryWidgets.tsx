@@ -1,6 +1,10 @@
 import { WidgetCard } from "../shared/WidgetCard";
 import { WidgetEmpty, WidgetError, WidgetLoading } from "../shared/WidgetState";
-import { useSelectedCarTelemetryMap, useSelectedEntryLapsMap, useSelectedPositionTelemetryMap } from "../../features/sessions/session-data.hooks";
+import {
+  useWorkspaceEntryLapsResource,
+  useWorkspaceCarTelemetryResource,
+  useWorkspacePositionTelemetryResource,
+} from "../../features/sessions/session-data.hooks";
 import { useSessionWorkspace } from "../../features/sessions/SessionWorkspaceContext";
 import {
   buildBrakePoints,
@@ -38,14 +42,14 @@ export function TelemetryLineChartWidget({
   const widgetOptions = (options ?? {}) as WidgetOptions;
   const workspace = useSessionWorkspace();
   const requiresLap = widgetOptions.requiresLap === true;
-  const shouldLoad = workspace.selectedEntries.length > 0 && (!requiresLap || workspace.lapSelection !== "all");
-  const telemetry = useSelectedCarTelemetryMap(
-    {
-      limit: 5000,
-      lap_number: workspace.lapSelection === "all" ? undefined : workspace.lapSelection,
-    },
-    shouldLoad,
-  );
+  const canRequestTelemetry = workspace.selectedEntries.length > 0 && (!requiresLap || workspace.lapSelection !== "all");
+  const telemetry = useWorkspaceCarTelemetryResource({
+    entryMode: "selected",
+    scope: "auto",
+    requireLap: requiresLap,
+    limit: 5000,
+    enabled: canRequestTelemetry,
+  });
 
   if (workspace.selectedEntries.length === 0) {
     return (
@@ -59,6 +63,22 @@ export function TelemetryLineChartWidget({
     return (
       <WidgetCard title={widgetOptions.title ?? "Telemetry"}>
         <WidgetEmpty message="Choose a specific lap to render lap-scoped telemetry." />
+      </WidgetCard>
+    );
+  }
+
+  if (telemetry.isError) {
+    return (
+      <WidgetCard title={widgetOptions.title ?? "Telemetry"}>
+        <WidgetError />
+      </WidgetCard>
+    );
+  }
+
+  if (!telemetry.ready) {
+    return (
+      <WidgetCard title={widgetOptions.title ?? "Telemetry"}>
+        <WidgetEmpty message={telemetry.waitMessage} />
       </WidgetCard>
     );
   }
@@ -112,14 +132,14 @@ export function BrakeTraceChartWidget({
   const widgetOptions = (options ?? {}) as WidgetOptions;
   const workspace = useSessionWorkspace();
   const requiresLap = widgetOptions.requiresLap !== false;
-  const shouldLoad = workspace.selectedEntries.length > 0 && (!requiresLap || workspace.lapSelection !== "all");
-  const telemetry = useSelectedCarTelemetryMap(
-    {
-      limit: 5000,
-      lap_number: workspace.lapSelection === "all" ? undefined : workspace.lapSelection,
-    },
-    shouldLoad,
-  );
+  const canRequestTelemetry = workspace.selectedEntries.length > 0 && (!requiresLap || workspace.lapSelection !== "all");
+  const telemetry = useWorkspaceCarTelemetryResource({
+    entryMode: "selected",
+    scope: "auto",
+    requireLap: requiresLap,
+    limit: 5000,
+    enabled: canRequestTelemetry,
+  });
 
   if (workspace.selectedEntries.length === 0) {
     return (
@@ -133,6 +153,22 @@ export function BrakeTraceChartWidget({
     return (
       <WidgetCard title={widgetOptions.title ?? "Brake Trace"}>
         <WidgetEmpty message="Choose a specific lap to compare braking points." />
+      </WidgetCard>
+    );
+  }
+
+  if (telemetry.isError) {
+    return (
+      <WidgetCard title={widgetOptions.title ?? "Brake Trace"}>
+        <WidgetError />
+      </WidgetCard>
+    );
+  }
+
+  if (!telemetry.ready) {
+    return (
+      <WidgetCard title={widgetOptions.title ?? "Brake Trace"}>
+        <WidgetEmpty message={telemetry.waitMessage} />
       </WidgetCard>
     );
   }
@@ -177,7 +213,10 @@ export function LapTimeTrendWidget({
 }) {
   const widgetOptions = (options ?? {}) as WidgetOptions;
   const workspace = useSessionWorkspace();
-  const laps = useSelectedEntryLapsMap(workspace.selectedEntries.length > 0);
+  const laps = useWorkspaceEntryLapsResource({
+    entryMode: "selected",
+    enabled: workspace.selectedEntries.length > 0,
+  });
 
   if (workspace.selectedEntries.length === 0) {
     return (
@@ -227,7 +266,10 @@ export function LapTableWidget({
 }) {
   const widgetOptions = (options ?? {}) as WidgetOptions;
   const workspace = useSessionWorkspace();
-  const laps = useSelectedEntryLapsMap(workspace.selectedEntries.length > 0);
+  const laps = useWorkspaceEntryLapsResource({
+    entryMode: "selected",
+    enabled: workspace.selectedEntries.length > 0,
+  });
 
   if (workspace.selectedEntries.length === 0) {
     return (
@@ -309,14 +351,14 @@ export function SessionTrackMapWidget({
   const widgetOptions = (options ?? {}) as WidgetOptions;
   const workspace = useSessionWorkspace();
   const isLapScoped = widgetOptions.scope === "lap";
-  const shouldLoad = workspace.selectedEntries.length > 0 && (!isLapScoped || workspace.lapSelection !== "all");
-  const positions = useSelectedPositionTelemetryMap(
-    {
-      limit: isLapScoped ? 5000 : 20000,
-      lap_number: isLapScoped && workspace.lapSelection !== "all" ? workspace.lapSelection : undefined,
-    },
-    shouldLoad,
-  );
+  const canRequestTelemetry = workspace.selectedEntries.length > 0 && (!isLapScoped || workspace.lapSelection !== "all");
+  const positions = useWorkspacePositionTelemetryResource({
+    entryMode: "selected",
+    scope: isLapScoped ? "lap" : "session",
+    requireLap: isLapScoped,
+    limit: isLapScoped ? 5000 : 20000,
+    enabled: canRequestTelemetry,
+  });
 
   if (workspace.selectedEntries.length === 0) {
     return (
@@ -330,6 +372,22 @@ export function SessionTrackMapWidget({
     return (
       <WidgetCard title={widgetOptions.title ?? "Track Map"}>
         <WidgetEmpty message="Choose a specific lap to render a lap-scoped track map." />
+      </WidgetCard>
+    );
+  }
+
+  if (positions.isError) {
+    return (
+      <WidgetCard title={widgetOptions.title ?? "Track Map"}>
+        <WidgetError />
+      </WidgetCard>
+    );
+  }
+
+  if (!positions.ready) {
+    return (
+      <WidgetCard title={widgetOptions.title ?? "Track Map"}>
+        <WidgetEmpty message={positions.waitMessage} />
       </WidgetCard>
     );
   }

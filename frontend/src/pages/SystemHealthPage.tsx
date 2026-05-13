@@ -12,7 +12,9 @@ import {
   useNormalizationHealthQuery,
   useStoryFeedHealthQuery,
 } from "../data/queries/module-health.queries";
+import { useImportJobsQuery } from "../data/queries/session-import.queries";
 import { useSessionsQuery } from "../data/queries/sessions.queries";
+import { useTelemetryMaterializationJobsQuery } from "../data/queries/telemetry-materialization.queries";
 import "./system-health-page.css";
 
 type HealthFact = {
@@ -89,6 +91,27 @@ function formatCount(value: number | null | undefined): string {
   return typeof value === "number" ? value.toLocaleString() : "Unknown";
 }
 
+function formatBytes(value: number | null | undefined): string {
+  if (typeof value !== "number") {
+    return "Unknown";
+  }
+
+  if (value < 1024) {
+    return `${value.toLocaleString()} B`;
+  }
+
+  const units = ["KB", "MB", "GB"];
+  let size = value / 1024;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${size.toFixed(size >= 10 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
 function SummaryTile({ label, value, description, status }: SummaryTileProps) {
   return (
     <article className="surface-card system-health-summary-tile">
@@ -158,6 +181,8 @@ export function SystemHealthPage() {
   const apiHealth = useApiHealthQuery();
   const authHealth = useAuthHealthQuery();
   const sessionsQuery = useSessionsQuery();
+  const importJobsQuery = useImportJobsQuery(25);
+  const telemetryJobsQuery = useTelemetryMaterializationJobsQuery(25);
   const ingestionHealth = useIngestionHealthQuery();
   const normalizationHealth = useNormalizationHealthQuery();
   const featureMetricsHealth = useFeatureMetricsHealthQuery();
@@ -172,6 +197,34 @@ export function SystemHealthPage() {
     ? "down"
     : sessionsQuery.isSuccess
       ? "healthy"
+      : "unknown";
+
+  const importJobs = importJobsQuery.data?.jobs ?? [];
+  const queuedJobs = importJobs.filter((job) => job.status === "queued");
+  const runningJobs = importJobs.filter((job) => job.status === "running");
+  const failedJobs = importJobs.filter((job) => job.status === "failed");
+  const completedJobs = importJobs.filter((job) => job.status === "completed");
+  const latestJob = importJobs[0] ?? null;
+  const telemetryJobs = telemetryJobsQuery.data?.jobs ?? [];
+  const queuedTelemetryJobs = telemetryJobs.filter((job) => job.status === "queued");
+  const runningTelemetryJobs = telemetryJobs.filter((job) => job.status === "running");
+  const failedTelemetryJobs = telemetryJobs.filter((job) => job.status === "failed");
+  const completedTelemetryJobs = telemetryJobs.filter((job) => job.status === "completed");
+  const latestTelemetryJob = telemetryJobs[0] ?? null;
+
+  const importJobsStatus = importJobsQuery.isError
+    ? "down"
+    : importJobsQuery.isSuccess
+      ? queuedJobs.length > 0 && runningJobs.length === 0
+        ? "degraded"
+        : "healthy"
+      : "unknown";
+  const telemetryJobsStatus = telemetryJobsQuery.isError
+    ? "down"
+    : telemetryJobsQuery.isSuccess
+      ? queuedTelemetryJobs.length > 0 && runningTelemetryJobs.length === 0
+        ? "degraded"
+        : "healthy"
       : "unknown";
 
   const ingestionStatus = ingestionHealth.data?.details?.configured
@@ -197,6 +250,8 @@ export function SystemHealthPage() {
       : normalizeHealthStatus(storyFeedHealth.data?.details ?? storyFeedHealth.data);
 
   const pipelineStatus = combineStatuses([
+    importJobsStatus,
+    telemetryJobsStatus,
     sessionsStatus,
     ingestionStatus,
     normalizationStatus,
@@ -215,6 +270,24 @@ export function SystemHealthPage() {
   ]);
 
   const cachedSessions = sessionsQuery.data?.length ?? 0;
+  const coreSessions = sessionsQuery.data?.filter((session) => session.import_profile === "core").length ?? 0;
+  const fullSessions = sessionsQuery.data?.filter((session) => session.import_profile === "full").length ?? 0;
+  const telemetryLoadedSessions =
+    sessionsQuery.data?.filter((session) => session.telemetry_status === "loaded").length ?? 0;
+  const workerSignal = runningJobs.length > 0
+    ? `${runningJobs.length} running`
+    : queuedJobs.length > 0
+      ? "Queued work waiting"
+      : importJobsQuery.isSuccess
+        ? "Idle or no recent jobs"
+        : "Checking";
+  const telemetryWorkerSignal = runningTelemetryJobs.length > 0
+    ? `${runningTelemetryJobs.length} running`
+    : queuedTelemetryJobs.length > 0
+      ? "Queued slices waiting"
+      : telemetryJobsQuery.isSuccess
+        ? "Idle or cached"
+        : "Checking";
 
   return (
     <PageContainer>
@@ -224,9 +297,9 @@ export function SystemHealthPage() {
             <span className="ui-pill ui-pill--ready">Diagnostics</span>
             <h1 className="display-font system-health-hero__title">System Health</h1>
             <p className="system-health-hero__lead">
-              This page is centered on the current session pipeline the frontend will depend
-              on most: FastF1 source access, ingestion, normalization, and the selected-session
-              cache exposed through the sessions API.
+              This page follows the current import architecture: clients create import jobs,
+              the worker loads FastF1 through profile-aware ingestion, normalization builds
+              the canonical snapshot, and PostgreSQL remains the selected-session cache.
             </p>
           </div>
 
@@ -237,8 +310,13 @@ export function SystemHealthPage() {
             </div>
             <div className="system-health-flow__arrow">-&gt;</div>
             <div className="system-health-flow__step">
-              <span className="system-health-flow__label">Load</span>
-              <strong>Ingestion</strong>
+              <span className="system-health-flow__label">Queue</span>
+              <strong>Import jobs</strong>
+            </div>
+            <div className="system-health-flow__arrow">-&gt;</div>
+            <div className="system-health-flow__step">
+              <span className="system-health-flow__label">Worker</span>
+              <strong>Profile load</strong>
             </div>
             <div className="system-health-flow__arrow">-&gt;</div>
             <div className="system-health-flow__step">
@@ -257,14 +335,28 @@ export function SystemHealthPage() {
           <SummaryTile
             label="Session pipeline"
             value={getStatusLabel(pipelineStatus)}
-            description="End-to-end import and cache path used by archive and telemetry surfaces."
+            description="Import jobs, source loading, normalization, and session-cache reads."
             status={pipelineStatus}
+          />
+
+          <SummaryTile
+            label="Import queue"
+            value={workerSignal}
+            description={`${formatCount(queuedJobs.length)} queued, ${formatCount(runningJobs.length)} running, ${formatCount(failedJobs.length)} failed in the recent job window.`}
+            status={importJobsStatus}
+          />
+
+          <SummaryTile
+            label="Telemetry cache"
+            value={telemetryWorkerSignal}
+            description={`${formatCount(queuedTelemetryJobs.length)} queued, ${formatCount(runningTelemetryJobs.length)} running, ${formatCount(completedTelemetryJobs.length)} completed telemetry slice jobs.`}
+            status={telemetryJobsStatus}
           />
 
           <SummaryTile
             label="Cached sessions"
             value={formatCount(cachedSessions)}
-            description="Sessions currently reachable through the selected-session cache."
+            description={`${formatCount(fullSessions)} full imports, ${formatCount(coreSessions)} core imports, ${formatCount(telemetryLoadedSessions)} with telemetry loaded.`}
             status={sessionsStatus}
           />
 
@@ -293,20 +385,59 @@ export function SystemHealthPage() {
           <div className="system-health-section__header">
             <div>
               <p className="system-health-section__eyebrow">Core domains</p>
-              <h2 className="system-health-section__title">The session pipeline that matters to the frontend</h2>
+              <h2 className="system-health-section__title">Import and session-cache pipeline</h2>
             </div>
             <p className="system-health-section__body">
-              These three domains work together. The sessions domain is the frontend-facing
-              cache layer, ingestion loads source data, and normalization turns source rows
-              into the canonical entry-centric model.
+              These domains now split slow import work away from normal reads. Import jobs
+              track operational state, ingestion loads the selected profile, normalization
+              produces the canonical shape, and the session domain serves cached data.
             </p>
           </div>
 
           <div className="system-health-grid">
             <DomainCard
+              eyebrow="Session import"
+              title="Job queue and worker path"
+              description="Owns background import requests, progress stages, heartbeat recovery, retries, and the handoff into canonical session storage."
+              status={importJobsStatus}
+              facts={[
+                {
+                  label: "Route reachability",
+                  value: importJobsQuery.isError ? "Unavailable" : importJobsQuery.isSuccess ? "Reachable" : "Checking",
+                },
+                {
+                  label: "Queued jobs",
+                  value: formatCount(queuedJobs.length),
+                },
+                {
+                  label: "Running jobs",
+                  value: formatCount(runningJobs.length),
+                },
+                {
+                  label: "Latest stage",
+                  value: latestJob?.progress_stage ?? "No recent jobs",
+                },
+                {
+                  label: "Completed recent",
+                  value: formatCount(completedJobs.length),
+                },
+              ]}
+              endpoints={[
+                "/api/session-import/jobs",
+                "/api/session-import/jobs/{id}",
+                "python -m app.worker",
+              ]}
+              note={
+                queuedJobs.length > 0 && runningJobs.length === 0
+                  ? "Queued jobs are waiting with no running job in the recent window. If this persists, check the worker process."
+                  : "This endpoint proves the queue API is reachable. Worker liveness is inferred from running jobs and queue movement."
+              }
+            />
+
+            <DomainCard
               eyebrow="Session domain"
               title="Selected-session cache"
-              description="Owns the archive-facing session model, session reads, entry reads, telemetry reads, and replay-oriented tick access."
+              description="Owns canonical session persistence, cache lifecycle, entry reads, telemetry reads, and replay-oriented tick access."
               status={sessionsStatus}
               facts={[
                 {
@@ -318,12 +449,16 @@ export function SystemHealthPage() {
                   value: formatCount(cachedSessions),
                 },
                 {
-                  label: "Role",
-                  value: "Frontend-facing session and telemetry domain",
+                  label: "Full imports",
+                  value: formatCount(fullSessions),
                 },
                 {
-                  label: "Storage model",
-                  value: "Selected-session cache",
+                  label: "Core imports",
+                  value: formatCount(coreSessions),
+                },
+                {
+                  label: "Telemetry loaded",
+                  value: formatCount(telemetryLoadedSessions),
                 },
               ]}
               endpoints={[
@@ -336,8 +471,43 @@ export function SystemHealthPage() {
               note={
                 sessionsQuery.isError
                   ? "The sessions API is not responding cleanly right now, so archive and detail screens would be blocked."
-                  : "This is the domain the frontend should treat as the stable read surface for imported sessions."
+                  : "This is still the stable frontend read surface. Import jobs feed this cache; widgets read from it."
               }
+            />
+
+            <DomainCard
+              eyebrow="Telemetry materialization"
+              title="On-demand telemetry slices"
+              description="Owns reusable telemetry cache segments for selected entries, scopes, and modes without creating separate sessions."
+              status={telemetryJobsStatus}
+              facts={[
+                {
+                  label: "Route reachability",
+                  value: telemetryJobsQuery.isError ? "Unavailable" : telemetryJobsQuery.isSuccess ? "Reachable" : "Checking",
+                },
+                {
+                  label: "Queued slice jobs",
+                  value: formatCount(queuedTelemetryJobs.length),
+                },
+                {
+                  label: "Running slice jobs",
+                  value: formatCount(runningTelemetryJobs.length),
+                },
+                {
+                  label: "Failed slice jobs",
+                  value: formatCount(failedTelemetryJobs.length),
+                },
+                {
+                  label: "Latest stage",
+                  value: latestTelemetryJob?.progress_stage ?? "No recent jobs",
+                },
+              ]}
+              endpoints={[
+                "/api/telemetry/materialization/ensure",
+                "/api/telemetry/materialization/jobs/{id}",
+                "python -m app.worker",
+              ]}
+              note="Lookback and simulation both use these segments. Loading one driver/lap adds to the session cache; it does not replace or delete other cached slices."
             />
 
             <DomainCard
@@ -368,8 +538,16 @@ export function SystemHealthPage() {
                       ? `${ingestionHealth.data.details.import_timeout_seconds}s`
                       : "Unknown",
                 },
+                {
+                  label: "FastF1 cache size",
+                  value: formatBytes(ingestionHealth.data?.details?.cache_size_bytes),
+                },
+                {
+                  label: "Profiles",
+                  value: "core, full",
+                },
               ]}
-              endpoints={["/api/ingestion/health", "/api/sessions/catalog", "/api/sessions/import"]}
+              endpoints={["/api/ingestion/health", "/api/sessions/catalog", "/api/session-import/jobs"]}
               note={
                 ingestionHealth.data?.details?.cache_dir
                   ? `FastF1 cache directory is configured at ${ingestionHealth.data.details.cache_dir}.`
@@ -402,9 +580,13 @@ export function SystemHealthPage() {
                   label: "Output shape",
                   value: "Entry-centric canonical snapshot",
                 },
+                {
+                  label: "Builder selection",
+                  value: "By source",
+                },
               ]}
-              endpoints={["/api/normalization/health", "/api/sessions/import"]}
-              note="Normalization is the layer that keeps FastF1-specific source shapes out of the session storage and query code."
+              endpoints={["/api/normalization/health", "/api/session-import/jobs"]}
+              note="Normalization now records whether the snapshot came from a core or full import while keeping FastF1-specific source shapes out of storage."
             />
           </div>
         </section>

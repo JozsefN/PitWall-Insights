@@ -59,6 +59,8 @@ The widget system exists to keep those questions separate.
 - `frontend/src/features/sessions/SessionWorkspaceContext.tsx`
 - `frontend/src/features/sessions/session-data.hooks.ts`
 
+`session-data.hooks.ts` is the preferred widget data boundary for session widgets. Widget components should usually consume its resource hooks instead of calling session APIs or telemetry materialization APIs directly.
+
 ## Core Concepts
 
 ## Very Important Distinction: widgets and layouts are not the same
@@ -246,7 +248,7 @@ That shape intentionally matches the saved-layout shape closely so built-ins and
 
 If a layout references a widget id that is not registered in the current build, the renderer does not crash the page.
 
-Instead it mounts an “Unavailable Widget” card.
+Instead it mounts an "Unavailable Widget" card.
 
 That matters for:
 
@@ -291,8 +293,176 @@ Current widgets include:
 - widgets read workspace context rather than receiving large prop trees
 - widgets decide whether they should load based on driver and lap selection
 - lap-scoped widgets show explicit empty states when `lap = all`
-- telemetry queries are lazy and widget-specific
+- telemetry queries are lazy and widget-specific, but materialization and per-entry fetching are centralized in session resource hooks
+- widgets do not need to know which backend job endpoint prepares telemetry
 - simple SVG rendering is used for current charting needs
+
+## Widget Data Resource Hooks
+
+Session widgets should use the shared hooks in `frontend/src/features/sessions/session-data.hooks.ts`.
+
+The recommended hooks are:
+
+- `useWorkspaceEntryLapsResource(options)`
+- `useWorkspaceCarTelemetryResource(options)`
+- `useWorkspacePositionTelemetryResource(options)`
+
+The lower-level hooks remain available for older or exceptional widgets:
+
+- `useSelectedEntryLapsMap`
+- `useSelectedCarTelemetryMap`
+- `useSelectedPositionTelemetryMap`
+- `useAllPositionTelemetryMap`
+
+The resource hooks are preferred because they combine driver resolution, scope resolution, telemetry materialization, polling, and final sample reads behind one widget-facing API.
+
+## Choosing the right resource hook
+
+Use `useWorkspaceEntryLapsResource` for widgets that need lap metadata rather than telemetry samples.
+
+Good examples:
+
+- lap tables
+- lap time trends
+- best lap summaries
+- stint summaries derived from lap rows
+
+Use `useWorkspaceCarTelemetryResource` for widgets that need car-channel telemetry.
+
+Good examples:
+
+- speed traces
+- throttle traces
+- brake traces
+- RPM or gear charts
+- DRS state widgets
+
+Use `useWorkspacePositionTelemetryResource` for widgets that need track position samples.
+
+Good examples:
+
+- static track maps
+- replay track maps
+- driver trail widgets
+- gap visualization that depends on position samples
+
+## Resource hook options
+
+Telemetry resource hooks accept `WorkspaceTelemetryResourceOptions`.
+
+Important options:
+
+- `entryIds`: explicit backend session entry ids to load
+- `entryMode`: `selected` uses selected drivers, `all` uses every entry in the workspace
+- `scope`: `auto`, `lap`, or `session`
+- `requireLap`: prevents loading until a specific lap is available
+- `lapNumber`: explicit lap override
+- `offset` and `limit`: sample window controls
+- `sessionTimeFromMs` and `sessionTimeToMs`: session-time window controls
+- `enabled`: final widget-level gate
+
+Entry lap resources accept the smaller `WorkspaceEntryResourceOptions` shape:
+
+- `entryIds`
+- `entryMode`
+- `enabled`
+
+## Scope behavior
+
+`scope: "auto"` follows the workspace lap selector:
+
+- `lap = all` becomes `scope: "session"`
+- a specific lap becomes `scope: "lap"`
+
+Use `scope: "lap"` with `requireLap: true` when a widget only makes sense for one lap, such as a lap comparison trace.
+
+Use `scope: "session"` when the widget should work across the whole imported session, such as a session track map or replay widget.
+
+## Resource hook return shape
+
+Telemetry resource hooks return:
+
+- `entryIds`
+- `entries`
+- `scope`
+- `lapNumber`
+- `query`
+- `enabled`
+- `ready`
+- `isPreparing`
+- `stage`
+- `waitMessage`
+- `dataByEntryId`
+- `isLoading`
+- `isError`
+
+`dataByEntryId` is the main render input. It is keyed by backend session entry id, so widgets can pair each sample list with the matching `entries` item.
+
+## Standard widget state pattern
+
+Most telemetry widgets should follow this order:
+
+1. Show `WidgetEmpty` if the required driver or lap selection does not exist.
+2. Show `WidgetError` if `resource.isError` is true.
+3. Show `WidgetEmpty` with `resource.waitMessage` if `resource.enabled && !resource.ready`.
+4. Show `WidgetLoading` if `resource.isLoading`.
+5. Render from `resource.dataByEntryId`.
+
+This keeps the user informed while the backend worker prepares cache segments, and it keeps widgets consistent across lookback and simulation surfaces.
+
+## Example: lap-scoped car telemetry widget
+
+```tsx
+const resource = useWorkspaceCarTelemetryResource({
+  scope: "lap",
+  requireLap: true,
+  limit: 5000,
+});
+
+if (!resource.lapNumber) {
+  return <WidgetEmpty message="Choose one lap to compare telemetry." />;
+}
+
+if (resource.isError) {
+  return <WidgetError />;
+}
+
+if (resource.enabled && !resource.ready) {
+  return <WidgetEmpty message={resource.waitMessage} />;
+}
+
+const samplesByEntryId = resource.dataByEntryId;
+```
+
+## Example: full-session position widget
+
+```tsx
+const resource = useWorkspacePositionTelemetryResource({
+  entryMode: "all",
+  scope: "session",
+  limit: 20000,
+});
+
+if (resource.enabled && !resource.ready) {
+  return <WidgetEmpty message={resource.waitMessage} />;
+}
+
+const traces = resource.entries.map((entry) => ({
+  entry,
+  samples: resource.dataByEntryId[entry.id] ?? [],
+}));
+```
+
+## Why widgets should not call materialization APIs directly
+
+Materialization is an implementation detail of preparing telemetry data. A widget should express what it needs:
+
+- entries
+- car or position data
+- session or lap scope
+- optional limits and time windows
+
+The session resource hooks translate that need into backend cache preparation and telemetry reads. That keeps new widgets small, consistent, and easier to migrate if the backend cache strategy changes again later.
 
 ## Replay Widgets
 
@@ -308,6 +478,7 @@ Current widgets include:
 - they consume the shared replay clock from workspace context
 - they are allowed only in `live-race` audience layouts
 - they query or derive only the data needed for the current replay view
+- they can reuse the same full-session telemetry resources as lookback widgets because simulation and lookback share one imported session identity
 
 This keeps replay behavior consistent across different simulation layouts.
 
@@ -355,6 +526,7 @@ That is exactly the kind of failure handling needed before a layout builder exis
 ### Does not belong here
 
 - API transport logic
+- direct telemetry materialization orchestration inside individual widgets
 - route navigation
 - session import flow
 - auth token behavior

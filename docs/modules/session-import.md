@@ -23,8 +23,9 @@ The chosen design is intentionally lean:
 2. Add import jobs.
 3. Add a worker.
 4. Keep normalized telemetry in PostgreSQL.
-5. Measure import and read pain using job/run metadata.
-6. Add artifacts only if telemetry volume or reproducibility requires it.
+5. Materialize telemetry on demand by selected session segment.
+6. Measure import and read pain using job/run metadata.
+7. Add artifacts only if telemetry volume or reproducibility requires it.
 
 ## Import Profiles
 
@@ -64,7 +65,9 @@ Persisted sessions imported with this profile use:
 Persisted sessions imported with this profile use:
 
 - `event_sessions.import_profile = "full"`
-- `event_sessions.telemetry_status = "loaded"`
+- `event_sessions.telemetry_status = "loaded"` when both telemetry streams load
+- `event_sessions.telemetry_status = "partial"` when only one telemetry stream loads
+- `event_sessions.telemetry_status = "unavailable"` when FastF1 cannot provide telemetry
 
 If a `full` import is requested for a session already cached as `core`, the
 repository refreshes the cached session so telemetry is actually written.
@@ -97,21 +100,32 @@ session rows are still owned by `session_domain`.
 
 The worker entrypoint is `backend/app/worker.py`.
 
+For local development, `backend/setup_backend.sh` starts the worker in the
+background before starting Uvicorn. Set `SKIP_WORKER=1` if you only want the API
+process.
+
 One worker cycle does this:
 
 1. Recover stale running jobs whose heartbeat expired.
 2. Delete expired completed/failed/cancelled job rows.
-3. Delete expired unpinned cached sessions.
-4. Claim the oldest queued job using a database row lock.
-5. Build an `IngestionService` for the job source.
-6. Load the source bundle according to the job import profile.
-7. Normalize the bundle into a `SessionSnapshot`.
-8. Persist the snapshot through `SessionRepository`.
-9. Mark the job completed with `session_id`, `source_version`, and `rows_written`.
+3. Claim the oldest queued session import job using a database row lock.
+4. If no session import job is waiting, claim the oldest queued telemetry
+   materialization job.
+5. If no work is waiting, clean up expired finished job rows.
+6. Load source data through `IngestionService`.
+7. Normalize source data into a `SessionSnapshot`.
+8. Persist either the full/core session snapshot or the requested telemetry
+   segment.
+9. Mark the job completed with source/version and row-count metadata.
 10. On failure, roll back uncommitted database work and mark the job failed.
 
 The API and worker can run as separate deployed processes that share the same
 PostgreSQL database.
+
+In deployment, run the same backend image/codebase with two commands:
+
+- API process: `python -m uvicorn app.main:app`
+- Worker process: `python -m app.worker`
 
 ## Cleanup Ownership
 
@@ -188,6 +202,8 @@ Owned elsewhere:
 
 - `event_sessions` and all canonical session tables belong to
   [Session Domain](./session-domain.md)
+- on-demand telemetry cache orchestration belongs to
+  [Telemetry Materialization](./telemetry-materialization.md)
 - source loading belongs to [Ingestion](./ingestion.md)
 - source-to-canonical conversion belongs to [Normalization](./normalization.md)
 

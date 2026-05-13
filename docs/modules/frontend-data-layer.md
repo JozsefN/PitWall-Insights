@@ -24,6 +24,8 @@ This project is already moving beyond simple page fetches. It now has:
 - health diagnostics
 - session catalog browsing
 - session import
+- asynchronous import job tracking
+- telemetry materialization job tracking
 - entry, lap, telemetry, and replay data
 - user-owned layout persistence
 
@@ -44,6 +46,8 @@ Without a dedicated data layer, those responsibilities would quickly leak into p
 - `frontend/src/data/api/feature-metrics.api.ts`
 - `frontend/src/data/api/story-feed.api.ts`
 - `frontend/src/data/api/sessions.api.ts`
+- `frontend/src/data/api/session-import.api.ts`
+- `frontend/src/data/api/telemetry-materialization.api.ts`
 - `frontend/src/data/api/layouts.api.ts`
 
 ### Typed contracts
@@ -52,6 +56,8 @@ Without a dedicated data layer, those responsibilities would quickly leak into p
 - `frontend/src/data/contracts/health.contracts.ts`
 - `frontend/src/data/contracts/module-health.contracts.ts`
 - `frontend/src/data/contracts/sessions.contracts.ts`
+- `frontend/src/data/contracts/session-import.contracts.ts`
+- `frontend/src/data/contracts/telemetry-materialization.contracts.ts`
 - `frontend/src/data/contracts/layouts.contracts.ts`
 
 ### Query hooks
@@ -60,6 +66,8 @@ Without a dedicated data layer, those responsibilities would quickly leak into p
 - `frontend/src/data/queries/health.queries.ts`
 - `frontend/src/data/queries/module-health.queries.ts`
 - `frontend/src/data/queries/sessions.queries.ts`
+- `frontend/src/data/queries/session-import.queries.ts`
+- `frontend/src/data/queries/telemetry-materialization.queries.ts`
 - `frontend/src/data/queries/layouts.queries.ts`
 
 ### Mappers
@@ -174,6 +182,36 @@ Important current details:
 
 Those details are what make the session explorer and workspace precise enough for testing weekends, replay, and per-widget lazy querying.
 
+## Session import job contracts
+
+`session-import.contracts.ts` defines the asynchronous import job shape used by frontend surfaces that track worker-backed imports and operational status.
+
+It covers:
+
+- job status: `queued`, `running`, `completed`, `failed`, and `cancelled`
+- job stage: `queued`, `loading_source`, `normalizing`, `persisting`, `completed`, and `failed`
+- selected session identity
+- import profile
+- source version
+- progress timestamps and heartbeat timestamps
+- written row count and error message
+
+This exists separately from `sessions.contracts.ts` because import jobs are operational resources, not imported session records.
+
+## Telemetry materialization contracts
+
+`telemetry-materialization.contracts.ts` defines the frontend shape for on-demand telemetry cache work.
+
+It covers:
+
+- telemetry kinds: `car` and `position`
+- telemetry scopes: `session` and `lap`
+- materialized cache segments
+- materialization jobs
+- ensure requests that ask the backend to make selected telemetry slices available
+
+This is the contract group that lets widgets request just the data they need, such as car telemetry for selected drivers on one lap or position telemetry for all entries over a full session.
+
 ## Layout contracts
 
 `layouts.contracts.ts` defines the persisted shape for user-owned layouts.
@@ -233,6 +271,26 @@ It currently exposes:
 
 These functions are intentionally resource-oriented. The frontend assembles pages from several small queries rather than expecting one giant page-shaped response.
 
+## Session import job APIs
+
+`session-import.api.ts` exposes the asynchronous import job endpoints:
+
+- create an import job
+- list recent import jobs
+- fetch one import job
+
+Use this surface when a frontend flow wants worker-backed import progress instead of waiting on the older synchronous import endpoint.
+
+## Telemetry materialization APIs
+
+`telemetry-materialization.api.ts` exposes the on-demand telemetry cache endpoints:
+
+- ensure telemetry materialization for a selected set of entries, kinds, and scope
+- list recent materialization jobs
+- fetch one materialization job
+
+These functions do not fetch telemetry samples directly. They only ensure that the backend cache has the requested telemetry segments. The actual samples still come through `sessions.api.ts`.
+
 ## Layout APIs
 
 `layouts.api.ts` exposes authenticated CRUD for user layouts:
@@ -267,6 +325,9 @@ The keys are structured by resource hierarchy, for example:
 - `["sessions", sessionId, "entries"]`
 - `["sessions", sessionId, "entries", entryId, "laps"]`
 - `["sessions", sessionId, "entries", entryId, "telemetry", "car", query]`
+- `["session-import", "jobs", jobId]`
+- `["telemetry-materialization", "ensure", request]`
+- `["telemetry-materialization", "jobs", jobId]`
 
 That matters for:
 
@@ -291,8 +352,32 @@ Examples:
 - entry telemetry only fetches when both `sessionId` and `entryId` exist
 - layout queries only run when the user is authenticated
 - replay tick queries only run in simulation mode
+- import job polling stops when a job is complete, failed, cancelled, or stale
+- telemetry materialization polling stops when a job is complete, failed, cancelled, or stale
 
 This pattern is one of the main reasons the workspace avoids unnecessary backend traffic.
+
+## Data Layer Versus Session Resource Hooks
+
+The data layer stops at transport, DTO contracts, query keys, polling, and invalidation.
+
+It does not decide:
+
+- which drivers a widget should read
+- whether a widget needs one lap or a full session
+- whether selected drivers or all entries should be used
+- how to combine materialization readiness with telemetry sample reads
+
+Those decisions live in `frontend/src/features/sessions/session-data.hooks.ts`.
+
+That file is the widget-facing resource layer. It composes:
+
+- workspace state from `SessionWorkspaceContext`
+- materialization readiness from `telemetry-materialization.queries.ts`
+- sample reads from `sessions.queries.ts` and `sessions.api.ts`
+- entry-keyed maps that widgets can render directly
+
+This split keeps the data layer reusable and keeps widget code out of backend URL details.
 
 ## Mapper Responsibilities
 
@@ -329,6 +414,7 @@ This file exists as an extension point for future session-focused projections. E
 - route composition
 - UI layout decisions
 - workspace control logic
+- widget resource selection rules
 - widget rendering
 - chart generation
 
@@ -339,6 +425,7 @@ Those belong in `pages`, `features`, or `widgets`.
 - Clear separation between transport, typing, and query orchestration
 - Query keys are readable and resource-oriented
 - Contracts already cover telemetry and replay data in enough detail for serious frontend work
+- Asynchronous session import and telemetry materialization are represented as first-class API resources
 - The layout persistence surface is ready before the layout builder itself exists
 
 ## Current Limitations
@@ -351,6 +438,6 @@ Those belong in `pages`, `features`, or `widgets`.
 ## Future Work
 
 - add stronger shared error modeling where the UI needs more precise recovery behavior
-- introduce telemetry-specific helper types if chart widgets need richer query composition
+- keep telemetry-specific orchestration in the session feature hooks unless it becomes backend-agnostic enough for the data layer
 - expand mapper usage as the story feed and standings surfaces become real
 - document query-key conventions more formally if the data layer grows much larger

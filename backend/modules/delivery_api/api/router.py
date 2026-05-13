@@ -4,6 +4,7 @@ from modules.delivery_api.api.health_routes import router as health_router
 from modules.delivery_api.api.auth_routes import router as auth_router
 from modules.delivery_api.api.session_routes import router as session_router
 from modules.delivery_api.api.import_job_routes import router as import_job_router
+from modules.delivery_api.api.telemetry_materialization_routes import router as telemetry_materialization_router
 from modules.delivery_api.api.ingestion_routes import router as ingestion_router
 from modules.delivery_api.api.normalization_routes import router as normalization_router
 from modules.delivery_api.api.feature_metrics_routes import router as feature_metrics_router
@@ -15,6 +16,7 @@ api_router.include_router(health_router)
 api_router.include_router(auth_router)
 api_router.include_router(session_router)
 api_router.include_router(import_job_router)
+api_router.include_router(telemetry_materialization_router)
 api_router.include_router(ingestion_router)
 api_router.include_router(normalization_router)
 api_router.include_router(feature_metrics_router)

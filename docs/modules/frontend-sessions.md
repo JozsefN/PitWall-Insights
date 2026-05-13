@@ -15,6 +15,7 @@ It is responsible for:
 - resuming the last active workspace
 - switching between lookback and simulation modes
 - coordinating driver, lap, layout, and replay state for widgets
+- preparing telemetry slices on demand through shared widget data hooks
 
 This is currently the richest real frontend domain in the project.
 
@@ -37,6 +38,7 @@ Because of that, the sessions frontend is not just another page. It is the main 
 - backend catalog data becomes user flow
 - layout composition becomes live UI
 - telemetry queries become contextual and lazy
+- expensive telemetry cache work happens only for the drivers, scope, and widget needs currently in use
 
 ## Current File Map
 
@@ -50,6 +52,7 @@ Because of that, the sessions frontend is not just another page. It is the main 
 
 - `frontend/src/features/sessions/SessionWorkspaceContext.tsx`
 - `frontend/src/features/sessions/session-data.hooks.ts`
+- `frontend/src/features/sessions/session-import-warmup.ts`
 - `frontend/src/features/sessions/session-layouts.ts`
 - `frontend/src/features/sessions/session-resume.ts`
 - `frontend/src/features/sessions/session-utils.ts`
@@ -58,10 +61,16 @@ Because of that, the sessions frontend is not just another page. It is the main 
 ### Data dependencies
 
 - `frontend/src/data/contracts/sessions.contracts.ts`
+- `frontend/src/data/contracts/session-import.contracts.ts`
+- `frontend/src/data/contracts/telemetry-materialization.contracts.ts`
 - `frontend/src/data/contracts/layouts.contracts.ts`
 - `frontend/src/data/queries/sessions.queries.ts`
+- `frontend/src/data/queries/session-import.queries.ts`
+- `frontend/src/data/queries/telemetry-materialization.queries.ts`
 - `frontend/src/data/queries/layouts.queries.ts`
 - `frontend/src/data/api/sessions.api.ts`
+- `frontend/src/data/api/session-import.api.ts`
+- `frontend/src/data/api/telemetry-materialization.api.ts`
 - `frontend/src/data/api/layouts.api.ts`
 
 ### Widget dependencies
@@ -87,8 +96,8 @@ Its job is not to display telemetry. Its job is to get the user into the right w
 - group catalog entries by weekend
 - let the user select year, race weekend, and session
 - let the user choose `lookback` or `simulation`
-- call `useImportSessionMutation()` when the user presses `Load session`
-- navigate directly into `/sessions/:sessionId` after import succeeds
+- call `useImportSessionMutation()` with `import_profile: "core"` when the user presses `Load session`
+- navigate directly into `/sessions/:sessionId` after the core import succeeds
 - auto-resume an already active workspace unless the user explicitly requests `?view=explorer`
 
 ### Important current UX detail
@@ -171,12 +180,14 @@ The import flow on `SessionsExplorerPage.tsx` is a core part of the module.
 
 1. user selects a catalog session
 2. user selects `lookback` or `simulation`
-3. `Load session` sends `season_year`, `round_number`, `session_name`, and `source_session_key`
-4. backend imports the session or returns the cached one
+3. `Load session` sends `season_year`, `round_number`, `session_name`, `source_session_key`, and `import_profile: "core"`
+4. backend imports the lightweight session cache or returns the cached one
 5. frontend writes default workspace state to local resume storage
 6. frontend navigates straight into `/sessions/:sessionId?...`
 
-That direct navigation is important. The user does not need to perform a second “open workspace” step after the import finishes.
+That direct navigation is important. The user does not need to perform a second "open workspace" step after the import finishes.
+
+The explorer intentionally does not start a full telemetry import. The workspace opens as soon as the core session exists, and widgets ask for heavier telemetry segments only when the selected layout actually needs them.
 
 ## Why `source_session_key` matters
 
@@ -210,13 +221,26 @@ For lookback mode, the page fetches lap lists for selected drivers so the lap se
 
 The page itself does not fetch all telemetry up front.
 
-Instead, widgets fetch their own data through session feature hooks, and only after:
+Instead, widgets fetch their own data through session feature resource hooks, and only after:
 
 - a valid layout is selected
 - the widget is mounted
 - the widget has enough control context
 
 That is one of the most important performance and architecture decisions in the module.
+
+For telemetry widgets, the feature hooks first ensure that the requested telemetry segment exists. If the backend already has the matching segment, the widget can read samples immediately. If not, the hook creates or observes a telemetry materialization job and exposes a preparing state to the widget.
+
+The normal flow is:
+
+1. widget resolves the entries it needs from workspace state
+2. widget selects `car` or `position` telemetry
+3. widget selects `session`, `lap`, or `auto` scope
+4. resource hook calls `/api/telemetry/materialization/ensure`
+5. resource hook polls the materialization job only if one is returned
+6. resource hook reads the normal session telemetry endpoint once the segment is ready
+
+This gives the UI partial usefulness earlier than the old full-telemetry-first approach, while still letting already materialized data stay reusable across lookback and simulation mode.
 
 ## Session Workspace Context
 
@@ -290,6 +314,8 @@ It uses:
 
 It does not allow future-aware lookback widgets. Only `live-race` audience layouts and widgets are allowed here.
 
+Simulation mode uses the same imported session identity as lookback mode. It should not create a duplicate session just because the user changes mode. Mode changes affect frontend controls, layout audience, replay behavior, and which widgets mount, not the backend identity of the session.
+
 ## Audience gating
 
 The audience is derived from mode in `session-layouts.ts`:
@@ -356,14 +382,32 @@ This is intentional. Once a session is loaded, the telemetry surface should domi
 
 `session-data.hooks.ts` gives widgets convenient multi-entry data access built on top of the workspace context.
 
-Current hook families include:
+Recommended resource hooks:
 
-- selected entry laps
-- selected car telemetry
-- selected position telemetry
-- all-entry position telemetry
+- `useWorkspaceEntryLapsResource`
+- `useWorkspaceCarTelemetryResource`
+- `useWorkspacePositionTelemetryResource`
 
 These hooks use `useQueries()` so widgets can request per-entry resources while still consuming the result as entry-keyed maps.
+
+They also centralize:
+
+- selected versus all-entry resolution
+- explicit `entryIds` overrides
+- `session` versus `lap` telemetry scope
+- `auto` scope based on the workspace lap selector
+- `requireLap` gating for lap-only widgets
+- materialization readiness
+- sample query limits and session-time windows
+
+Lower-level map hooks still exist for compatibility and unusual cases:
+
+- `useSelectedEntryLapsMap`
+- `useSelectedCarTelemetryMap`
+- `useSelectedPositionTelemetryMap`
+- `useAllPositionTelemetryMap`
+
+New widgets should start with the resource hooks.
 
 ## Lazy loading model
 
@@ -374,6 +418,10 @@ This matters because:
 - not every selected layout uses every dataset
 - replay widgets should not force lookback data loads
 - lap-scoped widgets should not load until a lap is chosen
+- a full-session position map should not force car telemetry to materialize
+- selected-driver charts should not force all-entry telemetry to materialize
+
+The cache key is the imported session plus the requested entries, telemetry kind, and scope. That means lookback and simulation can share the same backend session while still preparing only the slices they actually need.
 
 ## Boundaries
 
@@ -385,6 +433,7 @@ This matters because:
 - mode-to-audience mapping
 - shared session workspace context
 - feature-level telemetry hook composition
+- on-demand telemetry materialization orchestration for widgets
 
 ### Does not belong here
 
@@ -401,6 +450,7 @@ Those concerns belong in the data layer, widget system, or backend modules.
 - Real end-to-end archive workflow now exists
 - URL state makes workspace behavior linkable and inspectable
 - Layout selection cleanly gates widget mounting and telemetry fetching
+- Widgets can request reusable telemetry segments without owning backend job choreography
 - Replay mode has a shared clock instead of widget-local timing hacks
 - Resume behavior makes the sessions area feel continuous rather than disposable
 
@@ -409,11 +459,13 @@ Those concerns belong in the data layer, widget system, or backend modules.
 - No layout builder UI yet
 - Replay control state is local and not shareable through the URL
 - Some telemetry widgets still use simple SVG rendering and do not yet expose advanced chart interactions
-- Large multi-driver selections are allowed, but can still feel heavy
+- Large multi-driver selections are allowed, and can still trigger heavy materialization work if a widget asks for broad session telemetry
+- The workspace still contains compatibility code for tracking an older full-telemetry warmup job id if one exists in local storage
 
 ## Future Work
 
 - add a layout builder that saves the same `DashboardConfig` shape already used here
 - extend replay widgets and stage chrome once the dedicated live race surface is built
 - add more telemetry-oriented widgets without changing the explorer or workspace fundamentals
-- consider more sophisticated caching or prefetching once widget count grows further
+- add better shared progress UI if many widgets request materialization at the same time
+- measure real materialization latency before adding artifact storage or a heavier frontend caching layer

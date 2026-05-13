@@ -284,7 +284,10 @@ class FastF1Adapter:
 
     def _extract_telemetry(self, session: Any, attr_name: str) -> dict[str, list[dict[str, Any]]]:
         telemetry_by_driver: dict[str, list[dict[str, Any]]] = {}
-        session_attr = getattr(session, attr_name, None)
+        try:
+            session_attr = getattr(session, attr_name, None)
+        except Exception:
+            session_attr = None
 
         for driver_number in getattr(session, "drivers", []):
             driver_key = self._as_text(driver_number)

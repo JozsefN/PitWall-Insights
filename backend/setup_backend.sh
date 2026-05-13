@@ -3,6 +3,7 @@ set -euo pipefail
 
 SKIP_DOCKER="${SKIP_DOCKER:-0}"
 SKIP_RUN="${SKIP_RUN:-0}"
+SKIP_WORKER="${SKIP_WORKER:-0}"
 DB_READY_ATTEMPTS="${DB_READY_ATTEMPTS:-30}"
 DB_READY_SLEEP_SECONDS="${DB_READY_SLEEP_SECONDS:-2}"
 
@@ -79,6 +80,22 @@ fi
 
 if [ "$SKIP_RUN" != "1" ]; then
   echo "==> Starting backend"
+  WORKER_PID=""
+  cleanup_worker() {
+    if [ -n "$WORKER_PID" ]; then
+      kill "$WORKER_PID" >/dev/null 2>&1 || true
+    fi
+  }
+  trap cleanup_worker EXIT INT TERM
+
+  if [ "$SKIP_WORKER" != "1" ]; then
+    echo "==> Starting import worker"
+    "$PYTHON_EXE" -m app.worker &
+    WORKER_PID="$!"
+  else
+    echo "==> Import worker not started because SKIP_WORKER=1 was set."
+  fi
+
   "$PYTHON_EXE" -m uvicorn app.main:app --reload
 else
   echo "==> Setup complete. Backend not started because SKIP_RUN=1 was set."

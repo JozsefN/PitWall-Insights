@@ -6,6 +6,7 @@ Related module docs:
 
 - [Session Domain](../modules/session-domain.md)
 - [Session Import](../modules/session-import.md)
+- [Telemetry Materialization](../modules/telemetry-materialization.md)
 - [Identity Auth](../modules/identity-auth.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
@@ -61,7 +62,7 @@ These tables define the stable relational backbone of a cached session.
 `event_sessions` also records the import profile:
 
 - `import_profile`: `core` or `full`
-- `telemetry_status`: `not_loaded` or `loaded`
+- `telemetry_status`: `not_loaded`, `loaded`, `partial`, or `unavailable`
 - `pinned_at`: future lifecycle override for sessions that should not expire
 - `deleted_at`: reserved lifecycle marker for future soft-delete behavior
 
@@ -97,6 +98,17 @@ Owned by: [Session Import](../modules/session-import.md)
 This table tracks queued/running/completed/failed import requests, their import
 profile, heartbeat, retry count, final `session_id`, `source_version`, and row
 count. It is operational state, not canonical motorsport data.
+
+### Telemetry materialization tables
+
+- `telemetry_cache_segments`
+- `telemetry_materialization_jobs`
+
+Owned by: [Telemetry Materialization](../modules/telemetry-materialization.md)
+
+These tables track on-demand telemetry slices. A slice is keyed by session,
+entry, telemetry kind, scope, and optional lap. The cached sample rows still live
+in the canonical telemetry tables.
 
 ### Telemetry tables
 
@@ -169,6 +181,7 @@ The migration history currently includes:
 - expanded entry-centric session cache schema
 - user dashboard layouts
 - import jobs, import profiles, and session lifecycle columns
+- telemetry materialization jobs and cache segment metadata
 
 ## Standard Workflow
 

@@ -20,6 +20,15 @@ SessionLocal = sessionmaker(
 )
 
 
+# Keep all SQLAlchemy tables registered on shared metadata before repository
+# code starts mutating records with cross-module foreign keys.
+from modules.dashboard_layouts.infrastructure import db_models as _dashboard_layouts_db_models  # noqa: E402,F401
+from modules.identity_auth.infrastructure import db_models as _identity_auth_db_models  # noqa: E402,F401
+from modules.session_domain.infrastructure import db_models as _session_domain_db_models  # noqa: E402,F401
+from modules.session_import.infrastructure import db_models as _session_import_db_models  # noqa: E402,F401
+from modules.telemetry_materialization.infrastructure import db_models as _telemetry_materialization_db_models  # noqa: E402,F401
+
+
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:

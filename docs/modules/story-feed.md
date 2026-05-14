@@ -4,61 +4,109 @@ Back to [Backend Architecture](../architecture/02-backend-architecture.md)
 
 ## Purpose
 
-The story-feed module is the intended home for insight generation, editorial summaries, and higher-level narrative outputs built on top of session data.
+The story-feed module is reserved for season, race-week, and paddock-facing
+content rather than current-session metric calculations.
 
-This is not the place for raw ingestion or canonical storage. It is where the system can later answer questions like:
+It should eventually power product surfaces like:
 
-- what changed in the race over the last ten laps
-- which drivers are gaining or losing time in meaningful ways
-- what story should be highlighted to the user right now
+- official video wall
+- headline stack
+- race-week rhythm
+- follow-up stories from previous races this season
+- broader context around teams, drivers, and championship narratives
+
+This definition is intentionally different from feature-metric insights.
 
 ## Current State
 
-Today the module is still a placeholder with a health route and stub service status.
+The module currently exposes only:
 
-That is expected. The project first needed:
+```http
+GET /api/story-feed/health
+```
 
-- authentication basics
-- a stable session cache
-- ingestion and normalization boundaries
+The health payload reports:
 
-Only after those exist does it make sense to build reliable insight generation on top.
+- `feed_name: season_story_feed`
+- `status: planned`
+- `enabled: false`
+- planned surfaces such as official videos, headlines, race-week rhythm, and
+  season follow-up stories
 
-## Likely Responsibilities Later
+There is no active story-item session route right now.
 
-- generate narrative summaries from session or metric inputs
-- rank notable events or trends
-- provide feed items for archive or live-session views
-- translate telemetry and metric changes into user-facing explanations
+## Why Metric Insights Do Not Belong Here
 
-Depending on product direction, this module could eventually support:
+Outputs such as:
 
-- rule-based insight generation
-- prompt-driven summarization
-- ML-assisted ranking or explanation
+- "Driver X has the strongest pace rating"
+- "Driver Y is most consistent"
+- "Driver Z improved over the last five laps"
 
-## Inputs This Module Will Probably Need
+are not story-feed content in the current product definition.
 
-The story feed should consume already-structured data from other modules, especially:
+They are feature-metric insights:
 
-- canonical session data from `session_domain`
-- derived series and scoring outputs from `feature_metrics`
-- race control and track-status context
+```text
+feature metrics calculate facts
+decision engine selects the important fact
+feature metrics exposes the insight surface
+```
 
-This keeps the module focused on interpretation rather than raw data wrangling.
+Those current insight cards live under:
+
+```http
+GET /api/feature-metrics/sessions/{session_id}/insights
+```
+
+Story feed should not become a dumping ground for live/session analytics.
+
+## Future Responsibilities
+
+Likely future story-feed responsibilities:
+
+- ingest or reference official F1 videos and related clips
+- collect headline/news items from approved sources
+- group stories by race week, session, driver, team, or season thread
+- surface previous-race context for the current weekend
+- connect official/media content with imported session context
+
+Depending on product direction, it may later use:
+
+- manual/source-provided metadata
+- rule-based story grouping
+- prompt-driven summaries
+- embeddings/search over season story history
+
+## Inputs This Module May Need Later
+
+Possible inputs:
+
+- official video metadata
+- external headline/news feeds
+- race-week schedule/session metadata
+- imported session summaries
+- feature-metric insights as optional context
+- championship standings and prior race outcomes
+
+Feature metrics may inform a story later, but they should not be the story feed's
+primary calculation surface.
 
 ## What Does Not Belong Here
 
-- direct FastF1 access
-- canonical lap/telemetry persistence
-- low-level derived metric math
-- auth/session-token logic
+- low-level feature metric calculations
+- decision-engine thresholds for current-session signals
+- raw FastF1 access
+- canonical session persistence
+- frontend widget rendering
 
-Those concerns belong in ingestion, session-domain storage, feature metrics, and identity auth.
+Those concerns belong in feature metrics, decision engine, ingestion, session
+domain, or the frontend.
 
 ## Future Work
 
-- define a story item contract for frontend consumption
-- decide whether stories are precomputed, on-demand, or hybrid
-- connect to feature metrics once derived telemetry analytics are available
-- add ranking and explanation logic for live and archive experiences
+- define a true story item/source contract
+- decide source strategy for official videos and headlines
+- add season/race-week query routes
+- connect the frontend placeholder story-feed page to real content once a
+  source strategy exists

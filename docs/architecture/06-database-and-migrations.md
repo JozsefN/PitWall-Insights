@@ -10,6 +10,8 @@ Related module docs:
 - [Identity Auth](../modules/identity-auth.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
+- [Feature Metrics](../modules/feature-metrics.md)
+- [Decision Engine](../modules/decision-engine.md)
 
 ## Purpose
 
@@ -157,13 +159,24 @@ This is what allows future replay and multi-entry comparisons to be built on top
 The current database design deliberately separates:
 
 - canonical imported session data
-- future derived metrics
+- on-demand derived metrics
 
 Examples:
 
 - raw FastF1 car channels belong in telemetry tables
 - lap timing and tyre data belong in canonical session tables
-- future values such as acceleration, distance-driven, driver-ahead, or specialized chart series should eventually live in [Feature Metrics](../modules/feature-metrics.md) unless the team explicitly decides to treat them as canonical
+- current values such as pace rating, consistency score, and recent lap trend live in [Feature Metrics](../modules/feature-metrics.md)
+- rule-selected highlights such as pace leader or recent improver live in [Decision Engine](../modules/decision-engine.md)
+- future values such as acceleration, distance-driven, driver-ahead, tyre health, or specialized chart series should also live in feature metrics unless the team explicitly decides to treat them as canonical
+
+There are no feature-metric result tables yet. The current metrics compute on
+demand from `session_entries` and `entry_laps`, which means this feature did not
+need a migration. Future persisted metric tables should store metric id,
+version, scope, window, config version, confidence, components, corrections, and
+input coverage so old calculations remain explainable.
+
+The story-feed module also has no tables yet. It is currently a planned
+season/news/history surface, not storage for current-session metric insights.
 
 ## Migrations
 
@@ -203,6 +216,8 @@ The migration history currently includes:
 Likely future additions:
 
 - feature-metric tables for derived telemetry series
+- decision-rule/config tables if thresholds need operator tuning
+- story-feed source/item tables after the season-news content strategy is defined
 - better pagination/downsampling support for telemetry-heavy reads
 - partitioning or retention strategies if telemetry volume grows significantly
 - artifact storage only if PostgreSQL telemetry volume or raw replay needs prove it necessary

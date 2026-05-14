@@ -6,7 +6,9 @@ import {
   listEntryLaps,
   listPositionTelemetry,
   listSessionCatalog,
+  listSessionCircuitCorners,
   listSessionEntries,
+  listSessionTrackStatusEvents,
   listSessionTicks,
   listSessions,
 } from "../api/sessions.api";
@@ -53,6 +55,15 @@ export function useSessionEntriesQuery(sessionId?: string, enabled = true) {
     queryKey: ["sessions", sessionId, "entries"],
     queryFn: () => listSessionEntries(sessionId as string),
     enabled: Boolean(sessionId) && enabled,
+  });
+}
+
+export function useSessionCircuitCornersQuery(sessionId?: string, enabled = true) {
+  return useQuery({
+    queryKey: ["sessions", sessionId, "circuit-corners"],
+    queryFn: () => listSessionCircuitCorners(sessionId as string),
+    enabled: Boolean(sessionId) && enabled,
+    staleTime: 1000 * 60 * 60,
   });
 }
 
@@ -105,6 +116,21 @@ export function useSessionTicksQuery(
   return useQuery({
     queryKey: ["sessions", sessionId, "ticks", query],
     queryFn: () => listSessionTicks(sessionId as string, query),
+    enabled: Boolean(sessionId) && enabled,
+  });
+}
+
+export function useSessionTrackStatusEventsQuery(
+  sessionId?: string,
+  query?: {
+    offset?: number;
+    limit?: number;
+  },
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["sessions", sessionId, "track-status-events", query],
+    queryFn: () => listSessionTrackStatusEvents(sessionId as string, query),
     enabled: Boolean(sessionId) && enabled,
   });
 }

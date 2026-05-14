@@ -170,6 +170,8 @@ It covers:
 - session entries
 - entry laps
 - session ticks
+- session track-status events
+- session circuit-corner markers
 - car telemetry samples
 - position telemetry samples
 - telemetry query parameters
@@ -251,7 +253,42 @@ This includes:
 - feature metrics health
 - story feed health
 
-These files are important even though some of the user-facing product surfaces are still placeholders, because diagnostics already helps validate the backend stack.
+The backend also exposes `GET /api/decision-engine/health`, but the frontend has
+not added a dedicated wrapper for it yet. That should be added with the next
+metric-insight UI pass.
+
+These files are important even though some of the user-facing product surfaces
+are still placeholders, because diagnostics already helps validate the backend
+stack.
+
+## Feature Metrics and Decision Signals
+
+The backend now exposes score and insight routes:
+
+- `GET /api/feature-metrics/sessions/{session_id}/driver-scores`
+- `GET /api/feature-metrics/sessions/{session_id}/insights`
+- `GET /api/decision-engine/sessions/{session_id}/signals`
+
+The frontend data layer currently only wraps feature-metrics health. It does
+not yet define DTOs, API helpers, or query hooks for driver scores, metric
+insights, or lower-level decision signals.
+
+When those widgets are wired, the data layer should add:
+
+- contracts for metric definitions, driver scores, input coverage, windows, and
+  decision signal evidence
+- endpoint wrappers that support `metric_ids`, `signal_ids`, `entry_ids`,
+  `analysis_scope`, `recent_laps`, `lap_from`, and `lap_to`
+- query keys that include session id, requested metrics/signals, selected
+  entries, scope, and lap window
+
+Selected-driver widgets should pass `entry_ids` so the backend can run
+`explicit_entries` comparisons cheaply. Field-wide overview widgets should omit
+`entry_ids` so the backend can compare every session entry.
+
+Story-feed content should not use these metric insight contracts. The story
+feed remains a future season/news/history surface, and today only has a health
+route.
 
 ## Sessions APIs
 
@@ -268,6 +305,8 @@ It currently exposes:
 - fetch entry car telemetry
 - fetch entry position telemetry
 - fetch replay ticks
+- fetch session track-status events
+- fetch source-backed session circuit-corner markers
 
 These functions are intentionally resource-oriented. The frontend assembles pages from several small queries rather than expecting one giant page-shaped response.
 
@@ -290,6 +329,11 @@ Use this surface when a frontend flow wants worker-backed import progress instea
 - fetch one materialization job
 
 These functions do not fetch telemetry samples directly. They only ensure that the backend cache has the requested telemetry segments. The actual samples still come through `sessions.api.ts`.
+
+The ensure query is intentionally a one-shot request for a given telemetry
+shape. Once the backend returns a `job_id`, the frontend polls that job and the
+recent-job list instead of repeatedly POSTing `ensure`. This avoids creating
+request noise while the worker is still preparing the cache.
 
 ## Layout APIs
 
@@ -323,6 +367,7 @@ The keys are structured by resource hierarchy, for example:
 - `["sessions", "catalog", season]`
 - `["sessions", sessionId]`
 - `["sessions", sessionId, "entries"]`
+- `["sessions", sessionId, "circuit-corners"]`
 - `["sessions", sessionId, "entries", entryId, "laps"]`
 - `["sessions", sessionId, "entries", entryId, "telemetry", "car", query]`
 - `["session-import", "jobs", jobId]`
@@ -438,6 +483,8 @@ Those belong in `pages`, `features`, or `widgets`.
 ## Future Work
 
 - add stronger shared error modeling where the UI needs more precise recovery behavior
+- add frontend contracts/query hooks for feature-metric driver scores and metric insights
+- add decision-engine health and signal wrappers when diagnostics or debug views need them
 - keep telemetry-specific orchestration in the session feature hooks unless it becomes backend-agnostic enough for the data layer
 - expand mapper usage as the story feed and standings surfaces become real
 - document query-key conventions more formally if the data layer grows much larger

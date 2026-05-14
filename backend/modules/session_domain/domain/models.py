@@ -129,6 +129,23 @@ class SessionTickModel(BaseModel):
     source_kind: str
 
 
+class SessionTrackStatusEventModel(BaseModel):
+    id: str
+    session_time_ms: int
+    source_time_utc: datetime | None = None
+    status: str
+    message: str | None = None
+
+
+class SessionCircuitCornerModel(BaseModel):
+    number: int
+    letter: str | None = None
+    x: float
+    y: float
+    angle_deg: float | None = None
+    distance_m: float | None = None
+
+
 class CarTelemetrySampleModel(BaseModel):
     id: str
     tick_id: str

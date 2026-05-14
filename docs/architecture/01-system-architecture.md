@@ -4,13 +4,7 @@ Back to [Overview](./00-overview.md)
 
 ## High-Level Pipeline
 
-External source  
--> [Ingestion](../modules/ingestion.md)  
--> [Normalization](../modules/normalization.md)  
--> PostgreSQL session cache  
--> [Feature Metrics](../modules/feature-metrics.md)  
--> [Delivery API](./05-api-design.md)  
--> Frontend
+External source -> [Ingestion](../modules/ingestion.md) -> [Normalization](../modules/normalization.md) -> PostgreSQL session cache -> [Feature Metrics](../modules/feature-metrics.md) -> [Decision Engine](../modules/decision-engine.md) -> [Delivery API](./05-api-design.md) -> Frontend
 
 ## Primary External Dependency
 
@@ -47,8 +41,9 @@ The system currently treats FastF1 as the import source of truth and stores a no
 - `identity_auth` owns user signup/login/session inspection
 - `ingestion` owns external source access
 - `normalization` owns canonical transformation into the internal schema
-- `feature_metrics` is reserved for derived metrics
-- `story_feed` is reserved for editorial or insight-oriented content
+- `feature_metrics` owns derived analysis metrics and metric insight surfaces
+- `decision_engine` owns rule-based signal selection from metric outputs
+- `story_feed` is reserved for season/news/history content
 
 ### Storage
 
@@ -80,7 +75,8 @@ The driver/car combination inside one session is modeled as `session_entries`. T
 ### Raw vs derived data
 
 - Raw FastF1 channels should stay in the canonical session cache.
-- Derived values such as distance-driven or driver-ahead should eventually live in feature metrics unless there is a strong reason to treat them as canonical.
+- Derived values such as pace rating, consistency, distance-driven, driver-ahead, or tyre indicators should live in feature metrics unless there is a strong reason to treat them as canonical.
+- Rule-selected highlights such as strongest pace driver or recent improver should live in the decision engine and be exposed through feature-metric insight APIs.
 
 ### Replay readiness
 

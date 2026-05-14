@@ -6,12 +6,11 @@ import {
   LapTableWidget,
   LapTimeTrendWidget,
   SessionTrackMapWidget,
+  StintAnalysisWidget,
   TelemetryLineChartWidget,
-} from "../telemetry/SessionTelemetryWidgets";
-import {
-  ReplayDriverCardsWidget,
-  ReplayTrackMapWidget,
-} from "../replay/ReplayWidgets";
+} from "../telemetry";
+import { ReplayTrackMapWidget } from "../track-map";
+import { ReplayDriverCardsWidget } from "../replay/ReplayWidgets";
 
 export const widgetRegistry: Record<WidgetId, WidgetDefinition> = {
   "health-overview": {
@@ -42,10 +41,17 @@ export const widgetRegistry: Record<WidgetId, WidgetDefinition> = {
   },
   "lap-time-trend": {
     id: "lap-time-trend",
-    title: "Lap Time Trend",
-    description: "Lap progression for selected drivers.",
+    title: "Driver Lap Pace",
+    description: "Lap-time comparison with clean-lap filters, references, and hover values.",
     supportedAudiences: ["session-lookback"],
     component: LapTimeTrendWidget,
+  },
+  "stint-analysis": {
+    id: "stint-analysis",
+    title: "Stint Analysis",
+    description: "Stint pace, compound windows, and degradation against absolute lap numbers.",
+    supportedAudiences: ["session-lookback", "live-race"],
+    component: StintAnalysisWidget,
   },
   "lap-table": {
     id: "lap-table",

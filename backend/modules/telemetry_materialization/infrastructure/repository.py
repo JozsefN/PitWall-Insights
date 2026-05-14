@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -74,6 +74,7 @@ class TelemetryMaterializationRepository:
 
         active_job = None if request.force_refresh else self._find_active_job_covering_pairs(request, missing_pairs)
         if active_job is not None:
+            self._cancel_queued_jobs_covered_by_record(active_job)
             return TelemetryMaterializationEnsureResponse(
                 ready=False,
                 job_id=active_job.id,
@@ -89,6 +90,7 @@ class TelemetryMaterializationRepository:
             expires_at=expires_at,
             force_refresh=request.force_refresh,
         )
+        self._cancel_queued_jobs_covered_by_request(request, keep_job_id=job.id)
         return TelemetryMaterializationEnsureResponse(
             ready=False,
             job_id=job.id,
@@ -165,16 +167,25 @@ class TelemetryMaterializationRepository:
         return [self.to_job_model(record) for record in records]
 
     def claim_next_job(self, *, now: datetime) -> TelemetryMaterializationJobRecord | None:
-        record = (
+        records = (
             self.db.query(TelemetryMaterializationJobRecord)
             .filter(TelemetryMaterializationJobRecord.status == "queued")
             .order_by(TelemetryMaterializationJobRecord.created_at.asc())
             .with_for_update(skip_locked=True)
-            .first()
+            .limit(50)
+            .all()
         )
-        if record is None:
+        if not records:
             return None
 
+        record = max(
+            records,
+            key=lambda candidate: (
+                len(candidate.entry_ids) * len(candidate.kinds),
+                candidate.created_at,
+            ),
+        )
+        self._cancel_queued_jobs_covered_by_record(record, now=now, commit=False)
         record.status = "running"
         record.progress_stage = "loading_source"
         record.attempt_count += 1
@@ -389,13 +400,89 @@ class TelemetryMaterializationRepository:
             .order_by(TelemetryMaterializationJobRecord.created_at.asc())
             .all()
         )
+        covering_records = []
         for record in records:
             entry_ids = set(record.entry_ids)
             kinds = set(record.kinds)
             if all(entry_id in entry_ids and kind in kinds for entry_id, kind in required_pairs):
-                return record
+                covering_records.append(record)
+
+        if covering_records:
+            return max(
+                covering_records,
+                key=lambda record: (
+                    len(record.entry_ids) * len(record.kinds),
+                    record.created_at,
+                ),
+            )
 
         return None
+
+    def _cancel_queued_jobs_covered_by_record(
+        self,
+        covering_job: TelemetryMaterializationJobRecord,
+        *,
+        now: datetime | None = None,
+        commit: bool = True,
+    ) -> int:
+        request = self.to_request(covering_job)
+        return self._cancel_queued_jobs_covered_by_request(
+            request,
+            keep_job_id=covering_job.id,
+            now=now,
+            commit=commit,
+        )
+
+    def _cancel_queued_jobs_covered_by_request(
+        self,
+        request: TelemetryMaterializationRequest,
+        *,
+        keep_job_id: str,
+        now: datetime | None = None,
+        commit: bool = True,
+    ) -> int:
+        covered_pairs = {
+            (entry_id, kind)
+            for entry_id in request.entry_ids
+            for kind in request.kinds
+        }
+        if not covered_pairs:
+            return 0
+
+        cancelled_at = now or datetime.now(timezone.utc)
+        records = (
+            self.db.query(TelemetryMaterializationJobRecord)
+            .filter(
+                TelemetryMaterializationJobRecord.id != keep_job_id,
+                TelemetryMaterializationJobRecord.session_id == request.session_id,
+                TelemetryMaterializationJobRecord.status == "queued",
+                TelemetryMaterializationJobRecord.scope == request.scope,
+                TelemetryMaterializationJobRecord.lap_number == self._lap_value(request.scope, request.lap_number),
+                TelemetryMaterializationJobRecord.force_refresh.is_(False),
+            )
+            .all()
+        )
+        cancelled_count = 0
+        for record in records:
+            candidate_pairs = {
+                (entry_id, kind)
+                for entry_id in record.entry_ids
+                for kind in record.kinds
+            }
+            if not candidate_pairs or not candidate_pairs.issubset(covered_pairs):
+                continue
+
+            record.status = "cancelled"
+            record.progress_stage = "cancelled"
+            record.finished_at = cancelled_at
+            record.heartbeat_at = cancelled_at
+            record.error_message = "Superseded by a broader telemetry materialization job."
+            self.db.add(record)
+            cancelled_count += 1
+
+        if cancelled_count and commit:
+            self.db.commit()
+        return cancelled_count
 
     def _insert_car_samples(
         self,

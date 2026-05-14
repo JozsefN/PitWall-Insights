@@ -4,11 +4,13 @@ import type {
   EntryLapDto,
   PositionSampleDto,
   SessionCatalogItemDto,
+  SessionCircuitCornerDto,
   SessionDto,
   SessionEntryDto,
   SessionImportRequestDto,
   SessionTelemetryQuery,
   SessionTickDto,
+  SessionTrackStatusEventDto,
 } from "../contracts/sessions.contracts";
 
 export async function listSessions(): Promise<SessionDto[]> {
@@ -35,6 +37,13 @@ export async function getSession(sessionId: string): Promise<SessionDto> {
 
 export async function listSessionEntries(sessionId: string): Promise<SessionEntryDto[]> {
   const { data } = await apiClient.get(`/api/sessions/${sessionId}/entries`);
+  return data;
+}
+
+export async function listSessionCircuitCorners(
+  sessionId: string,
+): Promise<SessionCircuitCornerDto[]> {
+  const { data } = await apiClient.get(`/api/sessions/${sessionId}/circuit-corners`);
   return data;
 }
 
@@ -82,6 +91,19 @@ export async function listSessionTicks(
   },
 ): Promise<SessionTickDto[]> {
   const { data } = await apiClient.get(`/api/sessions/${sessionId}/ticks`, {
+    params: query,
+  });
+  return data;
+}
+
+export async function listSessionTrackStatusEvents(
+  sessionId: string,
+  query?: {
+    offset?: number;
+    limit?: number;
+  },
+): Promise<SessionTrackStatusEventDto[]> {
+  const { data } = await apiClient.get(`/api/sessions/${sessionId}/track-status-events`, {
     params: query,
   });
   return data;

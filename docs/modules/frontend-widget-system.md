@@ -50,7 +50,17 @@ The widget system exists to keep those questions separate.
 
 - `frontend/src/widgets/overlays/health-overview/HealthOverviewWidget.tsx`
 - `frontend/src/widgets/overlays/sessions-summary/SessionsSummaryWidget.tsx`
-- `frontend/src/widgets/telemetry/SessionTelemetryWidgets.tsx`
+- `frontend/src/widgets/telemetry/index.ts`
+- `frontend/src/widgets/telemetry/models.ts`
+- `frontend/src/widgets/telemetry/components/`
+- `frontend/src/widgets/telemetry/utils/`
+- `frontend/src/widgets/telemetry/widgets/`
+- `frontend/src/widgets/telemetry/SessionTelemetryWidgets.tsx` as a compatibility export barrel
+- `frontend/src/widgets/track-map/index.ts`
+- `frontend/src/widgets/track-map/models.ts`
+- `frontend/src/widgets/track-map/components/`
+- `frontend/src/widgets/track-map/utils/`
+- `frontend/src/widgets/track-map/widgets/`
 - `frontend/src/widgets/replay/ReplayWidgets.tsx`
 
 ### Sessions integration helpers
@@ -213,11 +223,16 @@ Lookback layouts:
 
 - `builtin:compare-lap`
 - `builtin:session-trends`
+- `builtin:stint-strategy`
 
 Simulation layouts:
 
 - `builtin:replay-command`
 - `builtin:replay-focus`
+
+`builtin:replay-command` also mounts `stint-analysis` as a replay-safe strategy
+section. In simulation mode the widget only includes laps completed by the
+current replay clock.
 
 Each built-in layout is a `LayoutRecord` with:
 
@@ -278,15 +293,30 @@ This keeps widget implementations focused on data logic rather than repeating th
 
 ## Telemetry Widgets
 
-The session-lookback widget family lives in `SessionTelemetryWidgets.tsx`.
+The session-lookback widget family lives under `frontend/src/widgets/telemetry`.
+
+The module is split by responsibility:
+
+- `models.ts` owns shared telemetry widget option and chart data types.
+- `components/` owns reusable chart renderers such as the simple line chart,
+  lap-time comparison chart, and stint analysis chart.
+- `utils/` owns calculation helpers such as lap filtering, status
+  classification, outlier detection, and reference-series generation.
+- `widgets/` owns one widget component per file.
+- `SessionTelemetryWidgets.tsx` remains only as a compatibility export barrel
+  for older imports.
 
 Current widgets include:
 
 - `TelemetryLineChartWidget`
 - `BrakeTraceChartWidget`
 - `LapTimeTrendWidget`
+- `StintAnalysisWidget`
 - `LapTableWidget`
-- `SessionTrackMapWidget`
+
+`SessionTrackMapWidget` is still exported through the telemetry barrel for
+layout compatibility, but the implementation now lives in the shared
+`track-map` module because the same renderer powers replay maps.
 
 ## Important telemetry widget behavior
 
@@ -295,7 +325,138 @@ Current widgets include:
 - lap-scoped widgets show explicit empty states when `lap = all`
 - telemetry queries are lazy and widget-specific, but materialization and per-entry fetching are centralized in session resource hooks
 - widgets do not need to know which backend job endpoint prepares telemetry
-- simple SVG rendering is used for current charting needs
+- simple SVG rendering is used for current charting needs, while the track map
+  has its own reusable top-down renderer
+
+### Driver lap pace widget
+
+`LapTimeTrendWidget` still uses the stable widget id `lap-time-trend` so saved
+layouts remain compatible, but its current product role is driver lap pace
+comparison rather than a bare trend line.
+
+It reads `entry_laps` through `useWorkspaceEntryLapsResource` and does not need
+telemetry materialization. The current chart supports:
+
+- selected-driver lap-time lines
+- lap numbers on the horizontal axis
+- formatted lap times on the vertical axis
+- hover values for exact lap time, delta, tyre, status, and position
+- track-status summary chips showing status range, approximate sector, and
+  duration when event timing is available
+- reference comparison against visible average, visible best, or any selected
+  driver
+- clean-lap, pit-lap, SC/VSC/red, outlier, smoothing, and track-status-band
+  controls
+- summary values for fastest visible lap, best median, shown laps, and active
+  reference
+
+The filtering is frontend-side because the existing lap DTO already carries the
+needed fields: pit markers, `track_status`, deleted/generated/accurate flags,
+compound, tyre life, and lap position. The widget also reads
+`/api/sessions/{session_id}/track-status-events` when available to make yellow,
+SC, VSC, and red-flag bands more precise than lap-level status alone.
+
+### Stint analysis widget
+
+`StintAnalysisWidget` uses the stable lap rows rather than a separate stint API.
+This fits the current backend model because `EntryLapDto` already includes:
+
+- `stint_number`
+- `compound`
+- `tyre_life`
+- pit in/out markers
+- lap accuracy/deleted/generated flags
+- `track_status`
+- absolute `lap_number`
+
+The widget groups selected-driver laps into stint series in the frontend and
+plots them against absolute session lap number. This is important: stint 2 does
+not restart at x-axis lap 0, it begins where that driver's previous stint ended
+in the session.
+
+The current widget supports:
+
+- per-driver, per-stint visibility toggles
+- compound-aware markers and labels
+- clean-lap, pit-lap, SC/VSC/red, outlier, trend-line, and track-status-band
+  controls
+- hover values for exact lap time, stint lap number, tyre life, track status,
+  and position
+- track-status summary chips and shaded bands that use event timing when
+  available, falling back to lap-level status when not
+- summary values for best median stint, longest stint, highest positive
+  degradation, and visible laps
+- simulation/replay usage by hiding laps that have not completed by the current
+  replay clock
+
+Because this is derived from selected entries, it stays cheap for compare views.
+A future backend route may still be useful for full-field strategy overviews,
+but it is not required for this first selected-driver stint widget.
+
+## Track Map Widgets
+
+The track-map widget family lives under `frontend/src/widgets/track-map`.
+
+It owns the top-down circuit renderer used by both:
+
+- `SessionTrackMapWidget` for session lookback
+- `ReplayTrackMapWidget` for simulation/replay layouts
+
+The module is split by responsibility:
+
+- `models.ts` owns track-map points, traces, bounds, and widget option types.
+- `utils/geometry.ts` owns sample sorting, lap grouping, smoothing,
+  downsampling, SVG path generation, heading calculation, bounds, camera
+  viewBox generation, and placeholder-position filtering.
+- `utils/circuit-corners.ts` adapts session circuit-corner DTOs into map turn
+  markers.
+- `utils/track-map-data.ts` converts position samples plus lap rows into
+  render-ready lookback or replay map data.
+- `components/TrackMapViewer.tsx` owns the shared SVG surface, zoom controls,
+  focus selection, pack/driver follow mode, manual pan, racing-line toggles,
+  previous-lap ghost lines, turn markers, start/finish marker, legend, and
+  current car/dot rendering.
+- `components/F1CarMarker.tsx` owns the simple top-down car sketch rendered
+  when the map is zoomed in enough.
+- `widgets/SessionTrackMapWidget.tsx` and `widgets/ReplayTrackMapWidget.tsx`
+  adapt workspace data into the shared renderer.
+
+### Why the map is now its own module
+
+The original map connected full-session position samples in order. That was
+useful as a smoke test, but it produced scribbled shapes because a full session
+contains many laps over the same circuit. The new map first segments position
+samples by lap, then uses one representative lap as the circuit outline.
+
+This gives the product a stronger base for the future map work:
+
+- selected-driver lookback maps render one lap's racing line, or a
+  representative lap when the workspace lap selector is set to `all`
+- replay maps render current-lap trails up to the replay clock and keep the
+  previous lap available as a faint ghost line so lap transitions are visible
+- if no drivers are selected in replay, the widget can show the full field
+- the outline is chosen from the best available lap rather than from connected
+  multi-lap session samples
+- zoom is viewBox-based, so the camera stays top-down and does not rotate
+- the focus selector can follow the pack or one selected driver
+- dragging the SVG switches the camera to manual pan mode
+- reset returns the camera to the full-circuit view
+- low zoom still shows driver dots and compact labels, while higher zoom adds
+  simple color-matched car sketches
+- car sketch size is derived from circuit scale and damped by zoom so it grows
+  predictably without overwhelming the track
+- racing lines and previous-lap ghosts can be toggled independently from the
+  current car markers
+- FastF1 circuit-corner metadata is exposed through
+  `GET /api/sessions/{session_id}/circuit-corners` and rendered as numbered
+  turn markers when the source provides it
+
+The current renderer uses the data available from FastF1-derived position
+samples, `EntryLapDto` rows, and source-backed circuit-corner metadata. The
+track surface is still derived from a representative lap rather than an
+official vector circuit polygon; this keeps side-by-side car positions and
+driver racing lines faithful to telemetry while leaving room for a richer
+official track asset later.
 
 ## Widget Data Resource Hooks
 
@@ -466,11 +627,12 @@ The session resource hooks translate that need into backend cache preparation an
 
 ## Replay Widgets
 
-The live-race widget family lives in `ReplayWidgets.tsx`.
+The live-race widget family is split across `ReplayWidgets.tsx` and the shared
+`track-map` module.
 
 Current widgets include:
 
-- `ReplayTrackMapWidget`
+- `ReplayTrackMapWidget`, implemented in `frontend/src/widgets/track-map`
 - `ReplayDriverCardsWidget`
 
 ## Important replay widget behavior

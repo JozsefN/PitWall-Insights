@@ -369,14 +369,17 @@ The user chooses a layout first. The renderer then mounts the widgets referenced
 
 The workspace never treats a layout as if it were itself a widget.
 
-## Stage and rail model
+## Control deck and stage model
 
-The loaded workspace uses a split layout:
+The loaded workspace now uses a top control deck with a full-width dashboard stage below it:
 
-- a smaller left rail for controls and layout picking
-- a larger right stage for the mounted telemetry layout
+- a hero/header area for session identity and summary counts
+- a telemetry banner for legacy full-telemetry warmup status and current materialization jobs
+- a status strip for session, entries, lap/replay, layouts, and telemetry readiness
+- a control deck for mode switching, driver/lap or replay controls, and layout selection
+- a large stage reserved for the selected dashboard layout
 
-This is intentional. Once a session is loaded, the telemetry surface should dominate the page, not the explorer controls.
+This replaced the earlier rail/stage split. Once a session is loaded, the controls stay visible near the top, but the dashboard stage gets the main uninterrupted area so mounted widgets can use the full page width.
 
 ## Session Data Hooks
 
@@ -465,7 +468,7 @@ Those concerns belong in the data layer, widget system, or backend modules.
 ## Future Work
 
 - add a layout builder that saves the same `DashboardConfig` shape already used here
-- extend replay widgets and stage chrome once the dedicated live race surface is built
+- extend replay widgets and workspace stage chrome once the dedicated live race surface is built
 - add more telemetry-oriented widgets without changing the explorer or workspace fundamentals
 - add better shared progress UI if many widgets request materialization at the same time
 - measure real materialization latency before adding artifact storage or a heavier frontend caching layer

@@ -45,6 +45,33 @@ POST /api/telemetry/materialization/ensure
 7. Widgets query the normal session telemetry endpoints after the segment is
    ready.
 
+The worker process must be running for queued jobs to move. In local
+development that means running `python -m app.worker` from `backend/`, or using
+`backend/setup_backend.sh`, which starts the worker unless `SKIP_WORKER=1` is
+set.
+
+## Queue Behavior
+
+Telemetry widgets can change their requested entry set quickly, especially in
+simulation mode when the user selects many drivers. The materialization queue
+therefore treats broader queued jobs as superseding narrower queued jobs for
+the same session, telemetry scope, lap, and kind.
+
+Current behavior:
+
+- `ensure` returns an existing active job when that job already covers the
+  missing entry/kind pairs.
+- if a broader job is queued, older queued subset jobs are marked `cancelled`
+  instead of staying ahead of the useful work.
+- the worker claims the broadest queued telemetry materialization job first,
+  so a 20-driver replay request does not wait behind a staircase of 1-driver,
+  2-driver, and 3-driver requests.
+- running jobs are not cancelled underneath the worker; only queued jobs are
+  superseded.
+
+The frontend should treat `cancelled` as a terminal job state. It is not an
+error for the user; it means a more complete cache request replaced stale work.
+
 ## Why This Exists
 
 Full-session telemetry can be hundreds of thousands of rows. Automatically

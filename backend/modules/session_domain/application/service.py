@@ -7,12 +7,14 @@ from modules.session_domain.domain.models import (
     CarTelemetrySampleModel,
     EntryLapModel,
     PositionSampleModel,
+    SessionCircuitCornerModel,
     SessionCatalogItem,
     SessionDetail,
     SessionEntrySummary,
     SessionImportRequest,
     SessionSummary,
     SessionTickModel,
+    SessionTrackStatusEventModel,
 )
 from modules.session_domain.infrastructure.repository import SessionRepository
 
@@ -57,6 +59,22 @@ class SessionService:
 
     def get_session(self, session_id: str) -> SessionDetail | None:
         return self.repository.get_session(session_id)
+
+    def list_circuit_corners(self, session_id: str) -> list[SessionCircuitCornerModel]:
+        session = self.get_session(session_id)
+        if session is None:
+            raise ValueError("Session not found")
+        if session.round_number is None:
+            return []
+
+        request = SessionImportRequest(
+            season_year=session.season_year,
+            round_number=session.round_number,
+            session_name=session.session_name,
+            source_session_key=session.source_session_key,
+            import_profile="core",
+        )
+        return self.ingestion_service.list_circuit_corners(request)
 
     def list_entries(self, session_id: str) -> list[SessionEntrySummary]:
         return self.repository.list_entries(session_id)
@@ -114,3 +132,12 @@ class SessionService:
         limit: int,
     ) -> list[SessionTickModel]:
         return self.repository.list_ticks(session_id, offset=offset, limit=limit)
+
+    def list_track_status_events(
+        self,
+        session_id: str,
+        *,
+        offset: int,
+        limit: int,
+    ) -> list[SessionTrackStatusEventModel]:
+        return self.repository.list_track_status_events(session_id, offset=offset, limit=limit)

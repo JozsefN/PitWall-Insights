@@ -78,6 +78,7 @@ The session-domain application service currently coordinates:
 - selected-session import
 - session list/detail reads
 - entry list reads
+- source-backed circuit-corner reads
 - lap reads
 - telemetry reads
 - tick reads
@@ -111,10 +112,12 @@ The session domain is exposed through:
 - `GET /api/sessions/{session_id}`
 - `DELETE /api/sessions/{session_id}`
 - `GET /api/sessions/{session_id}/entries`
+- `GET /api/sessions/{session_id}/circuit-corners`
 - `GET /api/sessions/{session_id}/entries/{entry_id}/laps`
 - `GET /api/sessions/{session_id}/entries/{entry_id}/telemetry/car`
 - `GET /api/sessions/{session_id}/entries/{entry_id}/telemetry/position`
 - `GET /api/sessions/{session_id}/ticks`
+- `GET /api/sessions/{session_id}/track-status-events`
 
 ## Boundaries
 
@@ -124,6 +127,7 @@ The session domain is exposed through:
 - selected-session cache lifecycle
 - entry/lap/stint/telemetry persistence
 - session-oriented read models
+- source-backed circuit-corner DTOs for map turn markers
 - `event_sessions.import_profile` and `event_sessions.telemetry_status`
 
 ### Does not belong here
@@ -144,6 +148,7 @@ Import job queue state belongs in [Session Import](./session-import.md).
 Likely future extensions for this module:
 
 - richer session detail projections
+- persisted circuit metadata if source-backed reads become too expensive
 - pagination/filtering/downsampling controls for telemetry reads
 - better replay-oriented query helpers
 - tighter frontend contracts for widgets and chart consumers

@@ -1,7 +1,11 @@
 from modules.ingestion.application.ports import SessionSourcePort
 from modules.ingestion.domain.models import IngestionSourceStatus, SourceSessionBundle
 from modules.ingestion.infrastructure.provider_registry import build_session_source
-from modules.session_domain.domain.models import SessionCatalogItem, SessionImportRequest
+from modules.session_domain.domain.models import (
+    SessionCatalogItem,
+    SessionCircuitCornerModel,
+    SessionImportRequest,
+)
 
 
 class IngestionSourceAdapter:
@@ -20,3 +24,6 @@ class IngestionSourceAdapter:
 
     def load_session(self, request: SessionImportRequest) -> SourceSessionBundle:
         return self.source.load_session(request)
+
+    def list_circuit_corners(self, request: SessionImportRequest) -> list[SessionCircuitCornerModel]:
+        return self.source.list_circuit_corners(request)

@@ -14,6 +14,7 @@ export type WidgetId =
   | "telemetry-line-chart"
   | "brake-trace-chart"
   | "lap-time-trend"
+  | "stint-analysis"
   | "lap-table"
   | "session-track-map"
   | "replay-track-map"

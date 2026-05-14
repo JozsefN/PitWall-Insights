@@ -4,11 +4,10 @@ from modules.story_feed.application.service import StoryFeedService
 
 router = APIRouter(prefix="/api/story-feed", tags=["story_feed"])
 
-service = StoryFeedService()
-
 
 @router.get("/health")
 def story_feed_health() -> dict:
+    service = StoryFeedService()
     return {
         "module": "story_feed",
         "status": "ok",

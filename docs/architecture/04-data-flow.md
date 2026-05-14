@@ -130,16 +130,63 @@ The auth flow is separate from session import and currently works like this:
 4. Axios attaches the token to future requests
 5. `/api/auth/session` decodes the token and returns a lightweight auth-session payload
 
-## Future Metrics Flow
+## Feature Metrics Flow
 
-Feature metrics should sit after canonical session storage.
+Feature metrics sit after canonical session storage.
 
-Expected future pattern:
+Current score flow:
 
-1. raw FastF1 data is imported
-2. canonical session tables are written
-3. derived metrics are computed from canonical data
-4. metrics are stored or cached separately
-5. widgets read only the specific metric series they need
+1. Client calls `GET /api/feature-metrics/sessions/{session_id}/driver-scores`.
+2. The route builds a `FeatureMetricsService`.
+3. The service creates a `FeatureMetricDriverScoreRequest`.
+4. `application/planner.py` resolves calculators and required inputs.
+5. `FeatureMetricInputProvider` loads only those inputs from canonical session
+   tables.
+6. Calculators compute scores and return confidence, scope, components,
+   corrections, and input coverage.
 
-This is important because not every useful chart should require the frontend to pull the full raw telemetry payload.
+Current v1 metrics use only entries and laps:
+
+- `pace_rating`
+- `consistency_score`
+- `lap_trend`
+
+This means they can run after a `core` import without telemetry
+materialization. It also means metric widgets can request compact derived
+payloads instead of pulling full raw telemetry.
+
+## Metric Insight and Decision Flow
+
+Metric insights use the decision engine:
+
+1. Client calls `GET /api/feature-metrics/sessions/{session_id}/insights`.
+2. The feature-metrics route builds a `DecisionEngineService`.
+3. The decision engine resolves requested rules.
+4. Each rule declares the feature metrics it needs.
+5. `FeatureMetricsService` computes those metrics for the requested scope.
+6. Rules emit signals when configured thresholds and confidence gates pass.
+
+The lower-level diagnostic route is:
+
+```http
+GET /api/decision-engine/sessions/{session_id}/signals
+```
+
+Current rules are:
+
+- `strongest_pace_driver`
+- `most_consistent_driver`
+- `recent_improver`
+
+## Story Feed Flow
+
+Story feed is not currently connected to session metric insights.
+
+For now it only exposes health/status:
+
+```http
+GET /api/story-feed/health
+```
+
+It is reserved for future season/news/history content such as official videos,
+headline stacks, race-week rhythm, and follow-up stories from previous races.

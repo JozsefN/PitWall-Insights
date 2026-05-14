@@ -90,6 +90,20 @@ def list_session_entries(
     return [entry.model_dump() for entry in service.list_entries(session_id)]
 
 
+@router.get("/{session_id}/circuit-corners")
+def list_session_circuit_corners(
+    session_id: str,
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    service = build_session_service(db)
+    try:
+        return [corner.model_dump() for corner in service.list_circuit_corners(session_id)]
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
 @router.get("/{session_id}/entries/{entry_id}/laps")
 def list_entry_laps(
     session_id: str,
@@ -174,4 +188,20 @@ def list_session_ticks(
     return [
         tick.model_dump()
         for tick in service.list_ticks(session_id, offset=offset, limit=limit)
+    ]
+
+
+@router.get("/{session_id}/track-status-events")
+def list_session_track_status_events(
+    session_id: str,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=1000, ge=1, le=10000),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    service = build_session_service(db)
+    if service.get_session(session_id) is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return [
+        event.model_dump()
+        for event in service.list_track_status_events(session_id, offset=offset, limit=limit)
     ]

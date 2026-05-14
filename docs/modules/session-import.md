@@ -109,8 +109,9 @@ One worker cycle does this:
 1. Recover stale running jobs whose heartbeat expired.
 2. Delete expired completed/failed/cancelled job rows.
 3. Claim the oldest queued session import job using a database row lock.
-4. If no session import job is waiting, claim the oldest queued telemetry
-   materialization job.
+4. If no session import job is waiting, claim the broadest queued telemetry
+   materialization job and cancel queued subset materialization jobs covered by
+   that broader request.
 5. If no work is waiting, clean up expired finished job rows.
 6. Load source data through `IngestionService`.
 7. Normalize source data into a `SessionSnapshot`.

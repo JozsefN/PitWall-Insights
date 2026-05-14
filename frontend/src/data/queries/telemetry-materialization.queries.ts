@@ -7,7 +7,7 @@ import {
 import type { TelemetryMaterializationRequestDto } from "../contracts/telemetry-materialization.contracts";
 
 const ACTIVE_STATUSES = new Set(["queued", "running"]);
-const QUEUED_POLL_TIMEOUT_MS = 45_000;
+const QUEUED_FAST_POLL_MS = 45_000;
 const RUNNING_HEARTBEAT_TIMEOUT_MS = 10 * 60_000;
 
 export function useEnsureTelemetryMaterializationQuery(
@@ -19,7 +19,6 @@ export function useEnsureTelemetryMaterializationQuery(
     queryFn: () => ensureTelemetryMaterialization(request as TelemetryMaterializationRequestDto),
     enabled: Boolean(request) && enabled,
     staleTime: 30_000,
-    refetchInterval: (query) => (query.state.data?.ready === false ? 3000 : false),
     refetchOnWindowFocus: false,
   });
 }
@@ -37,7 +36,7 @@ export function useTelemetryMaterializationJobQuery(jobId?: string | null, enabl
 
       if (job.status === "queued") {
         const queuedForMs = Date.now() - new Date(job.created_at).getTime();
-        return queuedForMs > QUEUED_POLL_TIMEOUT_MS ? false : 1500;
+        return queuedForMs > QUEUED_FAST_POLL_MS ? 5000 : 1500;
       }
 
       const heartbeatAt = job.heartbeat_at ?? job.started_at ?? job.created_at;

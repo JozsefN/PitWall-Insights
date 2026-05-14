@@ -28,6 +28,7 @@ Business and delivery logic grouped by feature/module:
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
 - [Feature Metrics](../modules/feature-metrics.md)
+- [Decision Engine](../modules/decision-engine.md)
 - [Story Feed](../modules/story-feed.md)
 - `delivery_api`
 - `storage`
@@ -55,7 +56,8 @@ The main API router includes:
 - auth routes
 - session routes
 - session import job routes
-- module health routes for ingestion, normalization, feature metrics, and story feed
+- module health routes for ingestion, normalization, feature metrics, decision engine, and story feed
+- metric score, metric insight, and decision-signal routes
 
 ### Application Layer
 
@@ -74,6 +76,8 @@ Examples:
 - `AuthService`
 - `IngestionService`
 - `NormalizationService`
+- `FeatureMetricsService`
+- `DecisionEngineService`
 
 ### Domain and Contract Layer
 
@@ -142,15 +146,16 @@ canonical sessions.
 - `session_import`
 - `ingestion`
 - `normalization`
+- `feature_metrics`
+- `decision_engine`
 - `delivery_api`
 - `storage`
 
-### Present but still mostly placeholders
+### Present but planned
 
-- `feature_metrics`
 - `story_feed`
 
-These two already have module health routes, but they do not yet own substantial production logic.
+`story_feed` currently reports planned season/news/history surfaces. It is not the home for current-session metric insight cards.
 
 ## Conventions Used In The Codebase
 
@@ -165,6 +170,7 @@ These two already have module health routes, but they do not yet own substantial
 - It is easy to discover where a change belongs.
 - It keeps the session model readable even as the schema grows.
 - It allows future metrics and replay logic to be added without reworking the ingestion pipeline.
+- It lets metric formulas, rule-selected insights, and future editorial story content evolve independently.
 - It matches the current scale of the project without over-engineering the service boundaries.
 
 ## Related Docs

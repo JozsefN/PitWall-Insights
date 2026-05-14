@@ -118,6 +118,23 @@ export interface SessionTickDto {
   source_kind: string;
 }
 
+export interface SessionTrackStatusEventDto {
+  id: string;
+  session_time_ms: number;
+  source_time_utc: string | null;
+  status: string;
+  message: string | null;
+}
+
+export interface SessionCircuitCornerDto {
+  number: number;
+  letter: string | null;
+  x: number;
+  y: number;
+  angle_deg: number | null;
+  distance_m: number | null;
+}
+
 export interface CarTelemetrySampleDto {
   id: string;
   tick_id: string;

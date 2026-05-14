@@ -8,7 +8,11 @@ from typing import Any
 from app.config import settings
 from modules.ingestion.domain.models import IngestionSourceStatus, SourceSessionBundle, SourceSessionMetadata
 from modules.ingestion.infrastructure.cache_paths import resolve_provider_cache_dir
-from modules.session_domain.domain.models import SessionCatalogItem, SessionImportRequest
+from modules.session_domain.domain.models import (
+    SessionCatalogItem,
+    SessionCircuitCornerModel,
+    SessionImportRequest,
+)
 
 
 class FastF1Adapter:
@@ -183,6 +187,41 @@ class FastF1Adapter:
             position_data=position_data,
             source_version=self._as_text(getattr(fastf1, "__version__", None)),
         )
+
+    def list_circuit_corners(self, request: SessionImportRequest) -> list[SessionCircuitCornerModel]:
+        fastf1 = self._load_fastf1()
+        session = self._resolve_session(fastf1, request)
+        session.load(laps=True, telemetry=False, weather=False, messages=False)
+
+        get_circuit_info = getattr(session, "get_circuit_info", None)
+        if not callable(get_circuit_info):
+            return []
+
+        circuit_info = get_circuit_info()
+        corners = getattr(circuit_info, "corners", None)
+        records = self._to_records(corners)
+        corner_models: list[SessionCircuitCornerModel] = []
+
+        for row in records:
+            number = self._as_int(row.get("Number"))
+            x = self._as_float(row.get("X"))
+            y = self._as_float(row.get("Y"))
+
+            if number is None or x is None or y is None:
+                continue
+
+            corner_models.append(
+                SessionCircuitCornerModel(
+                    number=number,
+                    letter=self._as_text(row.get("Letter")),
+                    x=x,
+                    y=y,
+                    angle_deg=self._as_float(row.get("Angle")),
+                    distance_m=self._as_float(row.get("Distance")),
+                )
+            )
+
+        return corner_models
 
     def _resolve_session(self, fastf1: Any, request: SessionImportRequest) -> Any:
         if request.source_session_key:
@@ -361,6 +400,15 @@ class FastF1Adapter:
             if value is None or str(value).strip().lower() in {"", "nan", "nat", "none"}:
                 return None
             return int(float(value))
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _as_float(value: Any) -> float | None:
+        try:
+            if value is None or str(value).strip().lower() in {"", "nan", "nat", "none"}:
+                return None
+            return float(value)
         except (TypeError, ValueError):
             return None
 

@@ -112,7 +112,7 @@ export const builtinSessionLayouts: LayoutRecord[] = [
   {
     id: "builtin:session-trends",
     name: "Session Trends",
-    description: "Track-wide lookback with lap time evolution, lap data, and full session lines.",
+    description: "Track-wide lookback with lap pace comparison, lap data, and full session lines.",
     source: "builtin",
     audience: "session-lookback",
     schemaVersion: 1,
@@ -120,12 +120,12 @@ export const builtinSessionLayouts: LayoutRecord[] = [
     config: {
       id: "session-trends",
       title: "Session Trends",
-      subtitle: "Full-session overview for lap times, selected drivers, and circuit shape.",
+      subtitle: "Full-session overview for driver lap pace, selected entries, and circuit shape.",
       sections: [
         {
           id: "headline",
           title: "Session Overview",
-          description: "Trend lines stay in full-session mode even when lap detail is available elsewhere.",
+          description: "Lap pace stays in full-session mode even when lap detail is available elsewhere.",
           layout: {
             type: "group",
             direction: "row",
@@ -137,6 +137,9 @@ export const builtinSessionLayouts: LayoutRecord[] = [
                 width: "2/3",
                 height: "lg",
                 minHeight: 320,
+                options: {
+                  title: "Driver Lap Pace",
+                },
               },
               {
                 type: "widget",
@@ -162,6 +165,46 @@ export const builtinSessionLayouts: LayoutRecord[] = [
             width: "full",
             height: "lg",
             minHeight: 360,
+          },
+        },
+      ],
+    },
+  },
+  {
+    id: "builtin:stint-strategy",
+    name: "Stint Strategy",
+    description: "Compare stint pace, compound windows, and degradation across selected drivers.",
+    source: "builtin",
+    audience: "session-lookback",
+    schemaVersion: 1,
+    updatedAt: "2026-04-12T00:00:00Z",
+    config: {
+      id: "stint-strategy",
+      title: "Stint Strategy",
+      subtitle: "Absolute lap-number stint analysis with compound and filtering controls.",
+      sections: [
+        {
+          id: "stints",
+          title: "Stint Analysis",
+          description: "Each stint starts on its real session lap, not a reset-to-zero axis.",
+          layout: {
+            type: "widget",
+            widgetId: "stint-analysis",
+            width: "full",
+            height: "lg",
+            minHeight: 620,
+          },
+        },
+        {
+          id: "lap-detail",
+          title: "Lap Detail",
+          description: "Raw lap rows stay nearby for checking individual laps behind the stint view.",
+          layout: {
+            type: "widget",
+            widgetId: "lap-table",
+            width: "full",
+            height: "md",
+            minHeight: 320,
           },
         },
       ],
@@ -204,6 +247,18 @@ export const builtinSessionLayouts: LayoutRecord[] = [
                 minHeight: 360,
               },
             ],
+          },
+        },
+        {
+          id: "replay-strategy",
+          title: "Strategy",
+          description: "Completed stint laps update with the replay clock.",
+          layout: {
+            type: "widget",
+            widgetId: "stint-analysis",
+            width: "full",
+            height: "lg",
+            minHeight: 560,
           },
         },
       ],

@@ -15,6 +15,7 @@ from modules.session_domain.domain.models import (
     SessionEntrySummary,
     SessionSummary,
     SessionTickModel,
+    SessionTrackStatusEventModel,
 )
 from modules.session_domain.infrastructure.models.common import generate_uuid
 from modules.session_domain.infrastructure.models import (
@@ -297,6 +298,23 @@ class SessionRepository:
             .all()
         )
         return [self._build_tick_model(record) for record in records]
+
+    def list_track_status_events(
+        self,
+        session_id: str,
+        *,
+        offset: int,
+        limit: int,
+    ) -> list[SessionTrackStatusEventModel]:
+        records = (
+            self.db.query(SessionTrackStatusEventRecord)
+            .filter(SessionTrackStatusEventRecord.session_id == session_id)
+            .order_by(SessionTrackStatusEventRecord.session_time_ms.asc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+        return [self._build_track_status_event_model(record) for record in records]
 
     def _upsert_season(self, snapshot: SessionSnapshot) -> SeasonRecord:
         season = self.db.get(SeasonRecord, snapshot.season.year)
@@ -823,4 +841,14 @@ class SessionRepository:
             session_time_ms=record.session_time_ms,
             source_time_utc=record.source_time_utc,
             source_kind=record.source_kind,
+        )
+
+    @staticmethod
+    def _build_track_status_event_model(record: SessionTrackStatusEventRecord) -> SessionTrackStatusEventModel:
+        return SessionTrackStatusEventModel(
+            id=record.id,
+            session_time_ms=record.session_time_ms,
+            source_time_utc=record.source_time_utc,
+            status=record.status,
+            message=record.message,
         )

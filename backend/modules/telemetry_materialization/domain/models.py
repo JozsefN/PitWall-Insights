@@ -16,6 +16,7 @@ TelemetryMaterializationStage = Literal[
     "persisting",
     "completed",
     "failed",
+    "cancelled",
 ]
 
 

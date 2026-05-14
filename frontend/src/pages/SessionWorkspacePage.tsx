@@ -1,5 +1,5 @@
 import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageContainer } from "../app/layout/PageContanier";
 import { listEntryLaps } from "../data/api/sessions.api";
@@ -13,6 +13,7 @@ import { useTelemetryMaterializationJobsQuery } from "../data/queries/telemetry-
 import { useAuthSession } from "../features/auth/useAuthSession";
 import {
   clearTelemetryWarmupJobId,
+  getTelemetryWarmupStorageKey,
   readTelemetryWarmupJobId,
   TELEMETRY_WARMUP_JOB_EVENT,
   type TelemetryWarmupJobEventDetail,
@@ -48,9 +49,7 @@ export function SessionWorkspacePage() {
   const { sessionId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const [telemetryWarmupJobId, setTelemetryWarmupJobId] = useState<string | null>(() =>
-    sessionId ? readTelemetryWarmupJobId(sessionId) : null,
-  );
+  const telemetryWarmupJobId = useTelemetryWarmupJobId(sessionId);
 
   const telemetryWarmupQuery = useImportJobQuery(telemetryWarmupJobId ?? undefined, Boolean(telemetryWarmupJobId));
   const telemetryWarmupActive =
@@ -93,36 +92,11 @@ export function SessionWorkspacePage() {
   const replayTicksLoading = searchState.mode === "simulation" && (ticksQuery.isLoading || ticksQuery.isFetching);
 
   useEffect(() => {
-    setTelemetryWarmupJobId(sessionId ? readTelemetryWarmupJobId(sessionId) : null);
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (!sessionId) {
-      return;
-    }
-
-    function handleTelemetryWarmupJob(event: Event) {
-      const detail = (event as CustomEvent<TelemetryWarmupJobEventDetail>).detail;
-
-      if (detail?.sessionId === sessionId) {
-        setTelemetryWarmupJobId(detail.jobId);
-      }
-    }
-
-    window.addEventListener(TELEMETRY_WARMUP_JOB_EVENT, handleTelemetryWarmupJob);
-
-    return () => {
-      window.removeEventListener(TELEMETRY_WARMUP_JOB_EVENT, handleTelemetryWarmupJob);
-    };
-  }, [sessionId]);
-
-  useEffect(() => {
     if (!sessionId || telemetryWarmupQuery.data?.status !== "completed") {
       return;
     }
 
     clearTelemetryWarmupJobId(sessionId);
-    setTelemetryWarmupJobId(null);
     void queryClient.invalidateQueries({ queryKey: ["sessions", sessionId] });
   }, [queryClient, sessionId, telemetryWarmupQuery.data?.status]);
 
@@ -486,6 +460,42 @@ export function SessionWorkspacePage() {
         </div>
       </SessionWorkspaceProvider>
     </PageContainer>
+  );
+}
+
+function useTelemetryWarmupJobId(sessionId?: string) {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (!sessionId || typeof window === "undefined") {
+        return () => undefined;
+      }
+
+      const activeSessionId = sessionId;
+
+      function handleTelemetryWarmupJob(event: Event) {
+        const detail = (event as CustomEvent<TelemetryWarmupJobEventDetail>).detail;
+
+        if (detail?.sessionId === activeSessionId) {
+          onStoreChange();
+        }
+      }
+
+      function handleStorage(event: StorageEvent) {
+        if (event.key === getTelemetryWarmupStorageKey(activeSessionId)) {
+          onStoreChange();
+        }
+      }
+
+      window.addEventListener(TELEMETRY_WARMUP_JOB_EVENT, handleTelemetryWarmupJob);
+      window.addEventListener("storage", handleStorage);
+
+      return () => {
+        window.removeEventListener(TELEMETRY_WARMUP_JOB_EVENT, handleTelemetryWarmupJob);
+        window.removeEventListener("storage", handleStorage);
+      };
+    },
+    () => (sessionId ? readTelemetryWarmupJobId(sessionId) : null),
+    () => null,
   );
 }
 

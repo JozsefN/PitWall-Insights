@@ -8,6 +8,7 @@ from modules.delivery_api.api.telemetry_materialization_routes import router as 
 from modules.delivery_api.api.ingestion_routes import router as ingestion_router
 from modules.delivery_api.api.normalization_routes import router as normalization_router
 from modules.delivery_api.api.feature_metrics_routes import router as feature_metrics_router
+from modules.delivery_api.api.decision_engine_routes import router as decision_engine_router
 from modules.delivery_api.api.layout_routes import router as layout_router
 from modules.delivery_api.api.story_feed_routes import router as story_feed_router
 
@@ -20,5 +21,6 @@ api_router.include_router(telemetry_materialization_router)
 api_router.include_router(ingestion_router)
 api_router.include_router(normalization_router)
 api_router.include_router(feature_metrics_router)
+api_router.include_router(decision_engine_router)
 api_router.include_router(layout_router)
 api_router.include_router(story_feed_router)

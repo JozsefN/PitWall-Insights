@@ -44,6 +44,9 @@ The backend is meaningfully ahead of the frontend at the moment. The backend alr
 - health endpoints
 - a session catalog/import/cache API
 - a relational schema for sessions, entries, laps, stints, telemetry, and ticks
+- on-demand feature metrics for pace rating, consistency score, and recent lap trend
+- rule-selected metric insights for pace leader, consistency leader, and recent improver
+- a planned story-feed namespace for future season/news/history content
 
 The frontend currently:
 
@@ -57,7 +60,8 @@ The frontend currently:
 - Prefer explicit module boundaries over shared magic.
 - Keep source-specific logic in ingestion, not spread across the whole backend.
 - Keep canonical session structure in normalization and session-domain storage.
-- Keep future derived metrics separate from raw imported data.
+- Keep derived metrics separate from raw imported data.
+- Keep rule-selected metric insights separate from editorial story-feed content.
 - Model the driver/car combination as a first-class session entry.
 - Optimize for readability and future change, not the shortest possible implementation.
 

@@ -29,6 +29,7 @@ The goal of these docs is practical clarity:
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
 - [Feature Metrics](../modules/feature-metrics.md)
+- [Decision Engine](../modules/decision-engine.md)
 - [Story Feed](../modules/story-feed.md)
 
 ### Frontend Modules
@@ -58,7 +59,7 @@ This means the most important active modules right now are:
 - `session_domain`
 - `delivery_api`
 
-`feature_metrics` and `story_feed` are intentionally present early so the eventual architecture has somewhere clean to put derived analysis and editorial insight logic without overloading the canonical session schema.
+`feature_metrics` is now the active home for cheap derived lap metrics and metric insight surfaces. `decision_engine` selects meaningful rule-based signals from those metrics. `story_feed` remains planned for future season/news/history content rather than current-session metric cards.
 
 ## What Changed Recently
 
@@ -73,6 +74,8 @@ It now includes:
 - laps, stints, weather, status, and race-control storage
 - per-entry raw telemetry tables
 - session-wide tick alignment for replay-oriented reads
+- lap-based feature metrics for pace, consistency, and recent trend
+- rule-selected metric insights for pace leader, consistency leader, and recent improver
 
 The docs in this folder have been expanded to reflect that newer architecture rather than the original scaffold-only state.
 

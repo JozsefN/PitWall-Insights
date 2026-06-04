@@ -1,12 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from modules.delivery_api.api.auth_dependencies import require_current_user
 from modules.session_domain.domain.models import SessionImportRequest
 from modules.session_import.application.service import ImportJobService
 from modules.session_import.domain.models import ImportJobListResponse, ImportJobRead
 from modules.storage.infrastructure.db import get_db
 
-router = APIRouter(prefix="/api/session-import/jobs", tags=["session-import"])
+router = APIRouter(
+    prefix="/api/session-import/jobs",
+    tags=["session-import"],
+    dependencies=[Depends(require_current_user)],
+)
 
 
 def build_import_job_service(db: Session) -> ImportJobService:

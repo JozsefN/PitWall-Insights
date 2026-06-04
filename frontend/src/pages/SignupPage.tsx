@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { signup } from "../data/api/auth.api";
+import { getAuthRedirectPath } from "../features/auth/auth-redirect";
 
 export function SignupPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
+  const redirectTo = getAuthRedirectPath(location.state);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +25,7 @@ export function SignupPage() {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-      navigate("/");
+      navigate(redirectTo, { replace: true });
     },
   });
 
@@ -98,7 +101,7 @@ export function SignupPage() {
 
         <p className="mt-5 text-sm text-[var(--color-text-secondary)]">
           Already have an account?{" "}
-          <Link to="/login" className="text-white underline underline-offset-4">
+          <Link to="/login" state={location.state} className="text-white underline underline-offset-4">
             Login
           </Link>
         </p>

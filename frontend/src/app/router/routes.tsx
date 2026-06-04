@@ -9,6 +9,7 @@ import { SignupPage } from "../../pages/SignupPage";
 import { FeaturePlaceholderPage } from "../../pages/FeaturePlaceholderPage";
 import { SessionsExplorerPage } from "../../pages/SessionsExplorerPage";
 import { SessionWorkspacePage } from "../../pages/SessionWorkspacePage";
+import { RequireAuth } from "../../features/auth/RequireAuth";
 
 export const routes: RouteObject[] = [
   {
@@ -18,11 +19,22 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       {
         path: "sessions",
-        element: <SessionsExplorerPage />,
+        element: (
+          <RequireAuth>
+            <SessionsExplorerPage />
+          </RequireAuth>
+        ),
       },
       {
         path: "sessions/:sessionId",
-        element: <SessionWorkspacePage />,
+        element: (
+          <RequireAuth
+            title="Session Workspace"
+            description="Sign in to open imported sessions, use lookback dashboards, run replay controls, and keep workspace features behind member access."
+          >
+            <SessionWorkspacePage />
+          </RequireAuth>
+        ),
       },
       {
         path: "live",
@@ -128,7 +140,17 @@ export const routes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "home", element: <Navigate to="/" replace /> },
-      { path: "system/health", element: <SystemHealthPage /> },
+      {
+        path: "system/health",
+        element: (
+          <RequireAuth
+            title="System Diagnostics"
+            description="Sign in to inspect backend health, import jobs, and authenticated session diagnostics."
+          >
+            <SystemHealthPage />
+          </RequireAuth>
+        ),
+      },
     ],
   },
 ];

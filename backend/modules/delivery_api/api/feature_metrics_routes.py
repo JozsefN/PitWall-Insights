@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
+from modules.delivery_api.api.auth_dependencies import require_current_user
 from modules.decision_engine.application.service import DecisionEngineService
 from modules.decision_engine.domain.models import DecisionSignalId
 from modules.decision_engine.domain.registry import SUPPORTED_SIGNAL_IDS
@@ -24,7 +25,7 @@ def feature_metrics_health() -> dict:
     }
 
 
-@router.get("/sessions/{session_id}/driver-scores")
+@router.get("/sessions/{session_id}/driver-scores", dependencies=[Depends(require_current_user)])
 def get_session_driver_scores(
     session_id: str,
     metric_ids: str | None = Query(
@@ -66,7 +67,7 @@ def get_session_driver_scores(
     return response.model_dump()
 
 
-@router.get("/sessions/{session_id}/insights")
+@router.get("/sessions/{session_id}/insights", dependencies=[Depends(require_current_user)])
 def get_session_metric_insights(
     session_id: str,
     signal_ids: str | None = Query(

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from modules.delivery_api.api.auth_dependencies import require_current_user
 from modules.storage.infrastructure.db import get_db
 from modules.telemetry_materialization.application.service import TelemetryMaterializationService
 from modules.telemetry_materialization.domain.models import (
@@ -10,7 +11,11 @@ from modules.telemetry_materialization.domain.models import (
     TelemetryMaterializationRequest,
 )
 
-router = APIRouter(prefix="/api/telemetry/materialization", tags=["telemetry-materialization"])
+router = APIRouter(
+    prefix="/api/telemetry/materialization",
+    tags=["telemetry-materialization"],
+    dependencies=[Depends(require_current_user)],
+)
 
 
 def build_telemetry_materialization_service(db: Session) -> TelemetryMaterializationService:

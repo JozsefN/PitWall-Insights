@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from modules.delivery_api.api.auth_dependencies import require_current_user
 from modules.ingestion.application.service import IngestionService
 from modules.ingestion.infrastructure.provider_registry import build_session_source
 from modules.normalization.application.service import NormalizationService
@@ -11,7 +12,11 @@ from modules.session_domain.domain.models import DeleteSessionResponse, SessionI
 from modules.session_domain.infrastructure.repository import SessionRepository
 from modules.storage.infrastructure.db import get_db
 
-router = APIRouter(prefix="/api/sessions", tags=["sessions"])
+router = APIRouter(
+    prefix="/api/sessions",
+    tags=["sessions"],
+    dependencies=[Depends(require_current_user)],
+)
 
 
 def build_session_service(db: Session) -> SessionService:

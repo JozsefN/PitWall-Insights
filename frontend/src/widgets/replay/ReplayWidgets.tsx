@@ -3,6 +3,7 @@ import { WidgetCard } from "../shared/WidgetCard";
 import { WidgetEmpty, WidgetError, WidgetLoading } from "../shared/WidgetState";
 import { useWorkspaceCarTelemetryResource } from "../../features/sessions/session-data.hooks";
 import { useSessionWorkspace } from "../../features/sessions/SessionWorkspaceContext";
+import { replaySampleInterval } from "../../features/sessions/replay-timeline";
 import {
   findTelemetrySampleAtTime,
   getEntryAccent,
@@ -16,7 +17,8 @@ export function ReplayDriverCardsWidget({
 }: {
   options?: Record<string, unknown>;
 }) {
-  void options;
+  const title =
+    typeof options?.title === "string" ? options.title : "Replay Driver Cards";
 
   const workspace = useSessionWorkspace();
   const entryIds = workspace.selectedDriverIds;
@@ -24,12 +26,18 @@ export function ReplayDriverCardsWidget({
     entryIds,
     scope: "session",
     limit: 20000,
-    enabled: entryIds.length > 0,
+    sampleIntervalMs: replaySampleInterval(
+      workspace.replay.minTimeMs,
+      workspace.replay.maxTimeMs,
+    ),
+    sessionTimeFromMs: workspace.replay.minTimeMs,
+    sessionTimeToMs: workspace.replay.maxTimeMs || undefined,
+    enabled: entryIds.length > 0 && workspace.replay.ticks.length > 0,
   });
 
   if (entryIds.length === 0) {
     return (
-      <WidgetCard title="Replay Driver Cards">
+      <WidgetCard title={title}>
         <WidgetEmpty message="Choose one or more drivers in the replay controls to see live-style telemetry cards." />
       </WidgetCard>
     );
@@ -37,15 +45,15 @@ export function ReplayDriverCardsWidget({
 
   if (telemetry.isError) {
     return (
-      <WidgetCard title="Replay Driver Cards">
-        <WidgetError />
+      <WidgetCard title={title}>
+        <WidgetError message={telemetry.errorMessage} />
       </WidgetCard>
     );
   }
 
   if (!telemetry.ready) {
     return (
-      <WidgetCard title="Replay Driver Cards">
+      <WidgetCard title={title}>
         <WidgetEmpty message={telemetry.waitMessage} />
       </WidgetCard>
     );
@@ -53,7 +61,7 @@ export function ReplayDriverCardsWidget({
 
   if (telemetry.isLoading) {
     return (
-      <WidgetCard title="Replay Driver Cards">
+      <WidgetCard title={title}>
         <WidgetLoading />
       </WidgetCard>
     );
@@ -61,14 +69,19 @@ export function ReplayDriverCardsWidget({
 
   const cards = entryIds
     .map((entryId, index) => {
-      const entry = workspace.entries.find((candidate) => candidate.id === entryId);
+      const entry = workspace.entries.find(
+        (candidate) => candidate.id === entryId,
+      );
 
       if (!entry) {
         return null;
       }
 
       const samples = telemetry.dataByEntryId[entryId] ?? [];
-      const currentSample = findTelemetrySampleAtTime(samples, workspace.replay.currentTimeMs);
+      const currentSample = findTelemetrySampleAtTime(
+        samples,
+        workspace.replay.currentTimeMs,
+      );
 
       return {
         entry,
@@ -76,11 +89,19 @@ export function ReplayDriverCardsWidget({
         accent: getEntryAccent(entry, index),
       };
     })
-    .filter((card): card is { entry: SessionEntryDto; currentSample: ReturnType<typeof findTelemetrySampleAtTime>; accent: string } => card !== null);
+    .filter(
+      (
+        card,
+      ): card is {
+        entry: SessionEntryDto;
+        currentSample: ReturnType<typeof findTelemetrySampleAtTime>;
+        accent: string;
+      } => card !== null,
+    );
 
   return (
     <WidgetCard
-      title="Replay Driver Cards"
+      title={title}
       description="Live-style telemetry cards driven by the replay clock."
     >
       <div className="replay-driver-grid">
@@ -92,15 +113,23 @@ export function ReplayDriverCardsWidget({
           >
             <header className="replay-driver-card__header">
               <div>
-                <span className="replay-driver-card__eyebrow">{card.entry.team_name ?? "Team"}</span>
+                <span className="replay-driver-card__eyebrow">
+                  {card.entry.team_name ?? "Team"}
+                </span>
                 <h4>{getEntryDisplayName(card.entry)}</h4>
               </div>
-              <span className="replay-driver-card__number">#{card.entry.car_number}</span>
+              <span className="replay-driver-card__number">
+                #{card.entry.car_number}
+              </span>
             </header>
             <div className="replay-driver-card__stats">
               <div>
                 <span>Speed</span>
-                <strong>{card.currentSample?.speed_kph != null ? `${Math.round(card.currentSample.speed_kph)} kph` : "--"}</strong>
+                <strong>
+                  {card.currentSample?.speed_kph != null
+                    ? `${Math.round(card.currentSample.speed_kph)} kph`
+                    : "--"}
+                </strong>
               </div>
               <div>
                 <span>Gear</span>
@@ -108,7 +137,11 @@ export function ReplayDriverCardsWidget({
               </div>
               <div>
                 <span>Throttle</span>
-                <strong>{card.currentSample?.throttle_pct != null ? `${Math.round(card.currentSample.throttle_pct)}%` : "--"}</strong>
+                <strong>
+                  {card.currentSample?.throttle_pct != null
+                    ? `${Math.round(card.currentSample.throttle_pct)}%`
+                    : "--"}
+                </strong>
               </div>
               <div>
                 <span>Brake</span>

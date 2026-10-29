@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <title>PitWall-Insights fejlesztői dokumentáció</title>
+  <style>
+    :root {
+      --ink: #18202b;
+      --muted: #5f6b7a;
+      --line: #d8dee8;
+      --soft: #f5f7fb;
+      --accent: #c71f1a;
+      --accent-2: #1d6fb8;
+      --ok: #16754a;
+      --warn: #9a6700;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #ffffff;
+      color: var(--ink);
+      font: 10.8pt/1.5 "Segoe UI", Arial, sans-serif;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 42px 56px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
+      color: #111827;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: 30pt;
+      letter-spacing: 0.01em;
+    }
+
+    h2 {
+      margin: 26px 0 10px;
+      padding-top: 8px;
+      border-top: 2px solid var(--line);
+      font-size: 19pt;
+    }
+
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 13.5pt;
+    }
+
+    p {
+      margin: 8px 0;
+    }
+
+    ul,
+    ol {
+      margin: 8px 0 14px 22px;
+      padding: 0;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    code {
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #eef2f7;
+      color: #0f172a;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    table {
+      width: 100%;
+      margin: 12px 0 18px;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+
+    th,
+    td {
+      vertical-align: top;
+      padding: 8px 9px;
+      border: 1px solid var(--line);
+    }
+
+    th {
+      background: #edf2f8;
+      color: #111827;
+      text-align: left;
+    }
+
+    .cover {
+      min-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-bottom: 0;
+      page-break-after: always;
+    }
+
+    .cover__eyebrow {
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .cover__meta {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 11pt;
+    }
+
+    .lead {
+      max-width: 760px;
+      color: #334155;
+      font-size: 13pt;
+    }
+
+    .toc {
+      page-break-after: always;
+    }
+
+    .toc ol {
+      columns: 2;
+      column-gap: 44px;
+      margin-left: 18px;
+    }
+
+    .chapter {
+      page-break-before: auto;
+    }
+
+    .note,
+    .status-card {
+      margin: 14px 0;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent-2);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .status-card.ok {
+      border-left-color: var(--ok);
+    }
+
+    .status-card.warn {
+      border-left-color: var(--warn);
+    }
+
+    .status-card.todo {
+      border-left-color: var(--accent);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 9.6pt;
+    }
+
+    .diagram {
+      margin: 16px 0 20px;
+      page-break-inside: avoid;
+    }
+
+    .diagram img {
+      display: block;
+      max-width: 100%;
+      border: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .diagram figcaption {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 9.5pt;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eef2f7;
+      font-size: 9pt;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.ok {
+      background: #e9f8ef;
+      color: #12613e;
+    }
+
+    .badge.skeleton {
+      background: #fff4db;
+      color: #7c5300;
+    }
+
+    .badge.locked {
+      background: #fdeaea;
+      color: #9d1a16;
+    }
+
+    .route-table td:first-child,
+    .route-table td:nth-child(2) {
+      white-space: nowrap;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 9.4pt;
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9pt;
+    }
+
+    @page {
+      margin: 14mm 13mm;
+    }
+
+    @media print {
+      main {
+        max-width: none;
+        padding: 0;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .chapter {
+        page-break-before: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="cover">
+    <div class="cover__eyebrow">Fejlesztői dokumentáció</div>
+    <h1>PitWall-Insights</h1>
+    <p class="lead">
+      Formula-1 session lookback, replay és későbbi live-race elemző webalkalmazás
+      jelenlegi architektúrája, moduljai, adatfolyamai, port/adaptor kialakítása,
+      API- és UI-döntései.
+    </p>
+    <div class="cover__meta">
+      <p><strong>Állapotdátum:</strong> 2026.05.27.</p>
+      <p><strong>Repo:</strong> <code>PitWall-Insights</code></p>
+      <p><strong>Dokumentum célja:</strong> fejlesztői átadás és karbantartási kiindulópont.</p>
+    </div>
+  </section>
+
+  <section class="toc">
+    <h2>Tartalom</h2>
+    <ol>
+      <li>Dokumentációs cél és tartalom</li>
+      <li>Projekt áttekintés</li>
+      <li>Mi működő funkció, és mi skeleton?</li>
+      <li>Rendszerarchitektúra</li>
+      <li>Backend modularchitektúra</li>
+      <li>Portok, adapterek és modulhatárok</li>
+      <li>Kommunikációs folyamatok</li>
+      <li>Adatmodell és perzisztencia</li>
+      <li>API route-ok</li>
+      <li>Frontend architektúra és route-ok</li>
+      <li>UI design döntések</li>
+      <li>Autentikáció és hozzáférés-védelem</li>
+      <li>Minőség, tesztelés, futtatás</li>
+      <li>Korlátok és további feladatok</li>
+      <li>MI eszközhasználat megjegyzés</li>
+    </ol>
+  </section>
+
+  <section class="chapter">
+    <h2>1. Dokumentációs cél és tartalom</h2>
+    <p>
+      A dokumentum fejlesztői átadási és karbantartási kiindulópont. A projekt
+      aktuális állapotát foglalja össze: architektúra, projektstruktúra, működő
+      és skeleton funkciók, API- és frontend route-ok, UI-döntések, adatfolyamok,
+      port/adaptor határok és a legfontosabb UML diagramok.
+    </p>
+    <p>
+      A cél, hogy egy új fejlesztő gyorsan átlássa, hol vannak a stabil részek,
+      hol vannak tervezett modulok, és mely technikai döntések határozzák meg a
+      további fejlesztést.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <h2>2. Projekt áttekintés</h2>
+    <p>
+      A PitWall-Insights motorsport-adatokra épülő webapp. A fő irány: Formula-1
+      session kiválasztása, importja, normalizálása, majd lookback/replay elemzése.
+      Nem általános data lake; a rendszer egy kiválasztott session köré szerveződik.
+    </p>
+    <div class="two-col">
+      <div class="status-card ok">
+        <strong>Aktív technológiai mag</strong>
+        <ul>
+          <li>FastAPI backend</li>
+          <li>PostgreSQL + SQLAlchemy + Alembic</li>
+          <li>FastF1 külső adatforrás</li>
+          <li>React 19 + React Router 7 frontend</li>
+          <li>TanStack Query + Axios adatkezelés</li>
+          <li>Vite + TypeScript + Tailwind v4/CSS</li>
+        </ul>
+      </div>
+      <div class="status-card">
+        <strong>Fő termékfolyamat</strong>
+        <ol>
+          <li>Felhasználó belép vagy regisztrál.</li>
+          <li>Session Explorerben szezont és hétvégét választ.</li>
+          <li>A backend FastF1-ből betölti a session core adatait.</li>
+          <li>A frontend workspace megnyílik lookback vagy simulation módban.</li>
+          <li>A widgetek igény szerint kérik a nehezebb telemetry szeleteket.</li>
+        </ol>
+      </div>
+    </div>
+
+    <h3>Repo szintű szerkezet</h3>
+    <table>
+      <tr><th>Útvonal</th><th>Szerep</th></tr>
+      <tr><td><code>backend/app</code></td><td>ASGI app, konfiguráció, bootstrap, worker belépési pont.</td></tr>
+      <tr><td><code>backend/modules</code></td><td>Backend modulok: delivery API, auth, session domain, import, ingestion, normalization, metrics, döntési motor, layoutok, storage.</td></tr>
+      <tr><td><code>backend/migrations</code></td><td>Alembic migrációk és adatbázisséma történet.</td></tr>
+      <tr><td><code>frontend/src/app</code></td><td>Provider-ek, router, app shell, header/sidebar.</td></tr>
+      <tr><td><code>frontend/src/data</code></td><td>DTO contractok, API wrapper-ek, query hookok, mapper-ek.</td></tr>
+      <tr><td><code>frontend/src/features</code></td><td>Auth és sessions feature szintű állapot/orchestration.</td></tr>
+      <tr><td><code>frontend/src/pages</code></td><td>Route-level oldalak és page CSS-ek.</td></tr>
+      <tr><td><code>frontend/src/widgets</code></td><td>Widget registry, dashboard renderer, telemetry/replay/track-map widgetek.</td></tr>
+      <tr><td><code>docs</code></td><td>Architektúra- és modul dokumentáció, valamint ez a fejlesztői dokumentáció.</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <h2>3. Mi működő funkció, és mi skeleton?</h2>
+    <p>
+      A projektben több olyan útvonal és modul is létezik, amely már helyet kapott az
+      információs architektúrában, de még nem végleges funkcionális felület. Ezt fontos
+      különválasztani a valóban használható end-to-end résztől.
+    </p>
+
+    <h3>Működő, érdemi implementáció</h3>
+    <table>
+      <tr><th>Terület</th><th>Állapot</th><th>Megjegyzés</th></tr>
+      <tr>
+        <td>Auth</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>Signup, login, bearer token, session endpoint, frontend guard. Nincs refresh token és szerepkörmodell.</td>
+      </tr>
+      <tr>
+        <td>Session catalog és import</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>FastF1 catalog, kiválasztott session import, core/full import profile.</td>
+      </tr>
+      <tr>
+        <td>Canonical session cache</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>Relációs session, entries, laps, stints, weather/status/race-control és telemetry táblák.</td>
+      </tr>
+      <tr>
+        <td>Import worker</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>Import job queue, heartbeat, retry, cleanup, worker process.</td>
+      </tr>
+      <tr>
+        <td>Telemetry materialization</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>Widget igényre session/lap scope szerinti car/position telemetry cache szelet.</td>
+      </tr>
+      <tr>
+        <td>Feature metrics és decision engine</td>
+        <td><span class="badge ok">működő backend</span></td>
+        <td>Pace rating, consistency score, lap trend, strongest pace, most consistent, recent improver. Frontend felhasználás még korlátozott.</td>
+      </tr>
+      <tr>
+        <td>Frontend Session Explorer</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>Szezon, race weekend, session választás, lookback/simulation mód, import és navigáció.</td>
+      </tr>
+      <tr>
+        <td>Frontend Session Workspace</td>
+        <td><span class="badge ok">működő</span></td>
+        <td>Driver/lap/layout kontrollok, replay kontroll, dashboard stage, widget renderelés.</td>
+      </tr>
+      <tr>
+        <td>Widget rendszer</td>
+        <td><span class="badge ok">működő alap</span></td>
+        <td>Built-in layoutok, registry, renderer, telemetry widgetek, replay widgetek, track map.</td>
+      </tr>
+      <tr>
+        <td>Saved dashboard layouts</td>
+        <td><span class="badge ok">backend + read flow</span></td>
+        <td>User layout CRUD backend oldalon megvan, frontend megjeleníti/validálja; vizuális builder még nincs.</td>
+      </tr>
+    </table>
+
+    <h3>Skeleton, placeholder vagy tervezett rész</h3>
+    <table>
+      <tr><th>Terület</th><th>Állapot</th><th>Mi hiányzik?</th></tr>
+      <tr>
+        <td><code>/live</code> és <code>/live/:sessionId</code></td>
+        <td><span class="badge skeleton">placeholder</span></td>
+        <td>Valós live timing, strategy és race-control felület még nincs bekötve.</td>
+      </tr>
+      <tr>
+        <td><code>/story-feed</code></td>
+        <td><span class="badge skeleton">placeholder</span></td>
+        <td>A backend story-feed csak health státuszt ad; nincs hír/video/story item modell.</td>
+      </tr>
+      <tr>
+        <td><code>/standings</code></td>
+        <td><span class="badge skeleton">placeholder</span></td>
+        <td>Nincs valós driver/constructor standings adatmodell és frontend lista.</td>
+      </tr>
+      <tr>
+        <td>Layout builder</td>
+        <td><span class="badge skeleton">tervezett</span></td>
+        <td>A layout JSON séma és mentés megvan, vizuális szerkesztő nincs.</td>
+      </tr>
+      <tr>
+        <td>Persistált feature metric eredmények</td>
+        <td><span class="badge skeleton">tervezett</span></td>
+        <td>Jelenleg on-demand számítás van; nincs metric_results tárolás.</td>
+      </tr>
+      <tr>
+        <td>Komplex auth</td>
+        <td><span class="badge skeleton">egyszerűsített</span></td>
+        <td>Nincs refresh token, session revocation, role-based authorization.</td>
+      </tr>
+      <tr>
+        <td>Automatizált tesztcsomag</td>
+        <td><span class="badge skeleton">hiányos</span></td>
+        <td>Build/lint/compile ellenőrzés van, de széles unit/integration/e2e tesztcsomag nem látható a repo-ban.</td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <h2>4. Rendszerarchitektúra</h2>
+    <p>
+      A központi domain entitás a session. A frontend nem FastF1-et hív, hanem a
+      backend normalizált, relációs cache-ét használja; erre épülnek a widgetek és a metrikák.
+    </p>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-01-system-context.png" alt="System context diagram">
+      <figcaption>PW-01 System Context - a frontend, FastAPI backend, worker, PostgreSQL cache és FastF1 kapcsolata.</figcaption>
+    </figure>
+    <p>
+      Az API és a worker közös PostgreSQL adatbázison dolgozik. Az API válaszol,
+      a worker intézi a lassú importot, telemetry materializationt és cleanupot.
+      A FastF1 cache csak ideiglenes provider cache; a tartós állapot PostgreSQL.
+    </p>
+
+    <h3>Fő adatút</h3>
+    <ol>
+      <li>A user a React SPA-ban protected session felületet nyit.</li>
+      <li>A frontend Axios kliensen keresztül JSON API-t hív.</li>
+      <li>A route réteg application service-t épít.</li>
+      <li>Az ingestion FastF1-ből betölt, a normalization canonical snapshotot készít.</li>
+      <li>A session repository tranzakcióban írja a normalized cache-t.</li>
+      <li>A widgetek később csak azt a telemetry szeletet materializáltatják, amelyre ténylegesen szükségük van.</li>
+    </ol>
+  </section>
+
+  <section class="chapter">
+    <h2>5. Backend modularchitektúra</h2>
+    <p>
+      A backend rétegzett, de nem túlbonyolított. A route vékony: HTTP paraméterezés,
+      dependency injection, hibafordítás. A use case application service-ben, az SQL
+      repository-ban, a külső forrás adapterben marad.
+    </p>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-02-backend-module-architecture.png" alt="Backend module architecture diagram">
+      <figcaption>PW-02 Backend Module Architecture - modulok és fő függőségek.</figcaption>
+    </figure>
+
+    <h3>Modulok szerepei</h3>
+    <table>
+      <tr><th>Modul</th><th>Felelősség</th><th>Állapot</th></tr>
+      <tr><td><code>delivery_api</code></td><td>FastAPI route-ok, request/response fordítás, service építés.</td><td>aktív</td></tr>
+      <tr><td><code>identity_auth</code></td><td>Felhasználó, jelszó hash, JWT/bearer token, session inspection.</td><td>aktív, egyszerű</td></tr>
+      <tr><td><code>session_domain</code></td><td>Canonical session modell, repository, session read/import orchestration.</td><td>aktív</td></tr>
+      <tr><td><code>session_import</code></td><td>Background import job queue, worker státusz, heartbeat, retry.</td><td>aktív</td></tr>
+      <tr><td><code>ingestion</code></td><td>FastF1 provider elérés, catalog és source bundle.</td><td>aktív, egy provider</td></tr>
+      <tr><td><code>normalization</code></td><td>FastF1 alakú adatokból canonical <code>SessionSnapshot</code>.</td><td>aktív</td></tr>
+      <tr><td><code>telemetry_materialization</code></td><td>On-demand telemetry szelet cache-elés és worker job.</td><td>aktív</td></tr>
+      <tr><td><code>feature_metrics</code></td><td>Lap-alapú metrikák, input planning, score output.</td><td>backend-ready</td></tr>
+      <tr><td><code>decision_engine</code></td><td>Metrikákból jelzés kiválasztás szabályokkal.</td><td>backend-ready</td></tr>
+      <tr><td><code>dashboard_layouts</code></td><td>User-owned dashboard layout JSON tárolás.</td><td>backend-ready</td></tr>
+      <tr><td><code>story_feed</code></td><td>Későbbi hír/video/story feed namespace.</td><td>skeleton</td></tr>
+      <tr><td><code>storage</code></td><td>SQLAlchemy engine/session/base és DB health.</td><td>aktív</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <h2>6. Portok, adapterek és modulhatárok</h2>
+    <p>
+      Nem teljes hexagonal architecture, de több ponton ugyanaz az elv működik:
+      service stabil határra támaszkodik, nem konkrét infrastruktúra-részletre.
+    </p>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-03-ports-and-adapters.png" alt="Ports and adapters diagram">
+      <figcaption>PW-03 Ports and Adapters - a legfontosabb backend port/adaptor jellegű határok.</figcaption>
+    </figure>
+
+    <h3>Backend port design</h3>
+    <table>
+      <tr><th>Port vagy határ</th><th>Implementáció</th><th>Miért fontos?</th></tr>
+      <tr>
+        <td><code>SessionSourcePort</code></td>
+        <td><code>FastF1Adapter</code></td>
+        <td>Az ingestion application réteg nem tud konkrét FastF1 részletekről. Új provider később a port mögé tehető.</td>
+      </tr>
+      <tr>
+        <td><code>SessionSnapshot</code> contract</td>
+        <td><code>FastF1SessionSnapshotBuilder</code></td>
+        <td>A repository már normalizált, belső formát kap; FastF1-specifikus tisztítás nem szivárog a perzisztenciába.</td>
+      </tr>
+      <tr>
+        <td>Repository határ</td>
+        <td><code>SessionRepository</code>, <code>AuthRepository</code>, <code>DashboardLayoutRepository</code></td>
+        <td>Az adatbázis-lekérdezések a modul infrastruktúrájában maradnak, route-ból nincs közvetlen SQL.</td>
+      </tr>
+      <tr>
+        <td>Metric input provider</td>
+        <td><code>FeatureMetricInputProvider</code></td>
+        <td>A metrika kalkulátorok nem SQL-t hívnak, hanem tervezett input bundle-t kapnak.</td>
+      </tr>
+      <tr>
+        <td>Worker queue boundary</td>
+        <td><code>import_jobs</code>, <code>telemetry_materialization_jobs</code></td>
+        <td>Az API és worker folyamat laza csatolású: közös DB-n keresztül kommunikálnak.</td>
+      </tr>
+    </table>
+
+    <h3>Frontend port jellegű határok</h3>
+    <p>
+      Frontenden ugyanez a data layerben és a widget resource hookokban látszik.
+      A widget igényt mond: entry, scope, telemetry kind. A <code>session-data.hooks.ts</code>
+      ebből API hívást, pollingot és sample readet készít.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <h2>7. Kommunikációs folyamatok</h2>
+    <h3>7.1 Protected sessions access</h3>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-05-communication-protected-sessions-access.png" alt="Protected sessions communication diagram">
+      <figcaption>PW-05 Communication - be nem jelentkezett user session route-ra lépése.</figcaption>
+    </figure>
+    <ol>
+      <li>A user megnyitja a <code>/sessions</code> vagy <code>/sessions/:sessionId</code> route-ot.</li>
+      <li>A <code>RequireAuth</code> hook lekéri a <code>/api/auth/session</code> státuszt.</li>
+      <li>Ha nincs valid bearer token, nem mountolódik a Session Explorer/Workspace.</li>
+      <li>A user feature cardot, Sign up és Sign in gombot lát.</li>
+      <li>A login/signup route megkapja a redirect state-et.</li>
+      <li>Sikeres auth után a user visszakerül az eredetileg kért protected route-ra.</li>
+    </ol>
+
+    <h3>7.2 Core session import</h3>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-06-communication-core-session-import.png" alt="Core session import communication diagram">
+      <figcaption>PW-06 Communication - Session Explorerből core import és workspace nyitás.</figcaption>
+    </figure>
+    <ol>
+      <li>A frontend <code>POST /api/sessions/import</code> hívást küld <code>import_profile: "core"</code> értékkel.</li>
+      <li>A route <code>SessionService</code>-t épít.</li>
+      <li>Az ingestion FastF1-ből betölti a kiválasztott session lightweight adatait.</li>
+      <li>A normalization canonical snapshotot készít.</li>
+      <li>A repository tranzakcióban menti a session, entry, lap, status és tick adatokat.</li>
+      <li>Az API visszaadja a <code>SessionDto</code>-t, a frontend eltárolja a resume state-et.</li>
+      <li>A user a workspace-be navigál, ahol még nem kell full telemetrynek készen lennie.</li>
+    </ol>
+
+    <h3>7.3 Telemetry materialization</h3>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-07-communication-telemetry-materialization.png" alt="Telemetry materialization communication diagram">
+      <figcaption>PW-07 Communication - widget igényből on-demand telemetry cache szelet.</figcaption>
+    </figure>
+    <ol>
+      <li>A widget kiválasztott entry-khez car vagy position telemetryt kér.</li>
+      <li>A resource hook <code>POST /api/telemetry/materialization/ensure</code> hívást indít.</li>
+      <li>Ha nincs megfelelő cache segment, queue-ba kerül egy materialization job.</li>
+      <li>A worker source telemetryt tölt, normalizál, majd csak a szükséges szeletet írja.</li>
+      <li>A hook a job státuszt pollolja, majd ready állapotban a normál session telemetry endpointot hívja.</li>
+      <li>A widget már egyszerű, entry-id szerinti <code>dataByEntryId</code> struktúrát kap.</li>
+    </ol>
+  </section>
+
+  <section class="chapter">
+    <h2>8. Adatmodell és perzisztencia</h2>
+    <p>
+      Az adatmodell relációs, entry-központú session cache. Fő lánc:
+      <code>season -> event_weekend -> event_session -> session_entry -> lap/stint/telemetry</code>.
+      Így nincs driverenként külön tábla és nincs ad hoc JSON adattömeg.
+    </p>
+    <table>
+      <tr><th>Csoport</th><th>Táblák</th><th>Felelős modul</th></tr>
+      <tr><td>Auth</td><td><code>users</code></td><td><code>identity_auth</code></td></tr>
+      <tr><td>Session backbone</td><td><code>seasons</code>, <code>event_weekends</code>, <code>event_sessions</code>, <code>drivers</code>, <code>teams</code>, <code>session_entries</code></td><td><code>session_domain</code></td></tr>
+      <tr><td>Entry detail</td><td><code>entry_results</code>, <code>entry_laps</code>, <code>entry_stints</code></td><td><code>session_domain</code></td></tr>
+      <tr><td>Session event context</td><td><code>session_weather_samples</code>, <code>session_status_events</code>, <code>session_track_status_events</code>, <code>session_race_control_messages</code>, <code>session_ticks</code></td><td><code>session_domain</code></td></tr>
+      <tr><td>Telemetry</td><td><code>car_telemetry_samples</code>, <code>position_samples</code></td><td><code>session_domain</code>, betöltési döntés: <code>telemetry_materialization</code></td></tr>
+      <tr><td>Operational jobs</td><td><code>import_jobs</code>, <code>telemetry_materialization_jobs</code></td><td><code>session_import</code>, <code>telemetry_materialization</code></td></tr>
+      <tr><td>Telemetry cache metadata</td><td><code>telemetry_cache_segments</code></td><td><code>telemetry_materialization</code></td></tr>
+      <tr><td>User layouts</td><td><code>user_dashboard_layouts</code></td><td><code>dashboard_layouts</code></td></tr>
+    </table>
+
+    <h3>Fontos adatmodellezési döntések</h3>
+    <ul>
+      <li><strong>Session entry mint központi entitás:</strong> egy driver-car-team kombináció egy adott sessionben.</li>
+      <li><strong>Core vs full import:</strong> <code>event_sessions.import_profile</code> jelzi, mennyi adat lett betöltve.</li>
+      <li><strong>Telemetry státusz:</strong> <code>not_loaded</code>, <code>loaded</code>, <code>partial</code>, <code>unavailable</code>.</li>
+      <li><strong>Session ticks:</strong> session-wide időtengely replay és több entry összehangolásához.</li>
+      <li><strong>Derived metric nincs canonical táblában:</strong> pace/consistency/trend számítás on-demand, külön feature_metrics logikában.</li>
+      <li><strong>FastF1 cache nem app storage:</strong> provider scratch, nem tartós domain contract.</li>
+    </ul>
+  </section>
+
+  <section class="chapter">
+    <h2>9. API route-ok</h2>
+    <p>
+      A backend REST jellegű JSON API-t ad. A táblázat a route csoportokat és az auth
+      státuszt mutatja. A session-használathoz kötődő adatelérési végpontok védettek.
+    </p>
+    <table class="route-table">
+      <tr><th>Method</th><th>Route</th><th>Auth</th><th>Szerep</th></tr>
+      <tr><td>GET</td><td>/health</td><td>publikus</td><td>Root health check.</td></tr>
+      <tr><td>GET</td><td>/api/health</td><td>publikus</td><td>API és DB health.</td></tr>
+      <tr><td>GET</td><td>/api/auth/health</td><td>publikus</td><td>Auth modul health.</td></tr>
+      <tr><td>POST</td><td>/api/auth/signup</td><td>publikus</td><td>Regisztráció, bearer token.</td></tr>
+      <tr><td>POST</td><td>/api/auth/login</td><td>publikus</td><td>Login, bearer token.</td></tr>
+      <tr><td>GET</td><td>/api/auth/session</td><td>publikus/token-aware</td><td>Token alapján lightweight session státusz.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/catalog</td><td><span class="badge locked">védett</span></td><td>FastF1-backed session catalog.</td></tr>
+      <tr><td>POST</td><td>/api/sessions/import</td><td><span class="badge locked">védett</span></td><td>Szinkron session import.</td></tr>
+      <tr><td>GET</td><td>/api/sessions</td><td><span class="badge locked">védett</span></td><td>Importált session lista.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}</td><td><span class="badge locked">védett</span></td><td>Session detail.</td></tr>
+      <tr><td>DELETE</td><td>/api/sessions/{session_id}</td><td><span class="badge locked">védett</span></td><td>Cache session törlés.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/entries</td><td><span class="badge locked">védett</span></td><td>Driver/car entries.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/circuit-corners</td><td><span class="badge locked">védett</span></td><td>FastF1 circuit corner metadata.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/entries/{entry_id}/laps</td><td><span class="badge locked">védett</span></td><td>Entry lap rows.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/entries/{entry_id}/telemetry/car</td><td><span class="badge locked">védett</span></td><td>Car telemetry samples.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/entries/{entry_id}/telemetry/position</td><td><span class="badge locked">védett</span></td><td>Position samples.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/ticks</td><td><span class="badge locked">védett</span></td><td>Replay-aligned tick timeline.</td></tr>
+      <tr><td>GET</td><td>/api/sessions/{session_id}/track-status-events</td><td><span class="badge locked">védett</span></td><td>Track status timing.</td></tr>
+      <tr><td>POST</td><td>/api/session-import/jobs</td><td><span class="badge locked">védett</span></td><td>Background import job létrehozás.</td></tr>
+      <tr><td>GET</td><td>/api/session-import/jobs</td><td><span class="badge locked">védett</span></td><td>Import job lista.</td></tr>
+      <tr><td>GET</td><td>/api/session-import/jobs/{job_id}</td><td><span class="badge locked">védett</span></td><td>Import job státusz.</td></tr>
+      <tr><td>POST</td><td>/api/telemetry/materialization/ensure</td><td><span class="badge locked">védett</span></td><td>Telemetry segment előkészítés.</td></tr>
+      <tr><td>GET</td><td>/api/telemetry/materialization/jobs</td><td><span class="badge locked">védett</span></td><td>Materialization job lista.</td></tr>
+      <tr><td>GET</td><td>/api/telemetry/materialization/jobs/{job_id}</td><td><span class="badge locked">védett</span></td><td>Materialization job detail.</td></tr>
+      <tr><td>GET/POST/PUT/DELETE</td><td>/api/layouts...</td><td><span class="badge locked">védett</span></td><td>User dashboard layout CRUD.</td></tr>
+      <tr><td>GET</td><td>/api/feature-metrics/health</td><td>publikus</td><td>Metric modul állapot.</td></tr>
+      <tr><td>GET</td><td>/api/feature-metrics/sessions/{session_id}/driver-scores</td><td><span class="badge locked">védett</span></td><td>Lap-based driver score-ok.</td></tr>
+      <tr><td>GET</td><td>/api/feature-metrics/sessions/{session_id}/insights</td><td><span class="badge locked">védett</span></td><td>Rule-selected metric insights.</td></tr>
+      <tr><td>GET</td><td>/api/decision-engine/health</td><td>publikus</td><td>Decision engine állapot.</td></tr>
+      <tr><td>GET</td><td>/api/decision-engine/sessions/{session_id}/signals</td><td><span class="badge locked">védett</span></td><td>Alacsonyabb szintű signal route.</td></tr>
+      <tr><td>GET</td><td>/api/ingestion/health, /api/normalization/health, /api/story-feed/health</td><td>publikus</td><td>Modul health és readiness.</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <h2>10. Frontend architektúra és route-ok</h2>
+    <p>
+      A frontend React SPA. A route tree a <code>frontend/src/app/router/routes.tsx</code>,
+      a keret az <code>AppLayout</code>. A route oldalak nem keverik közvetlenül az API
+      részleteket a widgetekkel; a data layer és feature hookok választják szét őket.
+    </p>
+    <figure class="diagram">
+      <img src="generated/ea-diagrams/pw-04-frontend-architecture.png" alt="Frontend architecture diagram">
+      <figcaption>PW-04 Frontend Architecture - route tree, app shell, data layer, sessions feature és widget rendszer.</figcaption>
+    </figure>
+
+    <h3>Frontend route-ok</h3>
+    <table>
+      <tr><th>Route</th><th>Állapot</th><th>Leírás</th></tr>
+      <tr><td><code>/</code></td><td>aktív</td><td>Home hub, termékirány, auth-aware CTA.</td></tr>
+      <tr><td><code>/sessions</code></td><td>védett, aktív</td><td>Session Explorer; bejelentkezés nélkül feature card + Sign up/Sign in.</td></tr>
+      <tr><td><code>/sessions/:sessionId</code></td><td>védett, aktív</td><td>Session Workspace lookback/simulation módokkal.</td></tr>
+      <tr><td><code>/live</code>, <code>/live/:sessionId</code></td><td>placeholder</td><td>Future live race command felület.</td></tr>
+      <tr><td><code>/story-feed</code></td><td>placeholder</td><td>Future hír/video/story feed.</td></tr>
+      <tr><td><code>/standings</code></td><td>placeholder</td><td>Future season standings.</td></tr>
+      <tr><td><code>/login</code></td><td>aktív</td><td>Login form, token mentés, redirect protected route-ra.</td></tr>
+      <tr><td><code>/signup</code></td><td>aktív</td><td>Signup form, token mentés, redirect protected route-ra.</td></tr>
+      <tr><td><code>/system/health</code></td><td>védett, aktív</td><td>Modul health és operational diagnostics.</td></tr>
+      <tr><td><code>/compare/:sessionId</code></td><td>redirect</td><td>Régi/tervezett route, jelenleg standingsre navigál.</td></tr>
+      <tr><td><code>/home</code></td><td>redirect</td><td>Root route-ra navigál.</td></tr>
+    </table>
+
+    <h3>Session workspace state modell</h3>
+    <p>
+      A workspace látható állapota URL search paramokban él: <code>mode</code>,
+      <code>layout</code>, <code>drivers</code>, <code>lap</code>. Ez linkelhetővé és
+      refresh-biztossá teszi az aktuális elemzési kontextust. A local resume state
+      <code>pitwall.active-session-workspace</code> kulcs alatt tárolódik.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <h2>11. UI design döntések</h2>
+    <p>
+      A vizuális rendszer motorsport command-center jellegű: sötét háttér,
+      státuszszínek, kompakt kártyák, pill címkék, dashboard kontrollok. Nem marketing
+      landing page; a fő használat operatív elemzés.
+    </p>
+    <table>
+      <tr><th>Döntés</th><th>Indok</th></tr>
+      <tr>
+        <td>App shell header + sidebar</td>
+        <td>A fő termékfelületek állandóan elérhetők, a sidebar desktopon kompaktból részletesre nyílik.</td>
+      </tr>
+      <tr>
+        <td>Home mint hub</td>
+        <td>A még placeholder felületek is helyet kapnak, így a termék IA-ja látszik, de a valódi munka a session flow-ban van.</td>
+      </tr>
+      <tr>
+        <td>Feature card auth gate</td>
+        <td>Anonymous user nem lát session adatot vagy workspace kontrollt, de érti, milyen funkciót kap login után.</td>
+      </tr>
+      <tr>
+        <td>Session Explorer kétlépcsős választás</td>
+        <td>Szezon -> race weekend -> session bontás, hogy ne ömöljön egy teljes éves session lista a userre.</td>
+      </tr>
+      <tr>
+        <td>Workspace control deck + full-width stage</td>
+        <td>A mód, driver/lap és layout kontrollok felül maradnak, a widgetek nagy, zavartalan dashboard területet kapnak.</td>
+      </tr>
+      <tr>
+        <td>Widget és layout szétválasztás</td>
+        <td>A widget renderelhető egység, a layout kompozíció. Ez kell a built-in és user layoutok közös kezeléséhez.</td>
+      </tr>
+      <tr>
+        <td>Audience gating</td>
+        <td>Lookback widgetek csak <code>session-lookback</code>, replay/live-safe widgetek <code>live-race</code> audience alatt.</td>
+      </tr>
+      <tr>
+        <td>Egyszerű SVG chartok</td>
+        <td>A jelenlegi chart igényekhez elég, kisebb dependency-k mellett; később cserélhető fejlettebb chart libraryre.</td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <h2>12. Autentikáció és hozzáférés-védelem</h2>
+    <p>
+      A session lookback/replay anonymous módban nem használható. Ez két szinten védett:
+    </p>
+    <ul>
+      <li><strong>Frontend guard:</strong> <code>RequireAuth</code> védi a session és diagnostics route-okat.</li>
+      <li><strong>Backend API védelem:</strong> session, import job, telemetry materialization, layout, feature-metric session score/insight és decision signal végpontok tokenhez kötöttek.</li>
+    </ul>
+    <p>
+      A token a <code>localStorage["auth_token"]</code> kulcs alatt van. Az Axios interceptor
+      bearer fejlécet ad a requestekhez. Logoutkor token törlés, auth cache frissítés,
+      majd login navigáció történik.
+    </p>
+    <div class="status-card warn">
+      <strong>Auth korlát:</strong> ez még nem enterprise-grade session management. Nincs refresh token,
+      nincs server-side revocation, nincs role/permission modell. A jelenlegi cél az, hogy a webapp
+      session funkciói ne legyenek anonymous módban használhatók.
+    </div>
+  </section>
+
+  <section class="chapter">
+    <h2>13. Minőség, tesztelés, futtatás</h2>
+    <h3>Jelenleg lefuttatott ellenőrzések</h3>
+    <ul>
+      <li><code>npm.cmd run build</code> - TypeScript build és Vite production build.</li>
+      <li><code>npm.cmd run lint</code> - ESLint frontend ellenőrzés.</li>
+      <li><code>python -m compileall backend\modules\delivery_api\api</code> - módosított backend route fájlok szintaktikai ellenőrzése.</li>
+    </ul>
+    <h3>Lokális futtatási kép</h3>
+    <ul>
+      <li>Frontend fejlesztői szerver: <code>npm.cmd run dev -- --host 127.0.0.1 --port 5173</code>.</li>
+      <li>Backend API: <code>python -m uvicorn app.main:app</code> a <code>backend</code> könyvtárból.</li>
+      <li>Worker: <code>python -m app.worker</code> a <code>backend</code> könyvtárból.</li>
+      <li>Adatbázis: PostgreSQL, Alembic migrációkkal.</li>
+    </ul>
+    <h3>Tesztelési hiányok</h3>
+    <p>
+      Jelenleg nincs teljes unit/integration/e2e tesztcsomag. Átadási kockázat:
+      session import, normalization, repository write, materialization queue és frontend
+      auth guard célzott tesztet igényel.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <h2>14. Korlátok és további feladatok</h2>
+    <table>
+      <tr><th>Prioritás</th><th>Feladat</th><th>Indok</th></tr>
+      <tr><td>Magas</td><td>Backend auth tesztek protected route-okra</td><td>Ne regresszáljon az anonymous session-hozzáférés bug.</td></tr>
+      <tr><td>Magas</td><td>Frontend route guard e2e teszt</td><td>Bizonyítani kell, hogy anonymous user feature cardot lát, authenticated user workspace-t.</td></tr>
+      <tr><td>Magas</td><td>Import/materialization integration test</td><td>A worker és API közös DB queue működése kritikus.</td></tr>
+      <tr><td>Közepes</td><td>Layout builder UI</td><td>A backend és renderer már támogatja, de user még nem tud vizuálisan szerkeszteni.</td></tr>
+      <tr><td>Közepes</td><td>Feature metric frontend hookok és widgetek</td><td>A backend-ready metrikákat termékfelületen is érdemes használni.</td></tr>
+      <tr><td>Közepes</td><td>Story feed source strategy</td><td>A placeholder felülethez valódi tartalommodell és forrás kell.</td></tr>
+      <tr><td>Közepes</td><td>Standings adatmodell</td><td>A standings route jelenleg csak termékirányt jelöl.</td></tr>
+      <tr><td>Alacsony/későbbi</td><td>Artifact store mérlegelése</td><td>Csak akkor érdemes, ha PostgreSQL telemetry vagy raw replay igény bizonyított bottleneck.</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <h2>15. MI eszközhasználat megjegyzés</h2>
+    <p>
+      A dokumentáció elkészítésében MI-eszköz is segített szerkesztési,
+      tömörítési és ellenőrzési feladatokban. A végső tartalom a projekt aktuális
+      forráskódján, meglévő dokumentációján és ellenőrzött működési állapotán alapul.
+    </p>
+    <p class="footer-note">
+      A PDF önálló fejlesztői dokumentációként értelmezendő; a benne szereplő
+      diagramok és leírások az aktuálisan dokumentált projektállapotot rögzítik.
+    </p>
+  </section>
+</main>
+</body>
+</html>

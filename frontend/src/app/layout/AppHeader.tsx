@@ -3,22 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { logout } from "../../data/api/auth.api";
 import { useAuthSession } from "../../features/auth/useAuthSession";
 
-const headerLinks = [
-  { label: "Home", to: "/", end: true },
-  { label: "Live Race", to: "/live", end: false },
-  { label: "Story Feed", to: "/story-feed", end: false },
-  { label: "Sessions", to: "/sessions", end: false },
-  { label: "Standings", to: "/standings", end: false },
-];
-
-function headerLinkClassName(isActive: boolean) {
-  return [
-    "inline-flex min-h-[38px] items-center rounded-full border px-4 text-[13px] font-medium transition duration-150",
-    isActive
-      ? "border-[var(--color-border-strong)] bg-[rgba(30,144,255,0.14)] text-white"
-      : "border-transparent text-[var(--color-text-secondary)] hover:border-[var(--color-border-subtle)] hover:bg-white/[0.03] hover:text-white",
-  ].join(" ");
-}
+import { navigationItems } from "./navigation";
 
 export function AppHeader() {
   const navigate = useNavigate();
@@ -40,67 +25,62 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border-subtle)] bg-[rgba(11,13,18,0.88)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1680px] flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="group flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(225,6,0,0.24)] bg-[rgba(225,6,0,0.1)] shadow-[0_0_24px_rgba(225,6,0,0.18)]">
-              <span className="h-3 w-3 rounded-full bg-[var(--color-accent-red)] shadow-[0_0_18px_rgba(225,6,0,0.55)]" />
-            </span>
-
-            <span className="flex flex-col">
-              <span className="display-font text-sm text-white sm:text-base">
-                Pitwall Insights
-              </span>
-              <span className="text-[11px] uppercase tracking-[0.22em] text-[var(--color-text-muted)]">
-                Motorsport intelligence interface
-              </span>
-            </span>
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
-          <nav className="flex flex-wrap items-center gap-2">
-            {headerLinks.map((item) => (
+    <header className="app-header">
+      <div className="app-header__inner">
+        <Link to="/" className="app-header__brand">
+          <span className="app-header__mark" aria-hidden="true" />
+          <span>
+            <strong>Pitwall Insights</strong>
+            <small>Motorsport intelligence</small>
+          </span>
+        </Link>
+        <nav className="app-header__nav" aria-label="Main navigation">
+          {navigationItems
+            .filter((item) => item.section !== "System")
+            .map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.end}
-                className={({ isActive }) => headerLinkClassName(isActive)}
+                end={item.to === "/"}
+                className={({ isActive }) =>
+                  `app-header__link${isActive ? " is-active" : ""}`
+                }
               >
                 {item.label}
               </NavLink>
             ))}
-          </nav>
-
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            {isLoading ? (
-              <span className="rounded-full border border-[var(--color-border-subtle)] bg-white/[0.02] px-4 py-2 text-[13px] text-[var(--color-text-secondary)]">
-                Checking session...
+        </nav>
+        <div className="app-header__account">
+          {isLoading ? (
+            <span>Checking session...</span>
+          ) : data?.authenticated ? (
+            <>
+              <span
+                className="app-header__identity"
+                title={data.email ?? undefined}
+              >
+                {data.email}
               </span>
-            ) : data?.authenticated ? (
-              <>
-                <span className="rounded-full border border-[var(--color-border-subtle)] bg-white/[0.02] px-4 py-2 text-[13px] text-[var(--color-text-secondary)]">
-                  {data.email}
-                </span>
-                <Link to="/system/health" className="button-secondary">
-                  Diagnostics
-                </Link>
-                <button onClick={handleLogout} className="button-secondary">
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="button-secondary">
-                  Sign in
-                </Link>
-                <Link to="/signup" className="button-primary">
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
+              <Link
+                to="/system/health"
+                className="button-secondary app-header__diagnostics"
+              >
+                Diagnostics
+              </Link>
+              <button onClick={handleLogout} className="button-secondary">
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="button-secondary">
+                Sign in
+              </Link>
+              <Link to="/signup" className="button-primary">
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

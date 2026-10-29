@@ -168,6 +168,7 @@ export interface PositionSampleDto {
 }
 
 export interface SessionTelemetryQuery {
+  sample_interval_ms?: number;
   offset?: number;
   limit?: number;
   lap_number?: number;

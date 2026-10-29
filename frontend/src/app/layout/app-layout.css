@@ -1,0 +1,225 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: rgba(11, 13, 18, 0.96);
+  backdrop-filter: blur(18px);
+}
+.app-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  max-width: 1680px;
+  margin: auto;
+  padding: 16px 24px;
+}
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.app-header__mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #65231f;
+  border-radius: 10px;
+  background: #281310;
+}
+.app-header__mark::after {
+  content: "";
+  width: 15px;
+  height: 15px;
+  border: 3px solid #ff574e;
+  border-left: 0;
+  transform: skew(-18deg);
+}
+.app-header__brand strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.app-header__brand small {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.app-header__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.app-header__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.app-header__link:hover {
+  background: var(--color-bg-tertiary);
+  color: white;
+}
+.app-header__link.is-active {
+  color: white;
+  border-color: #466084;
+  background: #18273c;
+  box-shadow: inset 0 -2px 0 var(--color-accent-blue);
+}
+.app-header__account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.app-header__account .button-secondary,
+.app-header__account .button-primary {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+.app-header__identity {
+  color: var(--color-text-secondary);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-sidebar {
+  display: none;
+  flex-shrink: 0;
+  width: 208px;
+  border-right: 1px solid var(--color-border-subtle);
+  background: #0e1118;
+}
+.app-sidebar__inner {
+  position: sticky;
+  top: 90px;
+  padding: 26px 14px;
+}
+.app-sidebar__section {
+  margin-bottom: 28px;
+}
+.app-sidebar__section h2 {
+  margin: 0 0 10px 12px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.app-sidebar__link {
+  display: block;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 11px 12px;
+  margin: 3px 0;
+}
+.app-sidebar__link > span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+.app-sidebar__link small {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.app-sidebar__link:hover {
+  background: var(--color-bg-tertiary);
+}
+.app-sidebar__link.is-active {
+  background: #192538;
+  border-color: #3b5273;
+  box-shadow: inset 3px 0 0 var(--color-accent-blue);
+}
+.app-sidebar__link.is-active > span {
+  color: white;
+}
+.app-sidebar__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--color-border-subtle);
+  padding: 18px 10px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+.app-sidebar__footer > span {
+  width: 5px;
+  height: 5px;
+  background: var(--color-accent-red);
+  border-radius: 50%;
+}
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  padding: 12px 18px;
+  background: white;
+  color: #0b0d12;
+  border-radius: 6px;
+}
+.skip-link:focus {
+  top: 12px;
+}
+@media (min-width: 1024px) {
+  .app-sidebar {
+    display: block;
+  }
+}
+@media (max-width: 1400px) {
+  .app-header__nav {
+    order: 3;
+    width: 100%;
+  }
+  .app-sidebar__inner {
+    top: 135px;
+  }
+}
+@media (max-width: 640px) {
+  .app-header {
+    position: relative;
+  }
+  .app-header__inner {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .app-header__identity,
+  .app-header__diagnostics {
+    display: none;
+  }
+  .app-header__brand small {
+    font-size: 8px;
+  }
+  .app-header__brand strong {
+    font-size: 11px;
+  }
+  .app-header__nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+  .app-header__link {
+    min-height: 40px;
+    padding: 0 10px;
+  }
+}

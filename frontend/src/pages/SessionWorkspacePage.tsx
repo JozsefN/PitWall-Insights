@@ -6,9 +6,10 @@ import { listEntryLaps } from "../data/api/sessions.api";
 import type { SessionEntryDto, SessionTelemetryStatus } from "../data/contracts/sessions.contracts";
 import type { ImportJobStage, ImportJobStatus } from "../data/contracts/session-import.contracts";
 import type { TelemetryMaterializationJobDto } from "../data/contracts/telemetry-materialization.contracts";
-import { useLayoutsQuery } from "../data/queries/layouts.queries";
+import { FavoriteButton } from "../features/dashboards/FavoriteButton";
+import { useLayoutFavoritesQuery, useSetLayoutFavoriteMutation, useLayoutsQuery } from "../data/queries/layouts.queries";
 import { useImportJobQuery } from "../data/queries/session-import.queries";
-import { useSessionEntriesQuery, useSessionQuery, useSessionTicksQuery } from "../data/queries/sessions.queries";
+import { useSessionEntriesQuery, useSessionQuery, useSessionReplayTimelineQuery } from "../data/queries/sessions.queries";
 import { useTelemetryMaterializationJobsQuery } from "../data/queries/telemetry-materialization.queries";
 import { useAuthSession } from "../features/auth/useAuthSession";
 import {
@@ -33,6 +34,7 @@ import {
   formatSessionClock,
   getEntryDisplayName,
 } from "../features/sessions/session-utils";
+import { LayoutPreview } from "../features/dashboards/LayoutPreview";
 import { DashboardRenderer } from "../widgets/shared/DashboardRenderer";
 import "./sessions-page.css";
 
@@ -60,9 +62,11 @@ export function SessionWorkspacePage() {
   const searchState = parseSessionWorkspaceSearchParams(searchParams);
   const audience = getAudienceForMode(searchState.mode);
   const layoutsQuery = useLayoutsQuery(authSession.data?.authenticated === true);
-  const resolvedLayouts = resolveWorkspaceLayouts(layoutsQuery.data, audience);
+  const favoritesQuery = useLayoutFavoritesQuery();
+  const favoriteMutation = useSetLayoutFavoriteMutation();
+  const resolvedLayouts = resolveWorkspaceLayouts(layoutsQuery.data, audience, favoritesQuery.data);
   const selectedLayout = getResolvedLayoutById(searchState.layoutId, resolvedLayouts);
-  const ticksQuery = useSessionTicksQuery(sessionId, { limit: 50000 }, searchState.mode === "simulation");
+  const ticksQuery = useSessionReplayTimelineQuery(sessionId, searchState.mode === "simulation");
   const telemetryJobsQuery = useTelemetryMaterializationJobsQuery(50, { refetchActive: Boolean(sessionId) });
 
   const entries = entriesQuery.data ?? [];
@@ -101,12 +105,13 @@ export function SessionWorkspacePage() {
   }, [queryClient, sessionId, telemetryWarmupQuery.data?.status]);
 
   useEffect(() => {
+    if (!entriesQuery.isSuccess) return;
     if (validDriverIds.length === searchState.driverIds.length) {
       return;
     }
 
     updateSearchState(searchState, setSearchParams, { driverIds: validDriverIds });
-  }, [searchState, setSearchParams, validDriverIds]);
+  }, [entriesQuery.isSuccess, searchState, setSearchParams, validDriverIds]);
 
   useEffect(() => {
     if (!searchState.layoutId || selectedLayout || layoutsQuery.isLoading) {
@@ -200,8 +205,8 @@ export function SessionWorkspacePage() {
       value:
         searchState.mode === "simulation"
           ? replayTicksLoading
-            ? "Loading ticks"
-            : `${ticksQuery.data?.length ?? 0} ticks`
+            ? "Loading timeline"
+            : ticksQuery.isError ? "Unavailable" : "Ready"
           : validDriverIds.length === 0
             ? "Pick drivers"
             : lapControlsLoading
@@ -212,7 +217,7 @@ export function SessionWorkspacePage() {
         searchState.mode === "simulation"
           ? replayTicksLoading
             ? "loading"
-            : "ready"
+            : ticksQuery.isError ? "warning" : "ready"
           : validDriverIds.length === 0
             ? "idle"
             : lapControlsLoading
@@ -276,7 +281,7 @@ export function SessionWorkspacePage() {
                 </span>
                 <h1>{formatEventSessionLabel(sessionQuery.data.event_name, sessionQuery.data.session_name)}</h1>
                 <p>
-                  Imported {formatDateTime(sessionQuery.data.imported_at)}. Layouts stay separate from widgets: you choose a layout here, then the renderer mounts the widgets that layout references.
+                  Imported {formatDateTime(sessionQuery.data.imported_at)}. Choose your drivers and a layout to explore the session.
                 </p>
               </div>
 
@@ -384,10 +389,14 @@ export function SessionWorkspacePage() {
 
               <section className="sessions-control-panel sessions-control-panel--layouts">
                 <div className="sessions-subheading">
-                  <h2>Layouts</h2>
-                  <p>Pick a layout here. The full stage below is reserved for the selected dashboard.</p>
+                  <div className="sessions-layout-heading">
+                    <h2>Layouts</h2>
+                    <Link to={`/dashboard-builder?audience=${audience}`} className="sessions-builder-link">Dashboard Builder <span aria-hidden="true">↗</span></Link>
+                  </div>
+                  <p>Choose the view for this session. Selected layouts are highlighted below.</p>
                 </div>
 
+                {favoriteMutation.isError ? <p role="alert">Could not update favorites. Please try again.</p> : null}
                 {layoutsLoading ? (
                   <div className="sessions-empty-state">Loading layouts...</div>
                 ) : resolvedLayouts.length === 0 ? (
@@ -395,19 +404,20 @@ export function SessionWorkspacePage() {
                 ) : (
                   <div className="sessions-layout-strip">
                     {resolvedLayouts.map((layout) => (
+                      <div className="sessions-layout-item" key={layout.id}>
                       <button
-                        key={layout.id}
                         type="button"
                         className={`sessions-layout-card${searchState.layoutId === layout.id ? " is-active" : ""}${layout.isValid ? "" : " is-disabled"}`}
                         aria-pressed={searchState.layoutId === layout.id}
                         onClick={() => layout.isValid && updateSearchState(searchState, setSearchParams, { layoutId: layout.id })}
                         disabled={!layout.isValid}
                       >
+                        <LayoutPreview config={layout.config} compact />
                         <div className="sessions-layout-card__header">
                           <span className={`ui-pill ${layout.source === "builtin" ? "ui-pill--ready" : "ui-pill--focus"}`}>
                             {layout.source === "builtin" ? "Built-in" : "Your layout"}
                           </span>
-                          <small>{layout.config.sections.length} sections</small>
+                          <small>{searchState.layoutId === layout.id ? "✓ Selected" : `${layout.config.sections.length} groups`}</small>
                         </div>
                         <h3>{layout.name}</h3>
                         <p>{layout.description ?? "Custom layout without a description."}</p>
@@ -416,6 +426,10 @@ export function SessionWorkspacePage() {
                           {!layout.isValid ? <span>{layout.invalidReason}</span> : null}
                         </footer>
                       </button>
+                      <FavoriteButton name={layout.name} favorite={favoritesQuery.data?.includes(layout.id) ?? false}
+                        disabled={favoriteMutation.isPending || favoritesQuery.isPending || favoritesQuery.isError}
+                        onToggle={() => favoriteMutation.mutate({ layoutId: layout.id, favorite: !favoritesQuery.data?.includes(layout.id) })} />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -429,8 +443,8 @@ export function SessionWorkspacePage() {
                     <h2>{selectedLayout?.name ?? "Telemetry stage"}</h2>
                     <p>
                       {selectedLayout
-                        ? selectedLayout.description ?? "The selected layout mounts its widget set here."
-                        : "Choose a layout from the top controls to mount its widgets and start telemetry queries."}
+                        ? selectedLayout.description ?? "Your selected session view."
+                        : "Choose a layout above to start exploring telemetry."}
                     </p>
                   </div>
 
@@ -443,7 +457,7 @@ export function SessionWorkspacePage() {
 
                 <div className="sessions-workspace__stage-body">
                   {!selectedLayout ? (
-                    <div className="sessions-empty-state">Choose a layout to mount its widgets and start telemetry queries.</div>
+                    <div className="sessions-empty-state">Choose a layout above to start exploring telemetry.</div>
                   ) : !selectedLayout.isValid ? (
                     <div className="sessions-empty-state sessions-empty-state--error">
                       This saved layout is not usable in the current build. Pick another layout to continue.

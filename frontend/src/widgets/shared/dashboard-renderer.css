@@ -173,3 +173,22 @@
     font-size: 26px;
   }
 }
+
+.layout-group--grid {
+  display: grid;
+}
+.layout-group--grid > .layout-widget {
+  min-height: 0;
+  min-width: 0;
+  width: auto;
+  overflow: auto;
+}
+@media (max-width: 768px) {
+  .layout-group--grid {
+    display: flex;
+    flex-direction: column;
+  }
+  .layout-group--grid > .layout-widget {
+    min-height: 240px;
+  }
+}

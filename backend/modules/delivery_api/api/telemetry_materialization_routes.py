@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from modules.delivery_api.api.auth_dependencies import require_current_user
 from modules.storage.infrastructure.db import get_db
 from modules.telemetry_materialization.application.service import TelemetryMaterializationService
+from modules.telemetry_materialization.infrastructure.repository import TelemetryMaterializationRepository
+from datetime import datetime, timezone
 from modules.telemetry_materialization.domain.models import (
     TelemetryMaterializationEnsureResponse,
     TelemetryMaterializationJobListResponse,
@@ -20,6 +22,11 @@ router = APIRouter(
 
 def build_telemetry_materialization_service(db: Session) -> TelemetryMaterializationService:
     return TelemetryMaterializationService(db=db)
+
+
+@router.get("/health")
+def telemetry_worker_health(db: Session = Depends(get_db)) -> dict:
+    return TelemetryMaterializationRepository(db).worker_health(now=datetime.now(timezone.utc))
 
 
 @router.post("/ensure", response_model=TelemetryMaterializationEnsureResponse, status_code=status.HTTP_202_ACCEPTED)

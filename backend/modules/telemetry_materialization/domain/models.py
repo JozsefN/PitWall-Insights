@@ -22,8 +22,8 @@ TelemetryMaterializationStage = Literal[
 
 class TelemetryMaterializationRequest(BaseModel):
     session_id: str = Field(min_length=1, max_length=64)
-    entry_ids: list[str] = Field(min_length=1)
-    kinds: list[TelemetryKind] = Field(min_length=1)
+    entry_ids: list[str] = Field(min_length=1, max_length=64)
+    kinds: list[TelemetryKind] = Field(min_length=1, max_length=2)
     scope: TelemetryScope = "session"
     lap_number: int | None = Field(default=None, ge=1)
     force_refresh: bool = False

@@ -1,0 +1,174 @@
+{
+  "known_at_ms": 0,
+  "source_note": "Retrospective OpenF1 pit enrichment. Report known_at uses source event plus visit duration plus 15 seconds, not measured original publication time.",
+  "track": null,
+  "pit_observations": [
+    {
+      "entry_id": "327f062f-4e4b-42df-a6a6-ee8a18fbcb77",
+      "lap_number": 19,
+      "event_time_ms": 5297180,
+      "known_at_ms": 5334368,
+      "lane_duration_s": 22.188,
+      "stationary_duration_s": 2.2,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "4a505f63-5fef-464e-8587-71f69bb26217",
+      "lap_number": 20,
+      "event_time_ms": 5394907,
+      "known_at_ms": 5432224,
+      "lane_duration_s": 22.317,
+      "stationary_duration_s": 2.5,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "484598c2-c292-4e98-a410-1b01de8a2ffa",
+      "lap_number": 22,
+      "event_time_ms": 5573454,
+      "known_at_ms": 5610569,
+      "lane_duration_s": 22.115,
+      "stationary_duration_s": 2.3,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "6d64b7a4-d73e-4674-8da9-7fe54a4fffc6",
+      "lap_number": 23,
+      "event_time_ms": 5666626,
+      "known_at_ms": 5704788,
+      "lane_duration_s": 23.162,
+      "stationary_duration_s": 3.0,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "9302aa7c-cdd7-4202-be44-e63a35ffd681",
+      "lap_number": 25,
+      "event_time_ms": 5836287,
+      "known_at_ms": 5875670,
+      "lane_duration_s": 24.383,
+      "stationary_duration_s": 4.4,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "a1d4ab1b-4d69-4075-a14a-ecff4cd99ef0",
+      "lap_number": 25,
+      "event_time_ms": 5840485,
+      "known_at_ms": 5877900,
+      "lane_duration_s": 22.415,
+      "stationary_duration_s": 2.9,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "lap_number": 26,
+      "event_time_ms": 5924462,
+      "known_at_ms": 5961964,
+      "lane_duration_s": 22.501,
+      "stationary_duration_s": 2.7,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "5010a1cd-33d0-46f4-9df2-ee76d44f7891",
+      "lap_number": 26,
+      "event_time_ms": 5928183,
+      "known_at_ms": 5965089,
+      "lane_duration_s": 21.906,
+      "stationary_duration_s": 2.5,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "f6500ec0-67ff-40d4-92a9-5575bff06721",
+      "lap_number": 27,
+      "event_time_ms": 6029734,
+      "known_at_ms": 6067294,
+      "lane_duration_s": 22.56,
+      "stationary_duration_s": 2.3,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "21b757e0-45bb-4f0d-a4a1-997bbcb2e469",
+      "lap_number": 28,
+      "event_time_ms": 6131046,
+      "known_at_ms": 6169150,
+      "lane_duration_s": 23.104,
+      "stationary_duration_s": 3.4,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "7bec8097-a77c-4d77-badd-747de62e8610",
+      "lap_number": 28,
+      "event_time_ms": 6155483,
+      "known_at_ms": 6194086,
+      "lane_duration_s": 23.602,
+      "stationary_duration_s": 3.6,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "792eeed3-41f4-403d-93e7-98cb6681a0c6",
+      "lap_number": 28,
+      "event_time_ms": 6189996,
+      "known_at_ms": 6227435,
+      "lane_duration_s": 22.439,
+      "stationary_duration_s": 2.5,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "da60f5cf-22b3-45db-b604-8e431dae0bc3",
+      "lap_number": 29,
+      "event_time_ms": 6203832,
+      "known_at_ms": 6240938,
+      "lane_duration_s": 22.106,
+      "stationary_duration_s": 2.2,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "7ebf8fca-00fb-4e73-9add-e7ee62b67dd0",
+      "lap_number": 29,
+      "event_time_ms": 6215290,
+      "known_at_ms": 6252334,
+      "lane_duration_s": 22.044,
+      "stationary_duration_s": 2.3,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "7b002219-d3a3-4e20-8322-aa1b277b2877",
+      "lap_number": 29,
+      "event_time_ms": 6237253,
+      "known_at_ms": 6276511,
+      "lane_duration_s": 24.257,
+      "stationary_duration_s": 4.5,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "4fb3469f-0c97-4b6c-9512-41bf9c073acc",
+      "lap_number": 29,
+      "event_time_ms": 6245334,
+      "known_at_ms": 6282517,
+      "lane_duration_s": 22.183,
+      "stationary_duration_s": 2.3,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "cb354e7b-f7ba-46c1-bc93-19032a628f17",
+      "lap_number": 32,
+      "event_time_ms": 6551166,
+      "known_at_ms": 6588226,
+      "lane_duration_s": 22.06,
+      "stationary_duration_s": 2.3,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    },
+    {
+      "entry_id": "ceb6e156-a8ff-4a2b-ac8c-3bc9dc607d84",
+      "lap_number": 36,
+      "event_time_ms": 6944431,
+      "known_at_ms": 6981540,
+      "lane_duration_s": 22.108,
+      "stationary_duration_s": 2.5,
+      "source_uri": "https://api.openf1.org/v1/pit?session_key=10033"
+    }
+  ],
+  "tyre_curves": [],
+  "tyre_inventory": {},
+  "pit_loss": null,
+  "rules": null,
+  "incident_history": []
+}

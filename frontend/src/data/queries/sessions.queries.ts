@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   getSession,
+  getReplayTimeline,
   importSession,
   listCarTelemetry,
   listEntryLaps,
@@ -16,6 +17,20 @@ import type {
   SessionImportRequestDto,
   SessionTelemetryQuery,
 } from "../contracts/sessions.contracts";
+import { buildReplayClock } from "../../features/sessions/replay-timeline";
+
+export function useSessionReplayTimelineQuery(
+  sessionId?: string,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["sessions", sessionId, "replay-timeline"],
+    queryFn: () => getReplayTimeline(sessionId as string),
+    select: (data) => buildReplayClock(data.start_time_ms, data.end_time_ms),
+    enabled: Boolean(sessionId) && enabled,
+    staleTime: Infinity,
+  });
+}
 
 export function useSessionsQuery() {
   return useQuery({
@@ -58,7 +73,10 @@ export function useSessionEntriesQuery(sessionId?: string, enabled = true) {
   });
 }
 
-export function useSessionCircuitCornersQuery(sessionId?: string, enabled = true) {
+export function useSessionCircuitCornersQuery(
+  sessionId?: string,
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["sessions", sessionId, "circuit-corners"],
     queryFn: () => listSessionCircuitCorners(sessionId as string),
@@ -86,8 +104,17 @@ export function useCarTelemetryQuery(
   enabled = true,
 ) {
   return useQuery({
-    queryKey: ["sessions", sessionId, "entries", entryId, "telemetry", "car", query],
-    queryFn: () => listCarTelemetry(sessionId as string, entryId as string, query),
+    queryKey: [
+      "sessions",
+      sessionId,
+      "entries",
+      entryId,
+      "telemetry",
+      "car",
+      query,
+    ],
+    queryFn: () =>
+      listCarTelemetry(sessionId as string, entryId as string, query),
     enabled: Boolean(sessionId && entryId) && enabled,
   });
 }
@@ -99,8 +126,17 @@ export function usePositionTelemetryQuery(
   enabled = true,
 ) {
   return useQuery({
-    queryKey: ["sessions", sessionId, "entries", entryId, "telemetry", "position", query],
-    queryFn: () => listPositionTelemetry(sessionId as string, entryId as string, query),
+    queryKey: [
+      "sessions",
+      sessionId,
+      "entries",
+      entryId,
+      "telemetry",
+      "position",
+      query,
+    ],
+    queryFn: () =>
+      listPositionTelemetry(sessionId as string, entryId as string, query),
     enabled: Boolean(sessionId && entryId) && enabled,
   });
 }

@@ -206,6 +206,7 @@ export function SessionsExplorerPage() {
                           key={item.source_session_key}
                           type="button"
                           className={`sessions-session-button${isSelected ? " is-selected" : ""}`}
+                          aria-pressed={isSelected}
                           onClick={() => {
                             setSelectedSessionKey(item.source_session_key);
                           }}
@@ -292,6 +293,7 @@ export function SessionsExplorerPage() {
                   <button
                     type="button"
                     className={`sessions-mode-card${mode === "lookback" ? " is-active" : ""}`}
+                    aria-pressed={mode === "lookback"}
                     onClick={() => {
                       setMode("lookback");
                     }}
@@ -304,6 +306,7 @@ export function SessionsExplorerPage() {
                   <button
                     type="button"
                     className={`sessions-mode-card${mode === "simulation" ? " is-active" : ""}`}
+                    aria-pressed={mode === "simulation"}
                     onClick={() => {
                       setMode("simulation");
                     }}

@@ -1,0 +1,885 @@
+--- PAGE 1 ---
+ 
+ 
+Diplomaterv Portál 
+Elektronikus szakdolgozat és diplomaterv  
+nyilvántartó és archiváló rendszer  
+Felhasználói ú tmutató  
+v15 
+Dr. Tevesz Gábor 
+2015. január 15. 
+--- PAGE 2 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 2 - 
+Bevezetés 
+A 2010/11 tanév kezdetétől a Villamosmérnöki és Informatikai Kar a Szakdolgozat készítés és a 
+Diplomatervezés tantárgyak teljes ügymenetét elektronikus formában bonyolítja. Az elektronikus 
+ügymenetkezelés részét képezi a téma és a feladat kiírásától kezdődően  az adatlap k itöltésén át  a 
+szakdolgozat/diplomaterv és bírálata beadásáig és archiválásáig a folyamat valamennyi lépése. A folyamat 
+valamennyi elektronikus dokumentum ának kezelése, nyilvántartása és archiválása a 
+http://diplomaterv.vik.bme.hu/ címen elérhető Diplomaterv Portál segítségével történik. 
+A korábbi papíralapú dokumentum kezelés megváltoztatását a Kari Tanács 2010. június 23 -i határozata írta 
+elő karunkon ( https://www.vik.bme.hu/files/00005359.pdf). A határozat több fontos változást is bevezetett a 
+korábban követett gyakorlathoz képest: 
+1. Az adatlapok elektronikus úton történő előállítását, benyújtását és feldolgozását. 
+2. A szakdolgozat/diplomatervezés téma- és feladatkiírásnak már a folyamat megind ításakor 
+kötelező kiállítását (mesterképzés és az ahhoz kapcsolódó 5 éves képzés esetén is). 
+3. A szakdolgozatok és diplomatervek elektronikus archiválási és nyilvántartási rendszerét. 
+Fenti előírásokat valósítja meg a D iplomaterv Portál  (a továbbiakban: Portál) . E z e gy olyan elektronikus 
+kezelőfelület és archívum, amely a BME V illamosmérnöki és Informatikai Karán elkészült szakdolgozatok és 
+diplomatervek kiírását, a munkák beadását, archiválását és visszakeresését támoga tja, valamint elősegíti a 
+Karon folyó munka és felgyülemlett tudás ellenőrzött bemutatását a külvilág felé. 
+A szakdolgozatok, diplomatervek  elektronikus kezelőfelülete - amely a webes felületen keresztül a nap 
+bármely szakában, akár otthonról is kezelhető - feleslegessé teszi a papíralapú ügyintézés hosszadalmas 
+folyamatát, egyszerűsíti és egységesíti a megadott adatok ellenőrzését és feldolgozását, továbbá lehetőséget 
+teremt a tanszékek számára a folyamatban lévő és a már lezárt szakdolgozat írási és diplomatervezési 
+folyamatok adatainak a félév során bármikor egyszerű szűréssel történő lekérdezésére. Az új eljárás révén  a 
+hallgatók, a témavezetők, a tanszéki adminisztrátorok, vagy a tanszékvezetők is könnyen ellenőrizhetik a 
+szakdolgozatok, diplomater vek állapotát, az e zekhez tartozó dokumentumokat . Az, hogy egy adott 
+felhasználó számára milyen adatok elérhetők, a felhasználó jogosultsági beállításaitól függenek.  
+A Portál szolgáltatásait a felhasználók visszajelzései és a kari folyamatok kényelmesebbé tétele érdekében 
+folyamatosan bővítjük. Kérjük, hogy esetleges észrevételeiket és ötleteiket a portálhoz kapcsolódó 
+diplomatervportal@vik-dh.bme.hu e-mail címen jelezzék számunkra. 
+--- PAGE 3 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 3 - 
+Tartalomjegyzék  
+Bevezetés ................................................................................................................................................................. 2 
+1. A Portál funkciói ................................................................................................................................................. 4 
+2. A munkamenet lépéseinek áttekintése ........................................................................................................... 7 
+3. A munkamenet lépéseinek részletes ismertetése .......................................................................................... 9 
+3.1. Bejelentkezés a Portálra ............................................................................................................................................................. 9 
+3.1.1. A Címtárról ........................................................................................................................................................................... 10 
+3.1.2. Gyakran Ismétlődő Kérdések ........................................................................................................................................ 10 
+3.1.3. Bejelentkezés BME címtár azonosítóval .................................................................................................................... 11 
+3.1.4. Címtáras azonosító és jelszó igénylése ..................................................................................................................... 12 
+3.1.5. Személyes adatok kezelése ............................................................................................................................................ 13 
+3.1.6. Kijelentkezés a Diplomaterv Portálról ....................................................................................................................... 14 
+3.2. Téma kiírása és nyomon követése ....................................................................................................................................... 16 
+3.2.1. Feladatkiírás feltöltése és jóváhagyása ..................................................................................................................... 20 
+3.2.2. Elbocsátó-befogadó nyilatkozat .................................................................................................................................. 21 
+3.2.3. Változási napló ................................................................................................................................................................... 22 
+3.3. Adatlapok kezelése .................................................................................................................................................................... 24 
+3.4. Dolgozat feltöltése ..................................................................................................................................................................... 30 
+3.5. A dolgozat beadása ................................................................................................................................................................... 34 
+3.6. Dolgozat jóváhagyása az oktató által ................................................................................................................................. 35 
+3.7. Bírálat feltöltése ........................................................................................................................................................................... 37 
+4. Témák, dokumentumok lezárása és utólagos módosítása ........................................................................ 38 
+5. Titkosított diplomatervek kezelése ............................................................................................................... 39 
+6. Jogosultságok ................................................................................................................................................... 40 
+ 
+--- PAGE 4 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 4 - 
+1. A Portál funkciói 
+A rendszer az alábbi szolgáltatásokat nyújtja a felhasználók számára: 
+1. Téma- és feladatkiírás: 
+a. A kar oktatója témát írhat ki a hallgatója számára és fel tudja tölteni hozzá a  
+szakdolgozat/diplomaterv feladatkiírásának hivatalos példányát PDF formátumban. Fontos 
+megjegyzés: a Portál  nem a szakdolgozat és diplomaterv témák meghirdetésének felülete, az 
+továbbra is a megszokott tanszéki eljárás szerint történik. A Portálon a hallgatóval már előzetesen 
+egyeztetett téma kerül kiírásra , és a véglegesített szakdolgozat, ill. diplomaterv feladatkiírás kerül 
+feltöltésre. 
+b. Az oktató több félévben is megnyithatja ugyanazt a témát annak megadásával,  hogy a hallgató 
+pontosan melyik tantárgyhoz kapcsolódóan dolgozik a témán (pl. BSc Szakdolgozat készítés, MSc 
+Diplomatervezés 1, Diplomatervezés 2, vagy 5 -éves Diplomatervezés ). A több féléves megnyitás 
+tipikus esete az MSc képzés diplomatervezésének két félévre elosztott folyamata, de előfordulha t 
+nem teljesített szakdolgozat készítést vagy 5-éves diplomatervezést követően is. 
+c. Amennyiben a hallgató nem a saját szakiránya, és/vagy ágazata szerinti ún. anyatanszéken végzi 
+munkáját, a témához kell feltöltenie a  gazdatanszék és a befogadó  tanszék vezetői által 
+jóváhagyott elbocsátó-befogadó nyilatkozatot. 
+d. A feltöltött feladatkiírást a tanszékvezető elektronikusan bírálja el és hagyja jóvá. 
+e. A téma- és feladat  kiírási időszak végén a Portál automatikusan lezárja ezt a folyamatot  (ettől 
+kezdve az adott félévben a téma és a feladatkiírás már nem módosítható), de a kari adminisztrátor 
+hivatalos kérésre fel tudja oldani a lezárást. 
+2. Szakdolgozat/diplomaterv adatlapok kezelése 
+a. A hallgató nak a szakdolgozat készítéshez, ill. a diplomatervezéshez  továbbiakban is  
+Szakdolgozat/Diplomaterv adatlapot kell kitöltenie és beadnia. Az adatlap tartalmazza a választott 
+témát, a hallgató és konzulense adatait, valamint a konzulens sel egyetértésben kiválasztott 
+záróvizsga tantárgyakat. Az elektronikus adatlap kitö ltése is a Portálon történik, a folyamat végén 
+a hallgató beadja azt. MSc diplomaterv készítése esetén az adatlapot a Diplomatervezés 2 
+tantárgy felvételének félévében kell kitölteni. 
+b. Az oktató ellenőrzi a hallgató által az adatlapo n megadott adatokat, majd jóváhagyja (véglegesíti) 
+azt. 
+c. A Dékáni Hivatal ellenőrzi az adatlapon szereplő valamennyi adatot, szükség szerint a hallgatóval 
+és oktatójával egyedileg egyeztet a megadott telefonszámon vagy e -mail elérhetőségen 
+keresztül. 
+d. A tanszéki és a kari adminisztrátor exportálni tudja a diplomaterv adatlapok tartalmát CSV és Excel 
+formátumban, amit a záróvizsgák szervezéséhez és lebonyolításához használhat fel. 
+--- PAGE 5 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 5 - 
+3. Szakdolgozat/diplomamunka beadása: 
+a. A hallgató feltölti az elkészült szakdolgozathoz/diplomatervhez tartozó állományokat PDF 
+formátumban, kitölti a dolgozat magyar és angol nyelvű tartalmi összefoglalóját, valamint a 
+munkához keresési kulcsszavakat és statisztikai információkat (terjedelem, oldalszámok) ad meg. 
+b. A konzulens a teljesen elkészült dolgoz atot jóváhagyja. A végleges beadás akkor történik, amikor 
+a hallgató a diplomaterv pa píralapú példányát a tanszéken l eadja. A jóváhagyással az oktató arról 
+nyilatkozik, hogy a munkát beadhatónak ítéli, ennek hiányában a munka nem bocsájtható sem 
+bírálatra, sem védésre.  
+c. A konzulensi jóváhagyás után a Portál automatikusan lezárja a feltöltési folyamatot (ettől kezdve a 
+dolgozat, annak mellékletei, az összefoglalók és az egyéb adatok már nem módosíthatóak), de a 
+kari adminisztrátor külön kérésre fel tudja oldani a lezárást. 
+4. Keresés és megjelenítés: 
+a. A Portál lehetőséget biztosít a felhasználók számára szabadszöveges keresésre. A tematikus 
+keresés és a részletes keresés segítségével tetszőleges kifejezésre kereshetnek a témák magyar és 
+angol címeiben, a magyar é s angol összefoglalóiban, a témákhoz rendelt magyar és angol 
+kulcsszavakban, a konzulens és a hallgató nevében, valamint ezeken a helyeken együttesen. Ez a 
+lehetőség a Portál valamennyi látogatója számára azonosítás nélkül is rendelkezésre áll. Ezen 
+túlmenően bejelentkezett felhasználóknak lehetőségük van a feltöltött dolgozatok tartalmában is 
+szabadszövegesen keresni. 
+b. Böngészés a diplomatervek között kulcsszó, tanszék, félév, konzulens stb. szerint.  
+c. Egy konkrét diplomamunkához tartozó következő adatok megj elenítése (jogosultságtól függően): 
+szerző, konzulens, tanszék, témakiírás, összefoglaló, feltöltött fájl, változási napló.  
+d. A diplomatervek tartalmához csak azonosított, bejelentkezési engedéllyel rendelkező Portál 
+felhasználók férnek hozzá, a bejelentkezés ténye a Portál által automatikusan naplózásra kerül. 
+e. Titkos diplomatervek tartalma a titkosítás időszaka alatt (3 év) nem kereshető és nem tekinthető 
+meg bejelentkezett látogatók számára sem, de címük, összefoglalójuk, kulcsszavaik igen.  
+5. Adatexportálás CSV és Excel formátumban adminisztrátori feldolgozásra: 
+a. Tanszéki adminisztrátor munkatársak a félév kiválasztása után exportálhatják a tanszékhez tartozó 
+összes adatot.  Titkos diplomatervek tartalmi adatai a titkosítás időszaka alatt számukra sem 
+elérhetők. 
+b. A kari adminisztrátor a félév kiválasztása után exportálhatja a rendszerben tárolt összes adatot. 
+6. Felhasználók kezelése: 
+a. A felhasználók adatai minden bejelentkezéskor automatikusan frissülnek a BME Címtárból (amely 
+a Neptunból kapja az adatokat). 
+--- PAGE 6 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 6 - 
+b. A kari adminisztrátor a felhasználók számára tanszéki adminisztrátori és kari adminisztrátori 
+jogosultságot adhat. 
+--- PAGE 7 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 7 - 
+2. A munkamenet lépéseinek áttekintése 
+A gyors és egyszerű áttekinthetőség érdekében az útmutató elején összefoglaljuk a 
+szakdolgozat/diplomaterv készí tés normál menetének lépéseit, az oktatók és a hallgatók által elvégzendő 
+feladatokat. A feladatok részletes leírását a következő fejezetek tárgyalják. 
+ Oktató Hallgató Tanszékvezető Határidő1 
+1. Téma kiírása / újbóli 
+megnyitása2   3. oktatási hét vége 
+2.  Elbocsátó-befogadó 
+nyilatkozat feltöltése 
+ 4. oktatási hét vége 
+3. Feladatkiírás feltöltése   5. oktatási hét vége 
+4.   Feladatkiírás 
+jóváhagyása 6. oktatási hét vége 
+5.  Adatlap kitöltése  6. oktatási hét vége 
+6.  Adatlap beadása  6. oktatási hét vége 
+7. Adatlap jóváhagyása3   6. oktatási hét vége 
+Dékáni Hivatal munkatársai ellenőrzik az adatlapok tartalmát, 
+szükség esetén egyeztetnek a hallgatóval és az oktatóval 
+8.  
+Dolgozat 
+munkaverzióinak 
+feltöltése 
+ 
+ 
+9.  
+Dolgozat (és melléklete) 
+végleges verzióinak 
+feltöltése 
+ Szorgalmi időszak 
+vége 
+10.  
+Magyar és angol nyelvű 
+összefoglaló kitöltése, 
+kulcsszavak megadása 
+ Szorgalmi időszak 
+vége 
+                                                      
+ 
+1  A megadott határidők tájékoztató jellegűek. A pontos határidőket minden félévben a tanszékekre küldött 
+és a hallgatók számára közzétett tájékoztató levél tartalmazza. A megadott határidő lejárta után az adott 
+munkafázist a Portál automatikusan lezárja. 
+2  Előző félév es téma felnyitása mesterképzéses (osztott) diplomatervezés, vagy az előző félévben 
+eredménytelenül zárult szakdolgozat készítés / diplomatervezés esetén történhe t, egy téma több félévben 
+is megnyitható. 
+3  Az adatlapot az oktató csak azt követően tudja jóváhagyni, ha azt a hallgató beadta (lezárta). 
+--- PAGE 8 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 8 - 
+ Oktató Hallgató Tanszékvezető Határidő1 
+11.  Dolgozat (és melléklete) 
+beadása 
+ Szorgalmi időszak 
+vége 
+12. Dolgozat jóváhagyása4   Szorgalmi időszak 
+vége 
+Dolgozat adatinak exportálása a záróvizsgák előkészítéséhez. 
+Bírálati és záróvizsga időszak 
+13. Bírálat feltöltése5   Záróvizsga időszak 
+vége 
+                                                      
+ 
+4  A dolgozatot az oktató akkor tudja jóváhagyni, ha a téma tartalmaz érvényes feladatkiírást, feltöltött 
+dolgozatot (esetleg mellékletekkel), kitöltött magyar és angol nyelvű összefoglalót, valamint megadott 
+kulcsszavakat. A dolgozat csak az oktatói jóváhagyással (lezárás) válik beadottá. 
+5  A feltöltés javasolt, de nem kötelező - csak a bíráló előzetes hozzájárulása esetén. 
+--- PAGE 9 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 9 - 
+3. A munkamenet lépéseinek részletes ismertetése 
+A következőkben részletesen bemutatjuk a Diplomaterv Portál munkafolyamatait, amelyek a következők: 
+ Bejelentkezés a Portálra (bejelentkezés, felhasználói adatok kezelése) 
+ Téma kiírása és nyomon követése, feladatkiírás feltöltése 
+ Adatlapok kezelése 
+ Adatlap jóváhagyása 
+ Dolgozat feltöltése 
+ Dolgozat jóváhagyása 
+ Bírálat feltöltése 
+A felhasználó munkáját a Portálon a lehetséges műveletvégzési helyek közelében az egérmutató mellett 
+megjelenő rövid magyarázó szövegek (tooltipek) segítik. 
+3.1. Bejelentkezés a Portálra 
+A Portál nyitó oldala  az alábbi ábrán  látható (1. ábra ). A Portál nyitó oldalán a kari adminisztrátor rövid 
+tájékoztató üzeneteket  helyezhet el. Feltétlenül ajánljuk ezen közérdekű üzenetek elolvasását minden 
+belépéskor! 
+  
+1. ábra - A Diplomaterv Portál nyitó oldala 
+A szolgáltatások bejelentkezés után érhetők el. Bejelentkezéshez kattintsunk a jobb felső sarokban található 
+Bejelentkezés hivatkozásra. 
+
+--- PAGE 10 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 10 - 
+ 
+2. ábra - A Bejelentkezés oldal 
+A Bejelentkezés hivatkozásra kattintás után a Bejelentkezés oldal jelenik meg ( 2. ábra ), amely  tájékoztatja 
+arról, hogy a bejelentkezés a BME Címtár segítségével történik , illetve innen a felhasználó 3 irányba indulhat 
+el: 
+ A Belépek a BME Címtár azonosítómmal  gombra kattintva pedig bejelentkezhet a Diplomaterv Portálra 
+(bővebben lásd a 3.1.3 fejezetben). 
+ A Nincs még címtáras jelszavam vagy elfelejtettem  hivatkozásra kattintva a felhasználó a Címtár 
+adminisztrációs oldalra jut, ahol a Neptun kódja és Neptun jelszava megadása után megtudhatj a a 
+címtáras azonosítóját, illetve beállíthatja a címtáras jelszavát (bővebben lásd a 3.1.4 fejezetben). 
+ A Kérdésem van  a címtárral kapcsolatban  hivatkozásra kattintva e -mailt küldhet a Címtár 
+üzemeltetőinek a support@login.bme.hu e-mail címre. 
+3.1.1. A Címtárról 
+A címtár lehetővé teszi az ún. egyszeri bejelentkezés (single sign -on) megvalósítását az egyetemi w eblapok 
+között, azaz a felhasználóknak elég egyszer megadniuk a címtáras azonosítójukat és jelszavukat, a címtárhoz 
+kapcsolt weblapok fel fogják ismerni a felhasználót anélkül, hogy újra be kellene jelentkeznie.  
+A Címtár bevezetése és megvalósításának rés zletei nem csak BME szintű, hanem egyetemek közötti 
+együttműködés, valamint hosszú távú, stratégiai döntések eredménye, és mint minden együttműködés, ez is 
+bizonyos kompromisszumokkal jár. Ezek közül a legfontosabb, hogy minden egyetemi polgár (aki a 
+Neptunban is szerepel), automatikusan kap egy generált címtáras azonosítót. Ennek a formája 
+XXXXX@bme.hu és nem lehet megváltoztatni. Az azonosítóhoz a felhasználók választhatnak maguknak egy 
+jelszót, és a továbbiakban a címtáras azonosítóval és a címtáras jels zóval tudnak majd bejelentkezni a 
+címtárhoz kapcsolt weboldalakra, így a Diplomaterv Portálra is. 
+3.1.2. Gyakran Ismétlődő Kérdések 
+Miért nem lehet a Neptun kódot használni azonosítóként? 
+Mert a Neptun fejlesztői nem járultak hozzá adatvédelmi okokra hivatkozva.  
+Miért nem választhatok magamnak saját azonosítót? 
+Ez a döntés az egyetemek közötti megállapodás eredménye. 
+
+--- PAGE 11 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 11 - 
+Akkor most lesz egy újabb azonosítóm? 
+Egyelőre igen, de talán egyszer a jövőben a Neptunba is a címtáras azonosítóval lehet majd bejelentkezni, és 
+akkor nem lesz többet szükség a Neptun jelszóra. 
+Honnan tudom meg a címtáras azonosítómat és jelszavamat? 
+A címtár adminisztrációs oldalán ( https://login.bme.hu/admin/) a Neptun kódod és Neptun jelszavad 
+megadása után megtudod a címtár azonosítódat, és beállíthatod a címtáras jelszavadat.  
+Problémám van a címtárral, kihez fordulhatok? 
+A címtárral kapcsolatos kérdésekre a címtár üzemeltetői a support@login.bme.hu e-mail címen válaszolnak. 
+3.1.3. Bejelentkezés BME címtár azonosítóval 
+Ha a Bejelentkezés oldalon a felhasználó a Belépek a BME Címtár azonosítómmal  gombra kattint, akkor a Portál 
+átirányítja a BME Címtár bejelentkező oldalára (3. ábra). 
+  
+3. ábra - A BME Címtár bejelentkező oldala 
+Ezen az oldalon kell a felhasználónak megadnia a címtár azonosítóját és a címtáras jelszavát a 
+bejelentkezéshez. Ha a fe lhasználó nem ismeri a címtáras azonosítóját vagy jelszavát, akkor az „ ezen az 
+oldalon” hivatkozásra kattintva a címtár adminisztrációs oldalra jutva megtudhatja azokat (lásd bővebben a 
+3.1.4 fejezetben). 
+Ha a felhasználó korábban másik weboldalra már bejelentkezett a címtáras adatai segítségével, akkor nem 
+szükséges ismét megadni a felhasználónevet és jelszót, a címtáras bejelentkező oldal meg sem jelenik, az 
+azonosítás megtörténik automatikusan (egyszeri bejelentkezés, single sign-on). 
+A helyes adatok megadása után a címtár automatikusan visszairányítja a felhasználót a Diplomaterv Portál 
+oldalára. 
+
+--- PAGE 12 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 12 - 
+Az első bejelentkezés alkalmával a Diplomaterv Portál tájékoztatja a felhasználót, hogy a Címtártól milyen 
+személyes adatokat kapott meg (4. ábra). Ezek később az Adataim oldalon is elérhetőek. 
+ 
+4. ábra - Tájékoztató a személyes adatok kezeléséről 
+A felhasználó címtáras azonosítója és jelszava a Portálon nem tárolódik. 
+A Rendben gombra kattintással a bejelentkezés befejeződik, és a felhasználó visszakerül a Portál 
+kezdőoldalára, ahol a jobb felső sarokban megjelenik a teljes neve (5. ábra). 
+ 
+5. ábra - A bejelentkezett felhasználó neve a jobb felső sarokban 
+3.1.4. Címtáras azonosító és jelszó igénylése 
+Ha a felhasználó még nem ismeri a címtár azonosítóját, nem állított be magának címtáras jelszót vagy 
+elfelejtette azt, akkor a Bejelentkezés oldalon a Nincs még címtáras jelszavam vagy elfelejtettem  hivatkozásra 
+kattintva a címtár adminisztrációs oldalán orvosolhatja a problémát. 
+A címtár felhasználói adminisztrációs oldalának eléréséhez először is a felhasználónak a Neptun kódja és a 
+Neptun jelszavának megadásával azonosítania kell magát (6. ábra). 
+ 
+6. ábra - Bejelentkezés a címtár adminisztrációs oldalára 
+
+--- PAGE 13 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 13 - 
+A sikeres azonosítás után megjelenik az adminisztrációs oldal, ahol megtekinthető a címtáras azonosító, 
+illetve beállítható a címtáras jelszó (7. ábra). 
+ 
+7. ábra - A Címtár felhasználói adminisztrációs oldala 
+3.1.5. Személyes adatok kezelése 
+Amennyiben a felhasználó valamelyik adata változik (teljes név, e -mail cím, oktató/hallgató státusz, tanszék), 
+akkor azt először a Neptunban kell frissíteni, ahonnan az 24 órán belül átkerül a Címtárba. Amikor a 
+felhasználó a következő alkalommal bejelentk ezik a Portálra, a címtárban tárolt adatok automatikusan 
+frissülnek a Portálon. 
+A Portálon tárolt személyes adatokat a felhasználó bármikor megtekintheti az  Adataim oldalon, amely a fejléc 
+jobb oldalán található hivatkozásra kattintva érhető el (8. ábra). 
+ 
+8. ábra - Az Adataim oldal elérése a fejlécből 
+
+--- PAGE 14 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 14 - 
+A 9. ábra  alsó részén látható, hogy további személyes adatokról rendelkezhet a felhasználó (e -mail cím 
+nyilvánossá tétele, fénykép megadása). Ezek a funkciók tovább növelik a rendszer képességeit, de a  
+felhasználónak explicit módon engedélyeznie kell a személyes adatai használatát.  
+ 
+9. ábra - A felhasználó személyes adatai 
+Az E-mail címem nyilvános  opció engedélyezésével a portál a látogatók számára megjeleníti a téma mellett 
+nem csak a felhasználó nevét, hanem e -mail címét is, így a portál látogatói könnyen felvehetik vele a 
+kapcsolatot.  A megjelenítés kódoltan, spamküldő robotok ellen védetten történik. 
+A Gravatar fényképem használata  opció engedélyezésével a portálon megjeleníthető a felhasználó e -mail 
+címéhez a http://www.gravatar.com oldalon hozzárendelt fénykép, így az oldalak személyesebbé tehetők, 
+illetve az oktatók és hallgatók közötti kommunikáció is könnyebbé válik. 
+3.1.6. Kijelentkezés a Diplomaterv Portálról 
+A Diplomaterv Portálról a kijelentkezni a jobb felső sarokban található Kijelentkezés hivatkozásra kattintással 
+lehet (10. ábra). 
+ 
+10. ábra - A Kijelentkezés hivatkozás a fejlécben 
+A Kijelentkezés hivatkozásra kattintva a Portál kijelentkezteti a felhasználót, majd megjelenik a sikeres 
+kijelentkezésről tájékoztató oldal (11. ábra). 
+
+--- PAGE 15 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 15 - 
+ 
+11. ábra - Tájékoztatás a sikeres kijelentkezésről 
+Itt a felhasználó választhat: 
+ Ha elhagyja az ol dalt, akkor a címtárban továbbra is él a munkamenete, így más címtárhoz kapcsolt 
+weboldalak továbbra is azonosított felhasználóként fogják kezelni, így azokon nem szükséges ismét 
+bejelentkezni. 
+ A Kijelentkezés a Címtárból  gombra kattintva a felhasználó munkamenete a Címtárban törlődik. Ha a 
+felhasználó később egy bejelentkezést igénylő szolgáltatást kíván elérni, akkor ahhoz ismét 
+szükséges lesz a címtáras azonosító és címtáras jelszó megadása. A címtáras kijelentkezés 
+eredményéről a 12. ábra látható értesítés tájékoztat. 
+ 
+12. ábra - Sikeres kijelentkezés a címtárból 
+
+--- PAGE 16 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 16 - 
+3.2. Téma kiírása és nyomon követése 
+A felhasználó  bejelentkezés után automatikusan a Témáim oldalra kerül, ahol az összes hozzá tartozó 
+szakdolgozat/diplomaterv félévenk énti bontásban listázásra kerül. Amennyiben a felhasználó oktató és még 
+nem nyitott meg témát a Portálon, az alábbi oldal fogadja: 
+ 
+13. ábra - A felhasználó összes témáját megjelenítő oldal korábbi téma hiányában 
+Korábban már megnyitott témák létezése esetén az oktatói nyitóoldal a következőképpen néz ki: 
+ 
+14. ábra - Az oktató összes témáját megjelenítő oldal 
+
+--- PAGE 17 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 17 - 
+Minden félévnél található egy Körlevél küldése  hivatkozás, amelyre kattintva az oktató számítógépének 
+alapértelmezett levelezőprogramjában egy új levél nyílik meg, megcímezve a félévben konzultált hallgató i e-
+mail címeivel. Megjegyzés: e gy hallgató e -mail címét csak akkor ismeri a rendszer, ha a hallgató előtte már 
+legalább egyszer bejelentkezett a Portálra. 
+A Témáim oldal jobb felső részén található Új téma kiírása  hivatkozásra kattintva nyílik meg az a felület, ahol 
+az oktató új témát írhat ki egy adott hallgató számára: 
+ 
+15. ábra - Új téma kiírása 
+Ezen az oldalon az alábbi adatokat kell az oktatónak megadnia: 
+ Téma címe angolul és magyarul 
+ Hallgató Neptun kódja 
+ Képzés (listából választva: BSc / MSc / 5-éves) 
+ Tárgy (listából választva: BSc Szakdolgozat  / MSC DipTerv1 / DipTerv2 / 5 -éves DipTerv ) 
+Megjegyzés: A 2009 -től szakirányra került 5 -éves képzése s hallgatók is az MSc 
+DipTerv1/DipTerv2 tárgyakat veszik fel diplomatervezéshez. 
+A téma mentése után az megjelen ik az oktató témáinak listájában ( 14. ábra ). Ebben a listában minden 
+témánál látható a hallgató neve, illetve a feladat kiírás, az adatlap, a hozzátartozó dolgozat és bírálat állapota. 
+A névre kattintva az oktató közvetlen e-mailt küldhet a hallgatónak.  
+ 
+16. ábra - A téma megtekintése közvetlenül a létrehozás után (megtekintési nézet) 
+A témalistában a téma címére kattintva a megtekintési nézet  (16. ábra ) nyílik meg, amely egyelőre csak a 
+téma címét, valamint a hallgató és a konzulens nevét tartalmazza. (Amennyiben a hallgató még nem lépett 
+
+--- PAGE 18 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 18 - 
+be a Portálra, a rendszer nem tudja őt nevével azonosítani – így előfordulhat, hogy a hallgató első belépéséig 
+neve helyén zárójelek között a Neptun kódja jelenik meg, ami természetesen nem hiba.) 
+A témalistában a téma címére kattintva, vagy a nyilvános oldalon a Szerkesztés hivatkozásra kattintva nyílik 
+meg a téma oktatói szerkesztői oldala: 
+ 
+17. ábra - A téma oktatói szerkesztői oldala 
+Mint láthat ó, egy téma szerkesztői oldal án igen sokféle adat fordulhat elő, az oldal mégis alapvetően két 
+részből áll: az általános adatokból (18. ábra) és a félévenkénti adatokból (19. ábra). 
+
+--- PAGE 19 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 19 - 
+Az általános adatoknál lehet feltölteni a hivatalos feladatkiírást  PDF formátumban (ugyanitt letölthető a 
+karon elfogadott ajánlott feladatkiírás sablon is), megtekinthető a dolgozat tartalmi összefoglalója magyar és 
+angol nyelven, a dolgozathoz tartozó kulcsszavak , a téma adatlapja, valamint az elbocsátó -befogadó 
+nyilatkozat, melyeket a hallgató ad  meg, ill. tölt fel (ld. később). Szintén ebben a blokkban lehet majd később 
+feltölteni a dolgozathoz készült bírálatot is. Minden dokumentumhoz több verzió is feltölthető, a rendszer 
+verziókövetési szolgáltatást is nyújt, mind ig a legutóbb feltöltött verzió minősül aktuálisnak. (A félév lezárását 
+követően az adatbázis helytakarékossági okokból „tisztításra” kerül, a feltöltött verziók közül csak a legutolsót 
+őrzi meg a rendszer.) 
+ 
+18. ábra - A téma oktatói szerkesztői oldala, általános adatok 
+Amennyiben a hallgató az előző félévben már dolgozott ezen a témán (mesterképzés , illetve 2009 után 
+szakirányra került 5 éves képzéses hallgató több féléves diplomatervezése, vagy korábban nem teljesített 
+félév után), akkor az oktató a téma féléves adatainál egyszerűen a Megnyitás hivatkozásra (19. ábra) kattintva 
+megnyitja témát az új félévre. Ebben az esetben csak az aktuális félévhez tartozó tárgyat kell megadnia. 
+ 
+19. ábra - A téma oktatói szerkesztői oldala, félévenkénti adatok 
+
+--- PAGE 20 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 20 - 
+3.2.1. Feladatkiírás feltöltése és jóváhagyása 
+A konzulens a témához tartozó feladatkiírást a téma szerkes ztő oldalán a Feladatkiírás sorban található 
+Feltöltés hivatkozásra kattintva tudja feltölteni (20. ábra). Ugyaninnen tölthető le a feladatkiírás elkészítéséhez 
+használható hivatalos Word dokumentum sablon is. 
+ 
+20. ábra - A feladatkiírás feltöltésére szolgáló link a téma oktatói szerkesztő oldalán 
+A felugró ablakban – csakúgy, mint a többi feltöltés esetén – egy maximum 15MB méretű, PDF formátumú 
+fájlt lehet kiválasztani és feltölteni (21. ábra). 
+ 
+21. ábra - Fájl kiválasztása a feladatkiírás feltöltéséhez 
+Feltöltés után a feladatkiírás Feltöltve, tanszékvezetői j óváhagyásra vár  állapotba kerül, ami azt jelenti, hogy 
+addig nem tekinthető a dokumentum beadottnak, amíg azt a tanszékvezető a Portálon elektronikusan jóvá 
+nem hagyta (22. ábra). 
+ 
+22. ábra - Feladatkiírás Jóváhagyásra vár állapotban 
+Tanszékvezetők számára a jóváhagyás menetéről bővebb útmutató található a  
+Tanszékvezetői segédletben. 
+
+--- PAGE 21 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 21 - 
+Sikeres jóváhagyás után a téma oktatói és hallgatói szerkesztő oldalán a feladatkiírás Tanszékvezető 
+jóváhagyta állapotba kerül ( 23. ábra ). Ha a tanszékvezető nem hagyja jóvá a feladatkiírást , Konzulensi 
+feltöltésre vár, mert a tanszékvezető elutasította üzenet jelenik meg. 
+ 
+23. ábra - Feladatkiírás tanszékvezetői jóváhagyás után 
+Amennyiben a feladatkiírás javításra szorul (akár elbírálás alatt, akár jóváhagyás vagy elutasítás után) , a 
+konzulens a témakiírási időszakban  tölthet fel újabb feladatkiírást. Fontos, hogy ebben az esetben a korábbi 
+feladatkiírás érvényét veszti, és amíg az újabb dokumentumot a tanszékvezető  nem hagyja jóvá, addig a 
+feladatkiírás nincs beadva! (24. ábra) 
+ 
+24. ábra - Frissített feladatkiírás 
+Fontos, hogy a félév végén a dolgozat beadásához szükséges, hogy legyen a témához a tanszékvezető által 
+jóváhagyott feladatkiírás. 
+3.2.2. Elbocsátó-befogadó nyilatkozat 
+Azok a hallgatók, akik munkájukat nem a szakirányuk/ágazatuk gazdatanszékén (a továbbiakban: 
+anyatanszék) végzik, a tantárgy felvéte léhez elbocsátó-befogadó nyilatkozatot  kell mellékeljenek  (a 
+szükséges formanyomtatvány a kari honlapról letölthető). A nyilatkozatot mind az anyatanszék, mind a 
+befogadó tanszék tanszékvezetője aláírásával hitelesíti. A hallgató és az oktató témaszerkeszt ő oldalán a 
+félévtől független adatok között jelenik meg az Elbocsátó-befogadó nyilatkozat sor: 
+ 
+25. ábra - Az elbocsátó-befogadó nyilatkozat sora a téma hallgatói szerkesztő oldalán 
+A sorban előbb egy státusz információ jelenik meg , utána pedig az elvégezhető műveletekre vonatkozó 
+linkek. Mind a státusz szöveg, mind pedig a művelet link fölé húzva az egeret, felugró tooltipben részletesebb 
+információ segíti a felhasználót a kezelésben: 
+ 
+26. ábra - Tooltip az elbocsátó-befogadó nyilatkozat feltöltéséhez 
+A hallgató a Feltöltés linkre kattintva egy felugró ablakban töltheti fel a digitalizált, aláírással és pecséttel 
+hitelesített nyilatkozatot: 
+
+--- PAGE 22 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 22 - 
+ 
+27. ábra - Elbocsátó-befogadó nyilatkozat feltöltése 
+Erre a fájlra is ugyanazok a korlátozások vonatkoznak, mint a portál többi részén feltöltött dokumentumokra: 
+maximum 15 MB méretű, PDF formátumú fájl tölthető fel.  A rendszer itt csak az utoljára feltöltött fájlt tárolja, 
+az újabb fájlok felülírják a régebbieket. 
+A feltöltést a hallgató helyett a tanszéki és a kari adminisztrátor is elvégezheti, az oktató nem.  
+Amíg nincs nyilatkozat feltöltve, addig az oktató csak egy státusz szöveget lát a saját témaszerkesztő oldalán  
+(ami azonban nem jelent köt elezettséget a feltöltésre, ha a hallgató munkáját a  szakiránya/ágazata szerinti  
+anyatanszékén végzi): 
+ 
+28. ábra - Fel nem töltött elbocsátó-befogadó nyilatkozat jelzése 
+Miután a hallgató feltöltötte a nyilatkozatot, az oktató is le tudja tölteni: 
+ 
+29. ábra - Feltöltött elbocsátó-befogadó nyilatkozat jelzése 
+3.2.3. Változási napló 
+Minden módosításról, akár az oktató, akár a hallgató , akár tanszéki vagy kari adminisztrátor is  végezte azt, 
+egy bejegyzés készül a témához tartozó változási naplóban, amely a megtekintési oldalon  a Változási napló  
+vagy a téma szerkesztő oldalán a Változási napló sorban a Megtekintés hivatkozásra kattintva válik láthatóvá: 
+ 
+30. ábra - A téma változási naplója 
+
+--- PAGE 23 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 23 - 
+A Portál az adott félévre előírt határidő lejárta után l ezárja az összes témakiírást . Lezárás után a témakiírás 
+nem módosítható, amennyiben valamelyik témakiíráson mégis változtatni kell, az oktató - a rendszeren kívül 
+- kérelemmel fordulhat a kari adminisztrátorhoz, aki egyedileg fel tudja oldani a lezárást, így utána az oktató 
+és a hallgató ismét szerkesztheti a témakiírást, majd az ismét lezárásra kerül. 
+--- PAGE 24 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 24 - 
+3.3. Adatlapok kezelése 
+A Portál lehetőséget biztosít a diplomaterv/szakdolgozat ad atlapokkal kapcsolatos ügyintézési folyamat 
+elektronikus lebonyolítására is: 
+1. A hallgató a téma szerkesztő i oldalán az Adatlap sorban található Kitöltés hivatkozásra ( 31. ábra ) 
+kattintva megnyitja az adatlap szerkesztő oldalát. 
+ 
+31. ábra - A szakdolgozat/diplomaterv adatlap megnyitása a téma szerkesztői oldaláról 
+A sorban előbb egy státusz információ jelenik meg, utána pedig az elvégezhető műveletekre 
+vonatkozó linkek.  
+2. Mielőtt a hallgató elkezdené kitölteni az adatlapot, a státuszsorban a Hallgatói k itöltésre vár!  üzenet 
+jelenik meg: 
+ 
+32. ábra - Az adatlap státuszsora kitöltés előtt 
+Az adatlap kitöltés időszak megnyílása előtt ebben a mezőben a Nincs kitöltési időszak  üzenet jelenik 
+meg. Amennyiben az időszak megnyílását követően ennek helyére a Nem kell adatlapot kitölteni  
+üzenet lép, a hallgató az adott fé lévben a Neptunban nem vette fel a Szakdolgozat készítés, a 
+Diplomatervezés 2 vagy a Diplomatervezés tárgyat. Ha ez szándéka szerint nem így lenne, azt a 
+hallgatónak haladéktalanul jeleznie kell a tanszéki vagy a kari adminisztrátor számára! 
+3. A Kitöltés linkre kattintva kezdhető meg az adatlap kitöltése  (33. ábra). Az adatlapon meg kell adnia a 
+szakdolgozat/diplomaterv védéséhez szükséges adatokat, ezek a következők:  
+ Személyes elérhetőség adatai 
+ Téma meghirdetőjének pontosítása (külső téma, külföldi téma) 
+ A védéshez kapcsolódó záróvizsga tantárgyak megadása (a tantárgyakkal kapcsolatos előírásokat 
+részletesen ld. a kari honlapon megtalálható szabályzatokban). 
+
+--- PAGE 25 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 25 - 
+ A kifutó 5 é ves képzés hallgatói számára megjelenik a helyettesítő tantárgy fogalma. Ezek 
+lehetnek alaptárgyak helyettesítői (központi kari előírás szerint), vagy szakirány tantárgyak 
+helyettesítői (a szakirány gazda tanszékek által előírva). Utóbbi esetben a hallgató nak mellékelnie 
+kell a tanszékvezető által hitelesített teljesítési igazolás digitalizált változatát  (az igazolás sablonja 
+a kari honlapról letölthető). 
+ 
+33. ábra - Diplomaterv adatlap (5-éves képzés) 
+A tantárgyak kiválasztása során  szigorúan betartandók az érvényben lévő kari 
+Szakdolgozat/Diplomaterv, záróvizsga és oklevél szabályzat, valamint azok mellékleteinek vonatkozó 
+előírásai. 
+Minden sorban részletes felugró tooltip ad segítséget a mező kitöltéséhez: 
+ 
+34. ábra - Tooltipek segítik az adatlapok kitöltését 
+A Külső konzulens  és a Külföldi-e a diplomaterv  sorokban a Van illetve az Igen értékeket kiválasztva 
+újabb mezők jelennek meg: 
+
+--- PAGE 26 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 26 - 
+ 
+35. ábra - Téma meghirdetőjének pontosítása 
+A záróvizsgatárgyak száma, a sorok megnevezése és hogy lehet -e helyettesítő tárgyat megadni attól 
+függően változik, hogy a hallgató milyen típusú űrlapot tölt ki. A rendszer automatikusan a hallgató 
+számára a képzéséhez kapcsolódó szabályzatnak megfelelő űrlapot kínálja fel. 
+Ötéves képzés esetén a hallgatónak fel kell töltenie a szakirány  tantárgyak teljesítését igazoló 
+mellékletet is. 
+Tájékoztató az 5 éves kifutó képzés hallgatói számára:  amennyiben a hallgató 
+szakiránya teljesítése során hallgatott helyet tesítő tantárgyat választ záróvizsga 
+tantárgyként, a listában az eredeti tantárgyat kell kiválasztani a, és a Helyettesítő tárgy  
+mezőben adható meg a valóban hallgatott tantárgy (amiből  a hallgatónak  ténylegesen 
+vizsgáznia kell).  
+4. A hallgató kitölti az Adat lapot, majd az űrlap alján lévő gombokra kattintva az alábbi lehetőségek 
+közül választhat (36. ábra): 
+  
+36. ábra - Választási lehetőségek az adatlap alján 
+a. A Mégsem gombra kattintva a módosítások mentése nélkül térhet vissza a téma szerkesztő 
+oldalára. 
+b. A Mentés gombra kattintva a Portál elmenti az eddig megadott adatokat, de az adatlap ezzel 
+még nem lesz beadva. Később a hallgató visszatérhet és befejezheti az adatlap szerkesztését. Az 
+adatlap többször menthető , majd  később tovább szerkeszthető. Erről így kap visszajelzést a 
+hallgató a téma szerkesztő oldalán: 
+ 
+37. ábra - Hallgató által nem véglegesített adatlap 
+c. A Mentés és  beadás gombra kattintva a Portál elmenti az adatokat és lezárja az adatlapot. A 
+hallgató ezután már nem módosíthatja az adatlapon szereplő adatokat. Az adatlapot a hallgató 
+csak akkor tudja beadni, ha minden rovatot kitöltött és feltöltötte a mellékletet is (amennyiben az 
+adott típusú űrlaphoz szükséges melléklet). A hiányzó mezőkről az űrlap alján és felugró 
+ablakban pontos visszajelzést kap: 
+
+--- PAGE 27 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 27 - 
+ 
+38. ábra - Hiányos adatlapot nem lehet beadni 
+Beadás után a hallgató téma szerkesztő oldalán a Konzulensi jóváhagyásra vár állapot jelenik meg: 
+ 
+39. ábra - Hallgató által véglegesített adatlap 
+FONTOS: Az adatlap addig nincs beadva, amíg az oktató is le nem zárja! Miután a 
+konzulens is lezárta az adatlapot, a hallgató ezt látja a téma szerkesztői oldalán: 
+ 
+40. ábra - Konzulens által jóváhagyott adatlap 
+A hallgató a Megtekintés linkre kattintva bármikor megnézheti az adatlapon megadott adatait a 
+Neptunból átemelt törzsadatokkal (pl. képzés, szak, szakirány) együtt (41. ábra). 
+ 
+41. ábra - Hallgatói adatlap megtekintése 
+5. A Portálra bejelentkezve az oktató a téma szerkesztő oldalán az Adatlap sorban tudja megtekinteni a 
+hallgató által megadott adatokat (42. ábra). 
+
+--- PAGE 28 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 28 - 
+ 
+42. ábra - Az adatlap megtekintése az oktató szerkesztői oldaláról 
+Mielőtt a hallgató elkezdené kitölteni az adatlapot, az oktató téma szerkesztői oldalán a Hallgatói kitöltésre vár 
+állapot jelenik meg az Adatlap sorban: 
+ 
+43. ábra - A hallgató még nem töltötte ki az adatlapot 
+Ha a hallgató már elkezdte kitölteni az adatlapot és elmentette a megadott értékeket, de még nem adta be 
+az adatlapot (nem zárta le): 
+ 
+44. ábra - A hallgató dolgozik az adatlap kitöltésén 
+Miután a hallgató már beadta az adatlapot: 
+  
+45. ábra - A hallgató lezárta az adatlapot 
+Ekkor a Megtekintés és jóváhagyás linkre kattintva az oktató is megnézheti és ellenőrizheti az adatlapon 
+szereplő adatokat. Ugyanaz az oldal jelenik meg az oktatónak is, mint a hallgatónak, mindössze annyi a 
+különbség, hogy az oldal alján lévő Jóváhagyás gombra kattintva az oktató véglegesítheti az adatlapon 
+szereplő adatokat . Amennyiben valamelyik adattal nem ért egyet, a z Elutasítás gombbal visszaadhatja az 
+adatlapot a hallgatónak javításra.  
+  
+46. ábra - Az oktató lehetőségei az adatlappal kapcsolatban 
+A jóváhagyás után az oktató téma szerkesztő oldalán is már csak a megtekintésre van lehetőség:  
+ 
+47. ábra - Az oktató által lezárt (jóváhagyott) adatlap 
+
+--- PAGE 29 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 29 - 
+Az oktatói jóváhagyás után már csak a kari adminisztrátorok tudják módosítani az adatlapon szereplő 
+adatokat. 
+A tanszéki adminisztrátorok a tanszéki oktatók helyett elvégezhetik az adatlap ok lezárását. A kari 
+adminisztrátorok az adatlap státuszától függetlenül bármikor szerkes zthetik az adatlapon szereplő adatokat  
+(pl. helytelen záróvizsga tantárgy cseréje a hallgatóval történt egyeztetést követően) .  
+A Portál a témához tartozó változási naplóba az adatlapot érintő minden módosítást bejegyez:  
+  
+48. ábra - Adatlap műveletek a változási naplóban 
+
+--- PAGE 30 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 30 - 
+3.4. Dolgozat feltöltése 
+Bejelentkezés után a hallgató is a Témáim oldalra kerül, ami a számára kiírt témákat jeleníti meg.  
+ 
+49. ábra - A hallgató Témáim oldala 
+Itt a téma címére kattintva juthat el a téma szerkesztő oldalára  (50. ábra ). Ez nagyban hasonlít az oktatói 
+szerkesztői nézethez, azzal a különbséggel, hogy a hallgató más mezőket szerkeszthet, mint az oktató. 
+
+--- PAGE 31 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 31 - 
+ 
+50. ábra - A téma hallgatói szerkesztői oldala 
+A hallgató által elvégezendő feladatok: 
+1. A hallgatónak a z Összefoglaló és kulcsszavak  sorban található Szerkesztés hivatkozás segítségével  
+témához meg kell adnia a téma összefoglalóját angolul és magyarul. Az összefoglaló megadása egy 
+nagyméretű szövegdobozban, formázás nélkül történik, így azoknak a szövegei kereshetők és 
+egységesen jeleníthetők meg az oldalon ( 51. ábra). Ügyelni kell arra, hogy a más dokumentumban 
+megszerkesztett másolás -beillesztés (copy -paste) funkcióval kitöltött összefoglalók és kulcsszavak 
+
+--- PAGE 32 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 32 - 
+tartalmazhatnak olyan rejtett karakterkódo kat, melyek megzavarhatják az adatok kezelését és 
+további szerkeszthetőségét! 
+ 
+51. ábra - Összefoglaló szerkesztése 
+2. Kulcsszavakat kell megadnia  dolgozatához a keresés megkönnyítésére.  A szövegdobozba gépelés 
+közben az oldal felkínálja a Portálon már használt kulcsszavakat - célszerű azok közül választani. 
+
+--- PAGE 33 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 33 - 
+3. Dolgozat feltöltése PDF formátumban  az adott félév Dolgozat sorában található Feltöltés hivatkozás 
+segítségével (több verzió is lehe tséges). A dolgozatok egységes kialakítása érdekében a Portálról 
+Microsoft Word és LaTeX sablonok tölthetők le a szerkesztői oldalról. A dolgozat elektronikus 
+változatának nem kell tartalmaznia a feladat kiírását (mivel az a témánál elkülönítve már 
+megtalálható), a beadandó papíralapú példányba azonban vagy a tanszéken kapott eredeti, vagy a 
+portálról letöltött jóváhagyott feladatkiírást (hogy melyiket, abban a tanszék előírása a mérvadó), be 
+kell köttetni. Minden feltöltés után a dolgozathoz statisztikai c élokból további adatokat kell 
+megadnia (hány oldalas a dolgozat, hány oldalnyi függeléket tartalmaz). A feltölthető fájl maximális 
+mérete a feltöltési segédablakban látható (jelenleg 15 MB). 
+4. Mellékletek feltöltése a dolgozathoz PDF vagy ZIP formátumban  az adott félév Melléklet sorában 
+található Feltöltés hivatkozás segítségével  (több verzió is lehetséges). A feltölthető fájl maximális 
+mérete a feltöltési segédablakban látható (jelenleg 15 MB). 
+Dolgozat vagy melléklet fájl feltöltése előtt a hallgatónak köte lezően el kell fogadnia a Hallgatói 
+Nyilatkozatot (52. ábra ), amelynek a beadandó papíralapú példányban is meg kell jelennie, és azt a 
+hallgatónak saját kezűleg alá is  kell írnia.  A feltöltő  oldalon kell megadnia dolgozata statisztikai adatait is 
+(tájékoztató oldalszámok). 
+ 
+52. ábra - A Hallgatói Nyilatkozat elfogadása feltöltés előtt 
+
+--- PAGE 34 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 34 - 
+3.5. A dolgozat beadása 
+Amennyiben a hallgató elkészült a féléves munkájával és be kívánja adni a Portálra feltöltött 
+dokumentumokat, akkor ezt a féléves státusz mellett található Beadás gombra kattintással teheti meg ( 53. 
+ábra). 
+ 
+53. ábra - A féléves munka hallgatói beadása 
+A féléves munka beadásához az alábbi feltételek teljesülése szükséges: 
+ A tanszékvezető korábban jóváhagyta a témához tartozó feladatkiírást. 
+ A hallgató töltött fel dolgozatot (a melléklet feltöltése nem kötelező). 
+ Diplomaterv 1 kivételével a hallgató megadta a téma kulcsszavait és összefoglalóját.  
+A beadás után a hallgató már nem módosíthatja a témához tartozó adatokat.  
+A dolgozat hallgatói beadásár ól a Portál automatikusan e -mail értesítést küld a konzulensnek, akinek a 
+feltöltött fájlokat még jóvá kell hagynia. 
+ 
+
+--- PAGE 35 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 35 - 
+3.6. Dolgozat jóváhagyása az oktató által 
+A hallgató által feltöltött fájlok a beadást követően még csak az oktató számára láthatóak. Az oktató nak a 
+feltöltött fájlokat és a megadott adatokat ellenőriznie kell, és ha azokban hibát talál, akkor azt e -mailben 
+vagy a következő konzultáció alka lmával a hallgató számára jelz i, és a hallgatónak ki kell azokat javítania. A 
+helyes adatokkal feltöltött do lgozatot a konzulensnek jóvá kell hagynia, ami egyben a dolgozat hivatalos 
+beadása is. 
+A féléves munkát az oktató a félév státusza mellett található Jóváhagyás gombbal (54. ábra) fogadhatja el és 
+zárhatja le (véglegesítés). Amennyiben a feltöltött fájlokban vagy adatokban az oktató hibát talál, akkor az 
+Elutasítás gombra kattintva küldheti vissza a témát a hallgatónak javításra. 
+ 
+54. ábra - A félévhez tartozó fájlok jóváhagyása és elutasítása 
+FONTOS: csak olyan témát tud az oktató lezárni, amelynél meg van adva a téma angol és magyar címe, 
+összefoglalója, kulcsszavai, valamint fel van töltve hozzá feladatkiírás és természetesen legalább egy dolgozat 
+fájl! Amennyiben a lezáráshoz még további adatok szükségesek, azt a Portál a Dolgozat státusza  sorban (54. 
+ábra) és a téma sz erkesztő oldalának tetején is f eltűnően jelzi  (55. ábra ). A címek és a feladatkiírás 
+megadásáról az oktatónak, az össze foglalóról, a kulcsszavakról és dolgozat feltöltéséről a hallgatónak kell 
+gondoskodnia! 
+ 
+55. ábra - Figyelmeztetés a beadáshoz szükséges hiányzó adatokról 
+Lezárt félévhez a hallgató nem tölthet fel további adatokat és fájlokat.  Amennyiben lezárás után mégis 
+szükséges az adatok módosítása vagy további fájlok feltöltése, a kari adminisztrátor ideiglenesen feloldhatja 
+a lezárást. 
+A záróvizsga időszak után a Dékáni Hivatal a Neptunban tárolt információk alapján a záróvizsgán megvédett 
+témákat Védett státuszúra állítja. Ettől kezdve a dolgozat és kiegészítő adatai a többi, megfelelő jogosultságú 
+felhasználó számára nyilvánosan is megjelenik a rendszerben, a következő formában:  
+
+--- PAGE 36 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 36 - 
+ 
+56. ábra - Hozzáférés jogosultsággal rendelkező felhasználó számára 
+
+--- PAGE 37 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 37 - 
+3.7. Bírálat feltöltése 
+A téma megjelenítő oldal án a feladatkiírás és a dolgozat mellett a harmadik dokumentumfajta a témához 
+tartozó bírálat.  A dolgozat után érdeklődő későbbi portállátogatók komoly érdeklődésére tarthat számot, 
+hogy a munkát alaposan áttanulmányozó szakember, a felkért bíráló milyen véleményt alkotott a jelölt 
+munkájáról, milyen hibáka t állapított meg benne, esetleg milyen tanácsokat adott a 
+szakdolgozat/diplomaterv szerzőjének. 
+A bírálat maga is szerzői jogi védelem alatt áll, tehát a bírálat feltöltése előtt kérjük ahhoz a bíráló 
+hozzájárulását. A hozzájárulás megtagadása esetén a bír álat nem tölthető fel a Portálra annak nyilvánossága 
+miatt (jóllehet a bírálat is csak bejelentkezett felhasználók számára lesz hozzáférhető).  
+A bírálat feltöltését lehetővé tevő Feltöltés ikon a téma oktatói szerkesztői oldalán található (57. ábra). 
+ 
+57. ábra - Bírálat feltöltése és letöltése 
+
+--- PAGE 38 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 38 - 
+4. Témák, dokumentumok lezárása és utólagos módosítása 
+A Portál az aktuális félévre beállított határidőknek megfelelően biztosítja az egyes munkafázisok bonyolítását. 
+Ezt az indokolja, hogy az előírt feladatok megfelelő időben elvégzésre kerüljenek, mivel  az egyes  
+munkafázisokat követően a feltöltött adatok fe ldolgozásán és ellenőrzésén a Kar más szervezeti egységei 
+kezdenek el dolgozni, a folyamatosan változó adatok ez eket az egymásra épülő munkafolyamatot 
+ellehetetlenítenék. Az egy-egy munkafázisra megadott határidő lejárta után a  Portál az adott munkafázishoz 
+kapcsolódó tevékenységeket automatikusan letiltja. 
+A fontosabb – határidőkhöz kapcsolódó - munkafázisok pontos határidőit minden félévben a kari/egyetemi 
+időbeosztástól függően összeállított tanszéki és hallgatói tájékoztatók tartalmazzák):  
+Lejárt határi dő miatt lezárt folyamatokon változtatásokat a kari adminisztrátor végezhet. Az általános 
+alapelvek a következők: 
+ Tévesen kiírt témát az oktató addig törölhet, ameddig ahhoz kapcsolódóan dokumentum 
+(feladatkiírás, nyilatkozat, adatlap) nem került feltöltésre vagy lezárásra. 
+ A tanszéki adminisztrátor a legtöbb oktatói feladatot el tudja végezni az oktató helyett, de témát 
+nem tud kiírni az oktató nevében. 
+ A tanszéki adminisztrátor a hallgató nevében nem járhat el, hallgató által elvégzendő feladatot 
+nem tud ellátni. 
+ A hallgató által lezárt adatlap ot a központi határidő lejárta előtt az oktató fel tudja nyitni , 
+amennyiben nem ért egyet annak tartalmával. 
+ A hallgató által lezárt adatlapot a kari adminisztrátor módosítani tudja. 
+ Az oktató két esetben végez el jó váhagyást (zárást): az adatlap és a dolgozat  (ideértve az 
+esetleges mellékleteket is) feltöltését követően.  
+ Lezárt témát, félévet, bírálatfeltöltést a tanszék hivatalos kérésére a kari adminisztrátor tud 
+felnyitni dokumentum pótlása céljából. 
+--- PAGE 39 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 39 - 
+5. Titkosított diplomatervek kezelése 
+Titkosított diplomatervek tekintetében a VIK Kari Tanács 2009. december 15 -i határozata van érvényben 
+karunkon (https://www.vik.bme.hu/files/00004025.pdf). Ennek legfontosabb sarokpontjai a következők:  
+1. Titkos diplomaterv -témát kizárólag mesterképzésben szabad meghirdetni, az  alapképzés 
+szakdolgozat-témái, illetve az ötéves képzés diplomaterv-témái nyilvánosak. 
+2. Titkos diplomaterv-témát külső vállalatok, gazdasági szervezetek kezdeményezhetnek. 
+3. A titkosítást a diplomaterv -téma kiírása előtt a diplomatervezést gondozó  tanszék vezetőjének 
+kérésére a Dékán engedélyezheti. 
+4. A Kar a képzési célok megvalósulása érdekében továbbra is a diplomatervtémák  nyilvánosságát 
+tartja alapvetőnek, a titkosítást csak kivételes esetben, 3 év időtartamra engedélyezi. 
+5. A titkosítási kérelmek során a tanszékeknek úgy kell eljárniuk, hogy több év  átlagában a kiadott 
+diplomaterv-témák maximum 10%-a legyen titkosított. 
+Téma titkosítását a Diplomaterv Portá lon a Dékán írásbeli engedélye alapján kizárólag a kari adminisztrátor 
+tud elvégezni. A titkosítás ténye mind a téma konzulense, mind a hallgató számára látható a téma 
+szerkesztési oldalán (18. ábra). 
+A titkosított témákat a Portál a következő módon kezeli:  A titkosítási engedély megadását követően a 
+Portálon beállításra kerül a titkosítás ténye, ezt a visszajelző szimbólumon mind a hallgató, mind a 
+konzulense ellenőri zni tudja. A titkosítás időtartama a téma lezárását követő 3 év. Titkosított diplomaterv 
+esetében a témaoldal (témakiírás, hallgató és konzulens neve, összefoglaló) megjelennek a témát megtekintő 
+személy számára , de a hozzátartozó adatfájlok – maga a dolgo zat és a mellékletei – már csak akkor, ha a 
+betekintő személy erre jogosult  (56. ábra ). Jogosult személynek a rendszer (bejelentkezés alapján) a téma 
+konzulensét, magá t a hallgatót és a kari adminisztrátort tekinti. Akár közvetlen URL hozzáférési kísérlet 
+esetén is ez a jogosultság ellenőrzésre kerül. A fájlok megtekintésére még a tanszéki adminisztrátornak sincs 
+joga. Kari adminisztrátoraink munkakörükből adódóan valamennyi adat tekintetében titoktartásra 
+kötelezettek. 
+--- PAGE 40 ---
+Diplomaterv Portál  Felhasználói útmutató 
+ - 40 - 
+6. Jogosultságok 
+A felhasználók azonosítását a Neptun rendszer végzi el Neptun kód és jelszó alapján. Szintén a Neptun adatai 
+alapján kerül meghatározásra, hogy a felhasználó oktató vagy hallgató -e, és hogy az oktató melyik 
+tanszékhez tartozik. Ezen kívül a kari adminisztrátor a felhasználóknak tanszéki adminisztrátor i, 
+tanszékvezetői és kari adminisztrátori jogosultságokat adhat. A bejelentkezés után a rendszer hat, egymáshoz 
+képest egyre inkább bővülő jogosultságokkal rendelkező szerepkört különböztet meg, minden felhasználó 
+pontosan egy szerepkörnek a tagja: 
+ Névtelen látogató (anonymous):  azonosítatlan felhasználó, aki a rendszer külvilág számára is 
+elérhető nyilvános szolgáltatásait (pl. keresés) érheti el. 
+ Hallgató: a hallgatók számára biztosított funkciókat (pl. szakdolgozat beadás) érheti el.  
+ Oktató: az oktatók számára biztosított funkciókat (pl. témakiírás) érheti el. 
+ Tanszéki adminisztrátor: a tanszék által kezelt adatokhoz férhet hozzá és művelet eket végezhet 
+el a tanszéki oktatók helyett, azonban a naplózásban egyértelműen azonosítható, hogy a 
+változtatást ki végezte el. 
+ Tanszékvezető: a tanszékhez tartozó témát feladatkiírásait bírálhatja el. 
+ Kari adminisztrátor:  a rendszerben tárolt összes adat hoz hozzáfér, műveletei a saját neve alatt 
+kerülnek naplózásra. 
+A tanszéki és kari adminisztrátorok eljárhatnak oktatók nevében is. Ekkor a változási naplóba az 
+adminisztrátor neve kerül, így pontosan visszakereshető, hogy ki végezte a módosításokat . Ez al ól kivétel az 
+új téma kiírása,  mert ebben az esetben  a téma kiírása egyben az oktatóhoz rendelést is jelenti, így az 
+adminisztrátor az oktató előzetes jóváhagyása nélkül hirdethetne meg témát az ő nevében. 
+Az adminisztrátorok lekérdezéseket végezhetnek a portál adataihoz kapcsolódóan: a tanszéki adminisztrátor 
+valamennyi, saját tanszékéhez kapcsolódó téma adatait le tudja kérdezni (téma és hallgató adatai, 
+feladatkiírás, dolgozat és bírálat feltöltöttsége, i ll. statisztikai adatai, téma URL címe stb.). A lekérdezések 
+azonnal megtekinthetők, ill. tárolhatók is (Excel vagy CSV formátumban).  
+A kari adminisztrátor fentieket az összes kari adat tekintetében (az összes szervezeti egység nevében) meg 
+tudja tenni. Ezen túlmenően le tudja kérdezni a portál felhasználóinak aktivitását, általános célú tájékoztató 
+üzeneteket tud elhelyezni a Portál nyitó oldalán, és a már bejelentkezett felhasználók jogosultsági adatainak 
+adminisztrálását is el tudja látni. 
+A kari adminisztrátor változtatásokat tud végezni a témához tartozó adatlapon. Erre azért van szükség, hogy 
+a lezárt és jóváhagyott adatlapok ellenőrzése során észlelt hibákat a hallgatóval és az oktatóval történt 
+egyeztetés után az adminisztrátor javítani tudja (elsőso rban hibás záróvizsga tantárgyak felvétele történik 
+meg gyakran). Az adatlap szerkesztését a változási napló természetesen az adminisztrátor neve alatt rögzíti.  
+A Portál tartalmaz egy tanszéki/kari adminisztrátori adatexportálási felületet, amely a 
+szakdolgozat/diplomaterv adatlapok adatait a záróvizsga jegyzőkönyvek készítéséhez használatos program 
+számára elektronikus adatfájl (Excel/CSV) formájában tudja szolgáltatni.  

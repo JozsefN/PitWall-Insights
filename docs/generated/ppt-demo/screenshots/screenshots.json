@@ -1,0 +1,68 @@
+[
+  {
+    "name": "01_logged_out_sessions_gate",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\01_logged_out_sessions_gate.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions"
+  },
+  {
+    "name": "02_signup",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\02_signup.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/signup"
+  },
+  {
+    "name": "03_login",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\03_login.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/login"
+  },
+  {
+    "name": "04_home_authenticated",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\04_home_authenticated.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/"
+  },
+  {
+    "name": "05_system_health",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\05_system_health.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/system/health"
+  },
+  {
+    "name": "06_session_explorer",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\06_session_explorer.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions?view=explorer"
+  },
+  {
+    "name": "07_workspace_driver_selection",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\07_workspace_driver_selection.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Asession-trends&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all"
+  },
+  {
+    "name": "08_lookback_session_trends",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\08_lookback_session_trends.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Asession-trends&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all"
+  },
+  {
+    "name": "09_compare_lap",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\09_compare_lap.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Acompare-lap&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee&lap=10"
+  },
+  {
+    "name": "10_stint_strategy",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\10_stint_strategy.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Astint-strategy&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all"
+  },
+  {
+    "name": "11_replay_command",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\screenshots\\11_replay_command.png",
+    "title": "Pitwall Insights",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=simulation&layout=builtin%3Areplay-command&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all"
+  }
+]

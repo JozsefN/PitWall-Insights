@@ -131,6 +131,7 @@ def list_car_telemetry(
     lap_number: int | None = Query(default=None, ge=1),
     session_time_from_ms: int | None = Query(default=None, ge=0),
     session_time_to_ms: int | None = Query(default=None, ge=0),
+    sample_interval_ms: int | None = Query(default=None, ge=100, le=10000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     service = build_session_service(db)
@@ -145,6 +146,7 @@ def list_car_telemetry(
                 lap_number=lap_number,
                 session_time_from_ms=session_time_from_ms,
                 session_time_to_ms=session_time_to_ms,
+                sample_interval_ms=sample_interval_ms,
             )
         ]
     except ValueError as exc:
@@ -160,6 +162,7 @@ def list_position_telemetry(
     lap_number: int | None = Query(default=None, ge=1),
     session_time_from_ms: int | None = Query(default=None, ge=0),
     session_time_to_ms: int | None = Query(default=None, ge=0),
+    sample_interval_ms: int | None = Query(default=None, ge=100, le=10000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     service = build_session_service(db)
@@ -174,10 +177,19 @@ def list_position_telemetry(
                 lap_number=lap_number,
                 session_time_from_ms=session_time_from_ms,
                 session_time_to_ms=session_time_to_ms,
+                sample_interval_ms=sample_interval_ms,
             )
         ]
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/{session_id}/replay-timeline")
+def get_replay_timeline(session_id: str, db: Session = Depends(get_db)) -> dict:
+    service = build_session_service(db)
+    if service.get_session(session_id) is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return service.get_replay_timeline(session_id)
 
 
 @router.get("/{session_id}/ticks")

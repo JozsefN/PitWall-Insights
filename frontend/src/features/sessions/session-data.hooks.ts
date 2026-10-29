@@ -12,7 +12,10 @@ import type {
   SessionEntryDto,
   SessionTelemetryQuery,
 } from "../../data/contracts/sessions.contracts";
-import type { TelemetryKind, TelemetryScope } from "../../data/contracts/telemetry-materialization.contracts";
+import type {
+  TelemetryKind,
+  TelemetryScope,
+} from "../../data/contracts/telemetry-materialization.contracts";
 import {
   useEnsureTelemetryMaterializationQuery,
   useTelemetryMaterializationJobQuery,
@@ -32,6 +35,7 @@ export type WorkspaceTelemetryResourceOptions = {
   limit?: number;
   sessionTimeFromMs?: number;
   sessionTimeToMs?: number;
+  sampleIntervalMs?: number;
   enabled?: boolean;
 };
 
@@ -43,13 +47,23 @@ export type WorkspaceEntryResourceOptions = {
 
 export function useSelectedEntryLapsMap(enabled = true) {
   const workspace = useSessionWorkspace();
-  return useEntryLapsMap(workspace.sessionId, workspace.selectedDriverIds, enabled);
+  return useEntryLapsMap(
+    workspace.sessionId,
+    workspace.selectedDriverIds,
+    enabled,
+  );
 }
 
-export function useWorkspaceEntryLapsResource(options: WorkspaceEntryResourceOptions = {}) {
+export function useWorkspaceEntryLapsResource(
+  options: WorkspaceEntryResourceOptions = {},
+) {
   const workspace = useSessionWorkspace();
   const resolved = resolveWorkspaceEntries(workspace, options);
-  const laps = useEntryLapsMap(workspace.sessionId, resolved.entryIds, resolved.enabled);
+  const laps = useEntryLapsMap(
+    workspace.sessionId,
+    resolved.entryIds,
+    resolved.enabled,
+  );
 
   return {
     ...resolved,
@@ -64,7 +78,12 @@ export function useSelectedCarTelemetryMap(
   enabled = true,
 ) {
   const workspace = useSessionWorkspace();
-  return useCarTelemetryMap(workspace.sessionId, workspace.selectedDriverIds, query, enabled);
+  return useCarTelemetryMap(
+    workspace.sessionId,
+    workspace.selectedDriverIds,
+    query,
+    enabled,
+  );
 }
 
 export function useSelectedPositionTelemetryMap(
@@ -72,7 +91,12 @@ export function useSelectedPositionTelemetryMap(
   enabled = true,
 ) {
   const workspace = useSessionWorkspace();
-  return usePositionTelemetryMap(workspace.sessionId, workspace.selectedDriverIds, query, enabled);
+  return usePositionTelemetryMap(
+    workspace.sessionId,
+    workspace.selectedDriverIds,
+    query,
+    enabled,
+  );
 }
 
 export function useAllPositionTelemetryMap(
@@ -88,7 +112,9 @@ export function useAllPositionTelemetryMap(
   );
 }
 
-export function useWorkspaceCarTelemetryResource(options: WorkspaceTelemetryResourceOptions = {}) {
+export function useWorkspaceCarTelemetryResource(
+  options: WorkspaceTelemetryResourceOptions = {},
+) {
   const workspace = useSessionWorkspace();
   const resolved = resolveWorkspaceTelemetryResource(workspace, options);
   const materialization = useTelemetryMaterializationReadiness({
@@ -115,7 +141,9 @@ export function useWorkspaceCarTelemetryResource(options: WorkspaceTelemetryReso
   });
 }
 
-export function useWorkspacePositionTelemetryResource(options: WorkspaceTelemetryResourceOptions = {}) {
+export function useWorkspacePositionTelemetryResource(
+  options: WorkspaceTelemetryResourceOptions = {},
+) {
   const workspace = useSessionWorkspace();
   const resolved = resolveWorkspaceTelemetryResource(workspace, options);
   const materialization = useTelemetryMaterializationReadiness({
@@ -167,16 +195,29 @@ export function useTelemetryMaterializationReadiness({
       }
     : null;
   const ensureQuery = useEnsureTelemetryMaterializationQuery(request, enabled);
-  const jobQuery = useTelemetryMaterializationJobQuery(ensureQuery.data?.job_id, Boolean(ensureQuery.data?.job_id));
+  const jobQuery = useTelemetryMaterializationJobQuery(
+    ensureQuery.data?.job_id,
+    Boolean(ensureQuery.data?.job_id),
+  );
   const completed = jobQuery.data?.status === "completed";
   const jobId = ensureQuery.data?.job_id;
+  const cancelled = jobQuery.data?.status === "cancelled";
+
+  useEffect(() => {
+    if (cancelled)
+      void queryClient.invalidateQueries({
+        queryKey: ["telemetry-materialization", "ensure"],
+      });
+  }, [cancelled, queryClient]);
 
   useEffect(() => {
     if (!jobId) {
       return;
     }
 
-    void queryClient.invalidateQueries({ queryKey: ["telemetry-materialization", "jobs"] });
+    void queryClient.invalidateQueries({
+      queryKey: ["telemetry-materialization", "jobs"],
+    });
   }, [jobId, queryClient]);
 
   useEffect(() => {
@@ -184,17 +225,34 @@ export function useTelemetryMaterializationReadiness({
       return;
     }
 
-    void queryClient.invalidateQueries({ queryKey: ["sessions", workspace.sessionId] });
-    void queryClient.invalidateQueries({ queryKey: ["sessions", workspace.sessionId, "entries"] });
-    void queryClient.invalidateQueries({ queryKey: ["telemetry-materialization", "ensure"] });
-    void queryClient.invalidateQueries({ queryKey: ["telemetry-materialization", "jobs"] });
+    void queryClient.invalidateQueries({
+      queryKey: ["sessions", workspace.sessionId],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ["sessions", workspace.sessionId, "entries"],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ["telemetry-materialization", "ensure"],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ["telemetry-materialization", "jobs"],
+    });
   }, [completed, queryClient, workspace.sessionId]);
 
   return {
-    ready: workspace.session.telemetry_status === "loaded" || ensureQuery.data?.ready === true || completed,
-    isError: ensureQuery.isError || jobQuery.data?.status === "failed" || jobQuery.isError,
-    isPreparing: enabled && !(workspace.session.telemetry_status === "loaded" || ensureQuery.data?.ready === true || completed),
-    stage: jobQuery.data?.progress_stage ?? (ensureQuery.isFetching ? "queued" : undefined),
+    ready: ensureQuery.data?.ready === true || completed,
+    isError:
+      ensureQuery.isError ||
+      jobQuery.data?.status === "failed" ||
+      jobQuery.isError,
+    isPreparing: enabled && !(ensureQuery.data?.ready === true || completed),
+    stage:
+      jobQuery.data?.progress_stage ??
+      (ensureQuery.isFetching ? "queued" : undefined),
+    errorMessage: jobQuery.data?.error_message,
+    queueStalled:
+      jobQuery.data?.status === "queued" &&
+      jobQuery.dataUpdatedAt - Date.parse(jobQuery.data.created_at) > 45_000,
   };
 }
 
@@ -203,19 +261,27 @@ function resolveWorkspaceTelemetryResource(
   options: WorkspaceTelemetryResourceOptions,
 ) {
   const resolvedEntries = resolveWorkspaceEntries(workspace, options);
-  const scope = resolveTelemetryScope(options.scope ?? "auto", workspace.lapSelection);
+  const scope = resolveTelemetryScope(
+    options.scope ?? "auto",
+    workspace.lapSelection,
+  );
   const lapNumber =
     scope === "lap"
-      ? options.lapNumber ?? (workspace.lapSelection === "all" ? undefined : workspace.lapSelection)
+      ? (options.lapNumber ??
+        (workspace.lapSelection === "all" ? undefined : workspace.lapSelection))
       : undefined;
   const hasRequiredLap = !options.requireLap || lapNumber != null;
-  const enabled = resolvedEntries.enabled && hasRequiredLap && (scope === "session" || lapNumber != null);
+  const enabled =
+    resolvedEntries.enabled &&
+    hasRequiredLap &&
+    (scope === "session" || lapNumber != null);
   const query: SessionTelemetryQuery = {
     offset: options.offset,
     limit: options.limit,
     lap_number: scope === "lap" ? lapNumber : undefined,
     session_time_from_ms: options.sessionTimeFromMs,
     session_time_to_ms: options.sessionTimeToMs,
+    sample_interval_ms: options.sampleIntervalMs,
   };
 
   return {
@@ -232,7 +298,9 @@ function resolveWorkspaceEntries(
   workspace: ReturnType<typeof useSessionWorkspace>,
   options: WorkspaceEntryResourceOptions,
 ) {
-  const entriesById = new Map(workspace.entries.map((entry) => [entry.id, entry]));
+  const entriesById = new Map(
+    workspace.entries.map((entry) => [entry.id, entry]),
+  );
   const entryIds = Array.from(
     new Set(
       options.entryIds ??
@@ -252,7 +320,10 @@ function resolveWorkspaceEntries(
   };
 }
 
-function resolveTelemetryScope(scope: TelemetryScopeMode, lapSelection: number | "all"): TelemetryScope {
+function resolveTelemetryScope(
+  scope: TelemetryScopeMode,
+  lapSelection: number | "all",
+): TelemetryScope {
   if (scope !== "auto") {
     return scope;
   }
@@ -275,6 +346,8 @@ function buildWorkspaceTelemetryResourceResult<TSample>({
   dataLoading,
   dataError,
   kind,
+  errorMessage,
+  queueStalled,
 }: {
   entryIds: string[];
   entries: SessionEntryDto[];
@@ -290,6 +363,8 @@ function buildWorkspaceTelemetryResourceResult<TSample>({
   dataLoading: boolean;
   dataError: boolean;
   kind: TelemetryKind;
+  errorMessage?: string | null;
+  queueStalled: boolean;
 }) {
   return {
     entryIds,
@@ -301,7 +376,10 @@ function buildWorkspaceTelemetryResourceResult<TSample>({
     ready,
     isPreparing,
     stage,
-    waitMessage: getTelemetryResourceWaitMessage(kind, stage),
+    waitMessage: queueStalled
+      ? "Preparation has not started. The background service may be offline or busy. Your request is saved and will continue when it becomes available."
+      : getTelemetryResourceWaitMessage(kind, stage),
+    errorMessage,
     dataByEntryId,
     isLoading: dataLoading,
     isError: isError || dataError,
@@ -326,22 +404,25 @@ function getTelemetryResourceWaitMessage(kind: TelemetryKind, stage?: string) {
   return `${label} is being prepared for this selection.`;
 }
 
-function useEntryLapsMap(sessionId: string, entryIds: string[], enabled: boolean) {
-  const results = useQueries({
+function useEntryLapsMap(
+  sessionId: string,
+  entryIds: string[],
+  enabled: boolean,
+) {
+  return useQueries({
     queries: entryIds.map((entryId) => ({
       queryKey: ["sessions", sessionId, "entries", entryId, "laps"],
       queryFn: () => listEntryLaps(sessionId, entryId),
       enabled,
     })),
+    combine: (results) => ({
+      dataByEntryId: Object.fromEntries(
+        entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
+      ) as Record<string, EntryLapDto[]>,
+      isLoading: results.some((result) => result.isLoading),
+      isError: results.some((result) => result.isError),
+    }),
   });
-
-  return {
-    dataByEntryId: Object.fromEntries(
-      entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
-    ) as Record<string, EntryLapDto[]>,
-    isLoading: results.some((result) => result.isLoading),
-    isError: results.some((result) => result.isError),
-  };
 }
 
 function useCarTelemetryMap(
@@ -352,7 +433,15 @@ function useCarTelemetryMap(
 ) {
   const results = useQueries({
     queries: entryIds.map((entryId) => ({
-      queryKey: ["sessions", sessionId, "entries", entryId, "telemetry", "car", query],
+      queryKey: [
+        "sessions",
+        sessionId,
+        "entries",
+        entryId,
+        "telemetry",
+        "car",
+        query,
+      ],
       queryFn: () => listCarTelemetry(sessionId, entryId, query),
       enabled,
     })),
@@ -373,19 +462,26 @@ function usePositionTelemetryMap(
   query: SessionTelemetryQuery | undefined,
   enabled: boolean,
 ) {
-  const results = useQueries({
+  return useQueries({
     queries: entryIds.map((entryId) => ({
-      queryKey: ["sessions", sessionId, "entries", entryId, "telemetry", "position", query],
+      queryKey: [
+        "sessions",
+        sessionId,
+        "entries",
+        entryId,
+        "telemetry",
+        "position",
+        query,
+      ],
       queryFn: () => listPositionTelemetry(sessionId, entryId, query),
       enabled,
     })),
+    combine: (results) => ({
+      dataByEntryId: Object.fromEntries(
+        entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
+      ) as Record<string, PositionSampleDto[]>,
+      isLoading: results.some((result) => result.isLoading),
+      isError: results.some((result) => result.isError),
+    }),
   });
-
-  return {
-    dataByEntryId: Object.fromEntries(
-      entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
-    ) as Record<string, PositionSampleDto[]>,
-    isLoading: results.some((result) => result.isLoading),
-    isError: results.some((result) => result.isError),
-  };
 }

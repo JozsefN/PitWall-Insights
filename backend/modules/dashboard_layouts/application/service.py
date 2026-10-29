@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
 
 from modules.dashboard_layouts.domain.models import (
     LayoutCreateRequest,
@@ -10,6 +9,7 @@ from modules.dashboard_layouts.domain.models import (
 )
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord
 from modules.dashboard_layouts.infrastructure.repository import DashboardLayoutRepository
+from modules.dashboard_layouts.domain.validation import validate_dashboard_config
 
 
 class DashboardLayoutService:
@@ -26,10 +26,12 @@ class DashboardLayoutService:
         return self._build_record(record)
 
     def create_layout(self, user_id: str, request: LayoutCreateRequest) -> LayoutRecord:
-        config = validate_dashboard_config(request.config)
+        if not request.name.strip():
+            raise ValueError("Layout name cannot be blank")
+        config = validate_dashboard_config(request.config, request.audience, request.schema_version)
         record = self.repository.create(
             owner_user_id=user_id,
-            name=request.name,
+            name=request.name.strip(),
             description=request.description,
             audience=request.audience,
             schema_version=request.schema_version,
@@ -47,14 +49,22 @@ class DashboardLayoutService:
         if record is None:
             return None
 
-        config = validate_dashboard_config(request.config) if request.config is not None else None
+        if request.name is not None and not request.name.strip():
+            raise ValueError("Layout name cannot be blank")
+        validate_dashboard_config(
+            request.config if request.config is not None else record.config_json,
+            request.audience or record.audience,
+            request.schema_version or record.schema_version,
+        )
+        config = deepcopy(request.config) if request.config is not None else None
         updated = self.repository.update(
             record,
-            name=request.name,
+            name=request.name.strip() if request.name is not None else None,
             description=request.description,
             audience=request.audience,
             schema_version=request.schema_version,
             config_json=config,
+            clear_description="description" in request.model_fields_set,
         )
         return self._build_record(updated)
 
@@ -65,6 +75,17 @@ class DashboardLayoutService:
 
         self.repository.delete(record)
         return True
+
+    def list_favorites(self, user_id: str) -> list[str]:
+        return self.repository.list_favorites(user_id)
+
+    def set_favorite(self, user_id: str, layout_key: str, favorite: bool) -> list[str]:
+        if layout_key.startswith("user:"):
+            if self.repository.get_for_user(user_id, layout_key[5:]) is None:
+                raise ValueError("Layout not found")
+        elif not layout_key.startswith("builtin:") or not layout_key[8:].strip():
+            raise ValueError("Invalid layout reference")
+        return self.repository.set_favorite(user_id, layout_key, favorite)
 
     @staticmethod
     def _build_record(record: UserDashboardLayoutRecord) -> LayoutRecord:
@@ -78,63 +99,3 @@ class DashboardLayoutService:
             createdAt=record.created_at,
             updatedAt=record.updated_at,
         )
-
-
-def validate_dashboard_config(config: dict[str, Any] | None) -> dict[str, Any]:
-    if not isinstance(config, dict):
-        raise ValueError("Layout config must be an object")
-
-    layout_id = config.get("id")
-    if not isinstance(layout_id, str) or not layout_id.strip():
-        raise ValueError("Layout config requires a string id")
-
-    sections = config.get("sections")
-    if not isinstance(sections, list) or not sections:
-        raise ValueError("Layout config requires at least one section")
-
-    for index, section in enumerate(sections):
-        _validate_section(section, f"sections[{index}]")
-
-    return deepcopy(config)
-
-
-def _validate_section(section: Any, path: str) -> None:
-    if not isinstance(section, dict):
-        raise ValueError(f"{path} must be an object")
-
-    section_id = section.get("id")
-    if not isinstance(section_id, str) or not section_id.strip():
-        raise ValueError(f"{path}.id must be a non-empty string")
-
-    _validate_layout_node(section.get("layout"), f"{path}.layout")
-
-
-def _validate_layout_node(node: Any, path: str) -> None:
-    if not isinstance(node, dict):
-        raise ValueError(f"{path} must be an object")
-
-    node_type = node.get("type")
-    if node_type == "widget":
-        widget_id = node.get("widgetId")
-        if not isinstance(widget_id, str) or not widget_id.strip():
-            raise ValueError(f"{path}.widgetId must be a non-empty string")
-
-        options = node.get("options")
-        if options is not None and not isinstance(options, dict):
-            raise ValueError(f"{path}.options must be an object when provided")
-        return
-
-    if node_type == "group":
-        direction = node.get("direction")
-        if direction not in {"row", "column"}:
-            raise ValueError(f"{path}.direction must be 'row' or 'column'")
-
-        children = node.get("children")
-        if not isinstance(children, list) or not children:
-            raise ValueError(f"{path}.children must be a non-empty array")
-
-        for index, child in enumerate(children):
-            _validate_layout_node(child, f"{path}.children[{index}]")
-        return
-
-    raise ValueError(f"{path}.type must be 'widget' or 'group'")

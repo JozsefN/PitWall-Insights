@@ -9,6 +9,11 @@ from pydantic import BaseModel, ConfigDict, Field
 DashboardAudience = Literal["session-lookback", "live-race"]
 
 
+class LayoutFavoriteRequest(BaseModel):
+    layout_id: str = Field(alias="layoutId", min_length=1, max_length=160)
+    favorite: bool
+
+
 class LayoutCreateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=160)
     description: str | None = Field(default=None, max_length=600)
@@ -17,7 +22,7 @@ class LayoutCreateRequest(BaseModel):
         default=1,
         alias="schemaVersion",
         serialization_alias="schemaVersion",
-        ge=1,
+        ge=1, le=2,
     )
     config: dict[str, Any]
 
@@ -32,7 +37,7 @@ class LayoutUpdateRequest(BaseModel):
         default=None,
         alias="schemaVersion",
         serialization_alias="schemaVersion",
-        ge=1,
+        ge=1, le=2,
     )
     config: dict[str, Any] | None = None
 

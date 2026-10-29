@@ -226,6 +226,7 @@ class SessionRepository:
         lap_number: int | None = None,
         session_time_from_ms: int | None = None,
         session_time_to_ms: int | None = None,
+        sample_interval_ms: int | None = None,
     ) -> list[CarTelemetrySampleModel]:
         self._assert_entry_belongs_to_session(session_id, entry_id)
         query = self.db.query(CarTelemetrySampleRecord).filter(
@@ -244,6 +245,9 @@ class SessionRepository:
         if session_time_to_ms is not None:
             query = query.filter(CarTelemetrySampleRecord.session_time_ms <= session_time_to_ms)
 
+        if sample_interval_ms is not None:
+            bucket = CarTelemetrySampleRecord.session_time_ms // sample_interval_ms
+            query = query.distinct(bucket).order_by(bucket, CarTelemetrySampleRecord.session_time_ms)
         records = (
             query.order_by(CarTelemetrySampleRecord.sample_seq.asc())
             .offset(offset)
@@ -262,6 +266,7 @@ class SessionRepository:
         lap_number: int | None = None,
         session_time_from_ms: int | None = None,
         session_time_to_ms: int | None = None,
+        sample_interval_ms: int | None = None,
     ) -> list[PositionSampleModel]:
         self._assert_entry_belongs_to_session(session_id, entry_id)
         query = self.db.query(PositionSampleRecord).filter(
@@ -280,6 +285,9 @@ class SessionRepository:
         if session_time_to_ms is not None:
             query = query.filter(PositionSampleRecord.session_time_ms <= session_time_to_ms)
 
+        if sample_interval_ms is not None:
+            bucket = PositionSampleRecord.session_time_ms // sample_interval_ms
+            query = query.distinct(bucket).order_by(bucket, PositionSampleRecord.session_time_ms)
         records = (
             query.order_by(PositionSampleRecord.sample_seq.asc())
             .offset(offset)
@@ -287,6 +295,19 @@ class SessionRepository:
             .all()
         )
         return [self._build_position_sample_model(record) for record in records]
+
+    def get_replay_timeline(self, session_id: str) -> dict[str, int]:
+        start, end = self.db.query(
+            func.min(EntryLapRecord.lap_start_time_ms),
+            func.max(EntryLapRecord.lap_end_time_ms),
+        ).join(SessionEntryRecord, EntryLapRecord.session_entry_id == SessionEntryRecord.id).filter(
+            SessionEntryRecord.session_id == session_id,
+        ).one()
+        if start is None or end is None:
+            start, end = self.db.query(
+                func.min(SessionTickRecord.session_time_ms), func.max(SessionTickRecord.session_time_ms),
+            ).filter(SessionTickRecord.session_id == session_id).one()
+        return {"start_time_ms": max(0, int(start or 0)), "end_time_ms": max(0, int(end or start or 0))}
 
     def list_ticks(self, session_id: str, *, offset: int, limit: int) -> list[SessionTickModel]:
         records = (

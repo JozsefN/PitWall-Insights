@@ -131,6 +131,9 @@ Current major feature areas:
 
 - `auth`
 - `sessions`
+- `dashboards` (shared layout catalog and structural previews)
+
+The authenticated Dashboard Builder lives at `/dashboard-builder`. It reuses the existing layout schema, registry, and query layer for an editable grid canvas, personal layout management, and profile-scoped favorites. See [Dashboard Builder](07-dashboard-builder-foundation.md) for its boundaries and future editor integration.
 
 ### `frontend/src/pages`
 

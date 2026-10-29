@@ -6,6 +6,7 @@ from modules.dashboard_layouts.domain.models import (
     LayoutCreateRequest,
     LayoutRecord,
     LayoutUpdateRequest,
+    LayoutFavoriteRequest,
 )
 from modules.dashboard_layouts.infrastructure.repository import DashboardLayoutRepository
 from modules.delivery_api.api.auth_dependencies import require_current_user
@@ -26,6 +27,26 @@ def list_layouts(
     service: DashboardLayoutService = Depends(get_layout_service),
 ) -> list[LayoutRecord]:
     return service.list_layouts(current_user.id)
+
+
+@router.get("/favorites", response_model=list[str])
+def list_favorites(
+    current_user: User = Depends(require_current_user),
+    service: DashboardLayoutService = Depends(get_layout_service),
+) -> list[str]:
+    return service.list_favorites(current_user.id)
+
+
+@router.put("/favorites", response_model=list[str])
+def set_favorite(
+    request: LayoutFavoriteRequest,
+    current_user: User = Depends(require_current_user),
+    service: DashboardLayoutService = Depends(get_layout_service),
+) -> list[str]:
+    try:
+        return service.set_favorite(current_user.id, request.layout_id, request.favorite)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/{layout_id}", response_model=LayoutRecord)

@@ -16,20 +16,27 @@ export function useEnsureTelemetryMaterializationQuery(
 ) {
   return useQuery({
     queryKey: ["telemetry-materialization", "ensure", request],
-    queryFn: () => ensureTelemetryMaterialization(request as TelemetryMaterializationRequestDto),
+    queryFn: () =>
+      ensureTelemetryMaterialization(
+        request as TelemetryMaterializationRequestDto,
+      ),
     enabled: Boolean(request) && enabled,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
   });
 }
 
-export function useTelemetryMaterializationJobQuery(jobId?: string | null, enabled = true) {
+export function useTelemetryMaterializationJobQuery(
+  jobId?: string | null,
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["telemetry-materialization", "jobs", jobId],
     queryFn: () => getTelemetryMaterializationJob(jobId as string),
     enabled: Boolean(jobId) && enabled,
     refetchInterval: (query) => {
       const job = query.state.data;
+      if (query.state.error) return false;
       if (!job || !ACTIVE_STATUSES.has(job.status)) {
         return false;
       }
@@ -59,7 +66,8 @@ export function useTelemetryMaterializationJobsQuery(
       }
 
       const jobs = query.state.data?.jobs ?? [];
-      return jobs.some((job) => ACTIVE_STATUSES.has(job.status)) ? 2000 : 3000;
+      if (query.state.error) return false;
+      return jobs.some((job) => ACTIVE_STATUSES.has(job.status)) ? 2000 : false;
     },
   });
 }

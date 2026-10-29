@@ -1,0 +1,231 @@
+{
+  "grid": {
+    "columns": 12,
+    "rowHeight": 48,
+    "gap": 12,
+    "designWidth": 1200,
+    "maxRows": 200
+  },
+  "widgets": {
+    "health-overview": {
+      "title": "System Health",
+      "description": "Current health signals across core services.",
+      "category": "platform",
+      "previewKind": "status",
+      "builderEnabled": false,
+      "supportedAudiences": [],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 5,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      }
+    },
+    "sessions-summary": {
+      "title": "Sessions",
+      "description": "Session volume and recent activity.",
+      "category": "platform",
+      "previewKind": "status",
+      "builderEnabled": false,
+      "supportedAudiences": [],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 5,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      }
+    },
+    "telemetry-line-chart": {
+      "title": "Telemetry Line Chart",
+      "description": "Speed or throttle overlays for selected drivers.",
+      "category": "telemetry",
+      "previewKind": "trace",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 5,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 5,
+        "compactBelowPx": 420,
+        "minAspect": 1.25,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "metric": "speed_kph",
+        "metricLabel": "Speed",
+        "unit": "kph",
+        "requiresLap": true
+      }
+    },
+    "brake-trace-chart": {
+      "title": "Brake Trace",
+      "description": "Brake-on overlays for a specific lap.",
+      "category": "telemetry",
+      "previewKind": "brake",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 3,
+        "minH": 3,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 4,
+        "compactBelowPx": 420,
+        "minAspect": 0.55,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "requiresLap": true
+      }
+    },
+    "lap-time-trend": {
+      "title": "Driver Lap Pace",
+      "description": "Lap-time comparison with clean-lap filters, references, and hover values.",
+      "category": "telemetry",
+      "previewKind": "pace",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 5,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 8,
+        "defaultH": 6,
+        "compactBelowPx": 420,
+        "minAspect": 1.25,
+        "shortBelowPx": 340
+      }
+    },
+    "stint-analysis": {
+      "title": "Stint Analysis",
+      "description": "Stint pace, compound windows, and degradation against absolute lap numbers.",
+      "category": "strategy",
+      "previewKind": "stints",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 6,
+        "minH": 5,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "minAspect": 1.4,
+        "shortBelowPx": 340
+      }
+    },
+    "lap-table": {
+      "title": "Lap Table",
+      "description": "Lap-by-lap data for selected drivers.",
+      "category": "telemetry",
+      "previewKind": "laps",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 6,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      }
+    },
+    "session-track-map": {
+      "title": "Session Track Map",
+      "description": "Position traces for selected drivers.",
+      "category": "track",
+      "previewKind": "track",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 3,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 6,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      }
+    },
+    "replay-track-map": {
+      "title": "Replay Track Map",
+      "description": "Current car positions against the replay clock.",
+      "category": "track",
+      "previewKind": "track",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 3,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 8,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      }
+    },
+    "replay-driver-cards": {
+      "title": "Replay Driver Cards",
+      "description": "Live-style driver telemetry cards.",
+      "category": "replay",
+      "previewKind": "driver-cards",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "sizing": {
+        "minW": 3,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 4,
+        "defaultH": 6,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      }
+    }
+  }
+}

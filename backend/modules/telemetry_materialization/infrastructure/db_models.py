@@ -10,6 +10,15 @@ from modules.session_domain.infrastructure.models.common import StringIdMixin, u
 from modules.storage.infrastructure.base import Base
 
 
+class TelemetryWorkerHeartbeatRecord(Base):
+    __tablename__ = "telemetry_worker_heartbeats"
+    worker_id: Mapped[str] = mapped_column(String(320), primary_key=True)
+    hostname: Mapped[str] = mapped_column(String(255), nullable=False)
+    process_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    heartbeat_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+
+
 class TelemetryCacheSegmentRecord(StringIdMixin, Base):
     __tablename__ = "telemetry_cache_segments"
     __table_args__ = (
@@ -57,13 +66,13 @@ class TelemetryMaterializationJobRecord(StringIdMixin, Base):
     __table_args__ = (
         Index("ix_telemetry_jobs_status_created", "status", "created_at"),
         Index("ix_telemetry_jobs_session_status", "session_id", "status"),
+        Index("ix_telemetry_jobs_session_id", "session_id"),
         Index("ix_telemetry_jobs_heartbeat", "heartbeat_at"),
     )
 
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     entry_ids: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
     kinds: Mapped[list[str]] = mapped_column(JSONB, nullable=False)

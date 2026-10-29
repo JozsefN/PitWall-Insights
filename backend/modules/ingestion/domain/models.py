@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 from datetime import datetime
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from modules.session_domain.domain.models import ImportProfile, SessionCatalogItem
+
+
+@dataclass(frozen=True)
+class TelemetrySelection:
+    """Internal extraction contract; raw source data stays reusable across jobs."""
+    driver_numbers: frozenset[str]
+    kinds: frozenset[str]
 
 
 class IngestionSourceStatus(BaseModel):
@@ -23,6 +31,7 @@ class SourceSessionMetadata(BaseModel):
     api_path: str | None = None
     f1_api_support: bool | None = None
     actual_start_utc: datetime | None = None
+    session_time_origin_utc: datetime | None = None
     session_info: dict[str, Any] = Field(default_factory=dict)
 
 

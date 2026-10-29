@@ -20,12 +20,10 @@ class CarTelemetrySampleRecord(StringIdMixin, Base):
     session_entry_id: Mapped[str] = mapped_column(
         ForeignKey("session_entries.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     tick_id: Mapped[str] = mapped_column(
         ForeignKey("session_ticks.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     lap_id: Mapped[str | None] = mapped_column(
         ForeignKey("entry_laps.id", ondelete="SET NULL"),
@@ -65,12 +63,10 @@ class PositionSampleRecord(StringIdMixin, Base):
     session_entry_id: Mapped[str] = mapped_column(
         ForeignKey("session_entries.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     tick_id: Mapped[str] = mapped_column(
         ForeignKey("session_ticks.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     lap_id: Mapped[str | None] = mapped_column(
         ForeignKey("entry_laps.id", ondelete="SET NULL"),

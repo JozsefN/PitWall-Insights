@@ -18,6 +18,13 @@ The goal of these docs is practical clarity:
 5. [Data Flow](./04-data-flow.md)
 6. [API Design](./05-api-design.md)
 7. [Database and Migrations](./06-database-and-migrations.md)
+8. [Dashboard Builder](./07-dashboard-builder-foundation.md)
+9. [Widget Creation Runbook](./widget-creation-runbook.md)
+10. [Replay Loading and Startup Target](./08-replay-loading.md)
+11. [Backend F1 Analytics and Extension Runbook](./09-f1-analytics.md)
+12. [F1 Metric Catalogue](./f1-metric-catalog.md)
+13. [Strategy Foundation, Methods and Runbook](./10-strategy-foundation.md)
+14. [Decision-oriented Strategy Catalogue](./strategy-metric-catalog.md)
 
 ## Module Reference
 
@@ -59,7 +66,7 @@ This means the most important active modules right now are:
 - `session_domain`
 - `delivery_api`
 
-`feature_metrics` is now the active home for cheap derived lap metrics and metric insight surfaces. `decision_engine` selects meaningful rule-based signals from those metrics. `story_feed` remains planned for future season/news/history content rather than current-session metric cards.
+`feature_metrics` owns the existing lap scores/insights and the separate [backend F1 analytics service](09-f1-analytics.md), with 137 versioned calculations, cached summaries and point-in-time car state. See the [metric catalogue](f1-metric-catalog.md) for exact definitions. `decision_engine` selects meaningful rule-based signals from the original scores. `story_feed` remains planned for future season/news/history content rather than current-session metric cards.
 
 ## What Changed Recently
 

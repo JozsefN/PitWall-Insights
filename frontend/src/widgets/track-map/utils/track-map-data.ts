@@ -3,7 +3,12 @@ import type {
   PositionSampleDto,
   SessionEntryDto,
 } from "../../../data/contracts/sessions.contracts";
-import type { TrackMapData, TrackMapPoint, TrackMapTrace, TrackMapTurnMarker } from "../models";
+import type {
+  TrackMapData,
+  TrackMapPoint,
+  TrackMapTrace,
+  TrackMapTurnMarker,
+} from "../models";
 import {
   buildPointsForLap,
   calculateHeadingDeg,
@@ -34,7 +39,10 @@ export function buildLookbackTrackMapData(
         selectedLap === "all"
           ? pickRepresentativeLapNumber(input.laps, groups)
           : selectedLap;
-      const rawSamples = lapNumber == null ? sortPositionSamples(input.samples) : groups.get(lapNumber) ?? [];
+      const rawSamples =
+        lapNumber == null
+          ? sortPositionSamples(input.samples)
+          : (groups.get(lapNumber) ?? []);
       const points = prepareTrackPoints(rawSamples, lapNumber, 640);
       const currentPoint = points[points.length - 1] ?? null;
 
@@ -60,9 +68,13 @@ export function buildLookbackTrackMapData(
 
   return {
     traces,
-    outlinePoints: buildOutlinePoints(entries, selectedLap === "all" ? null : selectedLap),
+    outlinePoints: buildOutlinePoints(
+      entries,
+      selectedLap === "all" ? null : selectedLap,
+    ),
     turnMarkers,
-    detail: selectedLap === "all" ? "Representative lap lines" : `Lap ${selectedLap}`,
+    detail:
+      selectedLap === "all" ? "Representative lap lines" : `Lap ${selectedLap}`,
   };
 }
 
@@ -71,59 +83,106 @@ export function buildReplayTrackMapData(
   currentTimeMs: number,
   turnMarkers: TrackMapTurnMarker[] = [],
 ): TrackMapData {
-  const traces = entries
-    .map((input): TrackMapTrace | null => {
-      const groups = groupSamplesByLap(input.samples, input.laps);
-      const lapNumber = resolveCurrentLapNumber(input.laps, groups, currentTimeMs);
-      const previousLapNumber = lapNumber == null ? null : lapNumber - 1;
-      const currentRawSamples =
-        lapNumber == null
-          ? sortPositionSamples(input.samples).filter((sample) => sample.session_time_ms <= currentTimeMs)
-          : groups.get(lapNumber) ?? [];
-      const previousRawSamples =
-        previousLapNumber == null ? [] : groups.get(previousLapNumber) ?? [];
-      const referenceRawSamples =
-        lapNumber != null && groups.has(lapNumber)
-          ? groups.get(lapNumber) ?? []
-          : resolveFirstUsableSamples(input.samples, groups, currentTimeMs);
+  return prepareReplayTrackMapData(entries, turnMarkers)(currentTimeMs);
+}
 
-      const referencePoints = prepareTrackPoints(referenceRawSamples, lapNumber, 760);
-      const lapPoints = prepareTrackPoints(currentRawSamples, lapNumber, 760);
-      const previousLapPoints = prepareTrackPoints(previousRawSamples, previousLapNumber, 520);
-      const points = lapPoints.filter((point) => point.sessionTimeMs <= currentTimeMs);
-      const currentPoint =
-        findPointAtTime(lapPoints, currentTimeMs) ??
-        points[points.length - 1] ??
-        findFirstFuturePoint(referencePoints, currentTimeMs);
+// Group and smooth the static data once; playback only resolves the current lap
+// and position. Cache lazily so seeking does not preprocess every race lap.
+export function prepareReplayTrackMapData(
+  entries: TrackMapEntryInput[],
+  turnMarkers: TrackMapTurnMarker[] = [],
+): (currentTimeMs: number) => TrackMapData {
+  const prepared = entries.map((input) => ({
+    input,
+    groups: groupSamplesByLap(input.samples, input.laps),
+    points: new WeakMap<PositionSampleDto[], Map<string, TrackMapPoint[]>>(),
+  }));
+  const outlinePoints = buildOutlinePoints(entries, null);
+  return (currentTimeMs) => {
+    const traces = prepared
+      .map(({ input, groups, points: cache }): TrackMapTrace | null => {
+        function pointsFor(
+          samples: PositionSampleDto[],
+          lap: number | null,
+          limit: number,
+        ) {
+          const key = `${lap}:${limit}`;
+          let variants = cache.get(samples);
+          if (!variants) {
+            variants = new Map();
+            cache.set(samples, variants);
+          }
+          if (!variants.has(key))
+            variants.set(key, prepareTrackPoints(samples, lap, limit));
+          return variants.get(key)!;
+        }
+        const lapNumber = resolveCurrentLapNumber(
+          input.laps,
+          groups,
+          currentTimeMs,
+        );
+        const previousLapNumber = lapNumber == null ? null : lapNumber - 1;
+        const currentRawSamples =
+          lapNumber == null
+            ? sortPositionSamples(input.samples).filter(
+                (sample) => sample.session_time_ms <= currentTimeMs,
+              )
+            : (groups.get(lapNumber) ?? []);
+        const previousRawSamples =
+          previousLapNumber == null
+            ? []
+            : (groups.get(previousLapNumber) ?? []);
+        const referenceRawSamples =
+          lapNumber != null && groups.has(lapNumber)
+            ? (groups.get(lapNumber) ?? [])
+            : resolveFirstUsableSamples(input.samples, groups, currentTimeMs);
 
-      if (!currentPoint && points.length < 2 && referencePoints.length < 2) {
-        return null;
-      }
+        const referencePoints = pointsFor(referenceRawSamples, lapNumber, 760);
+        const lapPoints = pointsFor(currentRawSamples, lapNumber, 760);
+        const previousLapPoints = pointsFor(
+          previousRawSamples,
+          previousLapNumber,
+          520,
+        );
+        const points = lapPoints.filter(
+          (point) => point.sessionTimeMs <= currentTimeMs,
+        );
+        const currentPoint =
+          findPointAtTime(lapPoints, currentTimeMs) ??
+          points[points.length - 1] ??
+          findFirstFuturePoint(referencePoints, currentTimeMs);
 
-      return buildTrace({
-        input,
-        points: points.length > 0 ? points : currentPoint ? [currentPoint] : [],
-        referencePoints,
-        previousLapPoints,
-        currentPoint,
-        headingPoints: lapPoints.length > 1 ? lapPoints : referencePoints,
-        lapNumber,
-        previousLapNumber,
-        progressPct: calculateLapProgressPct(lapPoints, currentTimeMs),
-        detail: lapNumber == null ? "Replay trail" : `Lap ${lapNumber}`,
-        sampleCount: currentRawSamples.length,
-      });
-    })
-    .filter((trace): trace is TrackMapTrace => trace !== null);
+        if (!currentPoint && points.length < 2 && referencePoints.length < 2) {
+          return null;
+        }
 
-  const currentLapNumber =
-    traces.find((trace) => trace.lapNumber != null)?.lapNumber ?? null;
+        return buildTrace({
+          input,
+          points:
+            points.length > 0 ? points : currentPoint ? [currentPoint] : [],
+          referencePoints,
+          previousLapPoints,
+          currentPoint,
+          headingPoints: lapPoints.length > 1 ? lapPoints : referencePoints,
+          lapNumber,
+          previousLapNumber,
+          progressPct: calculateLapProgressPct(lapPoints, currentTimeMs),
+          detail: lapNumber == null ? "Replay trail" : `Lap ${lapNumber}`,
+          sampleCount: currentRawSamples.length,
+        });
+      })
+      .filter((trace): trace is TrackMapTrace => trace !== null);
 
-  return {
-    traces,
-    outlinePoints: buildOutlinePoints(entries, currentLapNumber),
-    turnMarkers,
-    detail: currentLapNumber == null ? "Live replay" : `Lap ${currentLapNumber}`,
+    const currentLapNumber =
+      traces.find((trace) => trace.lapNumber != null)?.lapNumber ?? null;
+
+    return {
+      traces,
+      outlinePoints,
+      turnMarkers,
+      detail:
+        currentLapNumber == null ? "Live replay" : `Lap ${currentLapNumber}`,
+    };
   };
 }
 
@@ -182,12 +241,18 @@ function buildOutlinePoints(
         preferredLapNumber != null && groups.has(preferredLapNumber)
           ? preferredLapNumber
           : pickRepresentativeLapNumber(input.laps, groups);
-      const rawSamples = lapNumber == null ? sortPositionSamples(input.samples) : groups.get(lapNumber) ?? [];
+      const rawSamples =
+        lapNumber == null
+          ? sortPositionSamples(input.samples)
+          : (groups.get(lapNumber) ?? []);
       const points = prepareTrackPoints(rawSamples, lapNumber, 880);
 
       return {
         points,
-        score: scoreOutline(points, input.laps.find((lap) => lap.lap_number === lapNumber)),
+        score: scoreOutline(
+          points,
+          input.laps.find((lap) => lap.lap_number === lapNumber),
+        ),
       };
     })
     .filter((candidate) => candidate.points.length >= 8)
@@ -247,7 +312,10 @@ function resolveCurrentLapNumber(
       return false;
     }
 
-    return currentTimeMs >= first.session_time_ms && currentTimeMs <= last.session_time_ms;
+    return (
+      currentTimeMs >= first.session_time_ms &&
+      currentTimeMs <= last.session_time_ms
+    );
   });
 
   if (sampleLap) {
@@ -284,10 +352,17 @@ function resolveFirstUsableSamples(
 }
 
 function findFirstFuturePoint(points: TrackMapPoint[], currentTimeMs: number) {
-  return points.find((point) => point.sessionTimeMs >= currentTimeMs) ?? points[0] ?? null;
+  return (
+    points.find((point) => point.sessionTimeMs >= currentTimeMs) ??
+    points[0] ??
+    null
+  );
 }
 
-function calculateLapProgressPct(points: TrackMapPoint[], currentTimeMs: number) {
+function calculateLapProgressPct(
+  points: TrackMapPoint[],
+  currentTimeMs: number,
+) {
   const first = points[0];
   const last = points[points.length - 1];
 
@@ -299,7 +374,9 @@ function calculateLapProgressPct(points: TrackMapPoint[], currentTimeMs: number)
     0,
     Math.min(
       100,
-      ((currentTimeMs - first.sessionTimeMs) / (last.sessionTimeMs - first.sessionTimeMs)) * 100,
+      ((currentTimeMs - first.sessionTimeMs) /
+        (last.sessionTimeMs - first.sessionTimeMs)) *
+        100,
     ),
   );
 }

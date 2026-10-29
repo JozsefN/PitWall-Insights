@@ -23,7 +23,6 @@ class EventSessionRecord(StringIdMixin, Base):
     weekend_id: Mapped[str] = mapped_column(
         ForeignKey("event_weekends.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     session_name: Mapped[str] = mapped_column(String(128), nullable=False)
     session_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -84,7 +83,6 @@ class IngestionRunRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     job_id: Mapped[str | None] = mapped_column(
         ForeignKey("import_jobs.id", ondelete="SET NULL"),
@@ -115,7 +113,6 @@ class SessionTickRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     tick_no: Mapped[int] = mapped_column(Integer, nullable=False)
     session_time_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -134,7 +131,6 @@ class SessionWeatherSampleRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     session_time_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
     source_time_utc: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -156,7 +152,6 @@ class SessionStatusEventRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     session_time_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
     source_time_utc: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -172,7 +167,6 @@ class SessionTrackStatusEventRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     session_time_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
     source_time_utc: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -189,7 +183,6 @@ class SessionRaceControlMessageRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     session_entry_id: Mapped[str | None] = mapped_column(
         ForeignKey("session_entries.id", ondelete="SET NULL"),

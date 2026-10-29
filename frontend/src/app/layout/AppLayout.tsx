@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { AppHeader } from "./AppHeader";
 import { AppSidebar } from "./AppSidebar";
+import "./app-layout.css";
 
 export function AppLayout() {
   const { pathname } = useLocation();
@@ -9,6 +10,9 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] text-white">
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
       <AppHeader />
 
       <div
@@ -21,7 +25,7 @@ export function AppLayout() {
       >
         {isMarketingSurface ? null : <AppSidebar />}
 
-        <main className="min-w-0 flex-1">
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
           <Outlet />
         </main>
       </div>

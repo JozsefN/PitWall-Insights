@@ -38,7 +38,8 @@ export const builtinSessionLayouts: LayoutRecord[] = [
   {
     id: "builtin:compare-lap",
     name: "Compare Lap",
-    description: "Overlay speed, throttle, and braking traces for a chosen lap.",
+    description:
+      "Overlay speed, throttle, and braking traces for a chosen lap.",
     source: "builtin",
     audience: "session-lookback",
     schemaVersion: 1,
@@ -46,12 +47,14 @@ export const builtinSessionLayouts: LayoutRecord[] = [
     config: {
       id: "compare-lap",
       title: "Compare Lap",
-      subtitle: "Choose a lap, then compare the telemetry traces for your selected drivers.",
+      subtitle:
+        "Choose a lap, then compare the telemetry traces for your selected drivers.",
       sections: [
         {
           id: "lap-traces",
           title: "Lap Traces",
-          description: "Speed, throttle, and brake overlays update once a specific lap is selected.",
+          description:
+            "Speed, throttle, and brake overlays update once a specific lap is selected.",
           layout: {
             type: "group",
             direction: "row",
@@ -112,7 +115,8 @@ export const builtinSessionLayouts: LayoutRecord[] = [
   {
     id: "builtin:session-trends",
     name: "Session Trends",
-    description: "Track-wide lookback with lap pace comparison, lap data, and full session lines.",
+    description:
+      "Track-wide lookback with lap pace comparison, lap data, and full session lines.",
     source: "builtin",
     audience: "session-lookback",
     schemaVersion: 1,
@@ -120,12 +124,14 @@ export const builtinSessionLayouts: LayoutRecord[] = [
     config: {
       id: "session-trends",
       title: "Session Trends",
-      subtitle: "Full-session overview for driver lap pace, selected entries, and circuit shape.",
+      subtitle:
+        "Full-session overview for driver lap pace, selected entries, and circuit shape.",
       sections: [
         {
           id: "headline",
           title: "Session Overview",
-          description: "Lap pace stays in full-session mode even when lap detail is available elsewhere.",
+          description:
+            "Lap pace stays in full-session mode even when lap detail is available elsewhere.",
           layout: {
             type: "group",
             direction: "row",
@@ -173,7 +179,8 @@ export const builtinSessionLayouts: LayoutRecord[] = [
   {
     id: "builtin:stint-strategy",
     name: "Stint Strategy",
-    description: "Compare stint pace, compound windows, and degradation across selected drivers.",
+    description:
+      "Compare stint pace, compound windows, and degradation across selected drivers.",
     source: "builtin",
     audience: "session-lookback",
     schemaVersion: 1,
@@ -181,12 +188,14 @@ export const builtinSessionLayouts: LayoutRecord[] = [
     config: {
       id: "stint-strategy",
       title: "Stint Strategy",
-      subtitle: "Absolute lap-number stint analysis with compound and filtering controls.",
+      subtitle:
+        "Absolute lap-number stint analysis with compound and filtering controls.",
       sections: [
         {
           id: "stints",
           title: "Stint Analysis",
-          description: "Each stint starts on its real session lap, not a reset-to-zero axis.",
+          description:
+            "Each stint starts on its real session lap, not a reset-to-zero axis.",
           layout: {
             type: "widget",
             widgetId: "stint-analysis",
@@ -198,7 +207,8 @@ export const builtinSessionLayouts: LayoutRecord[] = [
         {
           id: "lap-detail",
           title: "Lap Detail",
-          description: "Raw lap rows stay nearby for checking individual laps behind the stint view.",
+          description:
+            "Raw lap rows stay nearby for checking individual laps behind the stint view.",
           layout: {
             type: "widget",
             widgetId: "lap-table",
@@ -213,7 +223,8 @@ export const builtinSessionLayouts: LayoutRecord[] = [
   {
     id: "builtin:replay-command",
     name: "Replay Command",
-    description: "Race-control style replay map with driver cards for simulation mode.",
+    description:
+      "Race-control style replay map with driver cards for simulation mode.",
     source: "builtin",
     audience: "live-race",
     schemaVersion: 1,
@@ -221,12 +232,14 @@ export const builtinSessionLayouts: LayoutRecord[] = [
     config: {
       id: "replay-command",
       title: "Replay Command",
-      subtitle: "Simulation layouts only expose widgets that can live inside the replay clock.",
+      subtitle:
+        "Simulation layouts only expose widgets that can live inside the replay clock.",
       sections: [
         {
           id: "replay-primary",
           title: "Replay Surface",
-          description: "Track position and live-style telemetry cards update from the current session time.",
+          description:
+            "Track position and live-style telemetry cards update from the current session time.",
           layout: {
             type: "group",
             direction: "row",
@@ -267,7 +280,8 @@ export const builtinSessionLayouts: LayoutRecord[] = [
   {
     id: "builtin:replay-focus",
     name: "Replay Focus",
-    description: "A tighter replay stack for following movement and telemetry together.",
+    description:
+      "A tighter replay stack for following movement and telemetry together.",
     source: "builtin",
     audience: "live-race",
     schemaVersion: 1,
@@ -275,12 +289,14 @@ export const builtinSessionLayouts: LayoutRecord[] = [
     config: {
       id: "replay-focus",
       title: "Replay Focus",
-      subtitle: "Compact replay surface with a larger track map and tighter driver telemetry.",
+      subtitle:
+        "Compact replay surface with a larger track map and tighter driver telemetry.",
       sections: [
         {
           id: "replay-focus-main",
           title: "Focused Replay",
-          description: "Best for staying close to track movement while keeping telemetry cards readable.",
+          description:
+            "Best for staying close to track movement while keeping telemetry cards readable.",
           layout: {
             type: "group",
             direction: "column",

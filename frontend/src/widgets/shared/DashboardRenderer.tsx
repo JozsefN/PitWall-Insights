@@ -1,3 +1,4 @@
+import { ResponsiveWidgetFrame } from "./ResponsiveWidgetFrame";
 import { widgetRegistry } from "../registry/widget.registry";
 import type {
   DashboardConfig,
@@ -9,6 +10,7 @@ import type {
 import { WidgetCard } from "./WidgetCard";
 import { WidgetError } from "./WidgetState";
 import "./dashboard-renderer.css";
+import "./widget-responsive.css";
 
 type DashboardRendererProps = {
   config: DashboardConfig;
@@ -20,7 +22,9 @@ export function DashboardRenderer({ config }: DashboardRendererProps) {
       {(config.title || config.subtitle) && (
         <header className="dashboard__hero">
           <div>
-            {config.title ? <h1 className="dashboard__title">{config.title}</h1> : null}
+            {config.title ? (
+              <h1 className="dashboard__title">{config.title}</h1>
+            ) : null}
             {config.subtitle ? (
               <p className="dashboard__subtitle">{config.subtitle}</p>
             ) : null}
@@ -46,7 +50,9 @@ function DashboardSectionView({ section }: { section: DashboardSection }) {
             <h2 className="dashboard-section__title">{section.title}</h2>
           ) : null}
           {section.description ? (
-            <p className="dashboard-section__description">{section.description}</p>
+            <p className="dashboard-section__description">
+              {section.description}
+            </p>
           ) : null}
         </div>
       )}
@@ -69,9 +75,13 @@ function LayoutNodeRenderer({ node }: { node: SectionLayoutNode }) {
 function LayoutGroupRenderer({ node }: { node: LayoutGroupNode }) {
   return (
     <div
-      className={`layout-group layout-group--${node.direction}`}
+      className={`layout-group layout-group--${node.grid ? "grid" : node.direction}`}
       style={{
         gap: node.gap ?? 16,
+        gridTemplateColumns: node.grid
+          ? `repeat(${node.grid.columns}, minmax(0, 1fr))`
+          : undefined,
+        gridAutoRows: node.grid?.rowHeight,
       }}
     >
       {node.children.map((child, index) => (
@@ -113,9 +123,17 @@ function LayoutWidgetRenderer({ node }: { node: LayoutWidgetNode }) {
         minHeight: node.minHeight,
         maxHeight: node.maxHeight,
         flexGrow: node.grow ?? 0,
+        gridColumn: node.placement
+          ? `${node.placement.x + 1} / span ${node.placement.w}`
+          : undefined,
+        gridRow: node.placement
+          ? `${node.placement.y + 1} / span ${node.placement.h}`
+          : undefined,
       }}
     >
-      <Component options={node.options} />
+      <ResponsiveWidgetFrame widgetId={node.widgetId}>
+        <Component options={node.options} />
+      </ResponsiveWidgetFrame>
     </div>
   );
 }

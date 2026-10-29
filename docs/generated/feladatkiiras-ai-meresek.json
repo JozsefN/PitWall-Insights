@@ -1,0 +1,363 @@
+{
+  "date": "2026-10-08",
+  "current_document": "docs/PitWall-Insights-feladatkiiras-szoveg.txt",
+  "current_body_sha256": "e61e0cda96c28eb0c51b7e7523e112a19ce596ce70733b51142e230b0dfa57b7",
+  "results": [
+    {
+      "service": "ZeroGPT",
+      "version": "prior-version",
+      "url": "https://www.zerogpt.com/",
+      "ai_percentage": 6.8,
+      "full_text_verified": true,
+      "input_characters": 3054,
+      "reported_words": 381,
+      "input_sha256": "27e4ce1dd70e474aa9dfbe5736ece734553bc0baf5ba317a404fc8fbe4818b53",
+      "http_status": 200,
+      "screenshot": "feladatkiiras-zerogpt-elozo.png",
+      "response": {
+        "success": true,
+        "code": 200,
+        "message": "detection result passed to proxy",
+        "data": {
+          "sentences": [],
+          "isHuman": 100,
+          "additional_feedback": "",
+          "h": [
+            "Az edzések és versenyek kiválasztása után az alkalmazás betölti és tárolja az adatokat, a felületen pedig követhető a betöltés állapota.",
+            "A felhasználók regisztrálhatnak, bejelentkezhetnek és kezelhetik a saját mentett elrendezéseiket."
+          ],
+          "hi": [],
+          "textWords": 381,
+          "aiWords": 30,
+          "fakePercentage": 6.8,
+          "specialIndexes": [],
+          "specialSentences": [],
+          "originalParagraph": "A PitWall Insights egy webes alkalmazás Formula–1-es edzések és versenyek telemetriaadatainak elemzésére. A célom, hogy a felhasználó egy helyen tudja megnézni és összehasonlítani a versenyzők adatait, visszajátszani egy eseményt, és a saját igényei szerint összeállítani az elemzőfelületet. Az adatok értelmezését AI-panelek és egy chatbot is segítik.\nA fejlesztést önálló labor keretében kezdtem el, ezt folytatom a szakdolgozatban. A dolgozatban a teljes alkalmazás szerepel, külön jelezve, mi készült el korábban, és mit fejlesztettem tovább. A felület Reactre, a háttéralkalmazás FastAPI-ra épül, az adatokat PostgreSQL tárolja. A versenyadatok betöltéséhez FastF1-et használok.\nA megvalósítandó feladatok:\n1. Az edzések és versenyek kiválasztása után az alkalmazás betölti és tárolja az adatokat, a felületen pedig követhető a betöltés állapota. A felhasználók regisztrálhatnak, bejelentkezhetnek és kezelhetik a saját mentett elrendezéseiket.\n2. A telemetrianézet megjeleníti a kiválasztott versenyzők sebességét, gáz- és fékadatait, köridőit és helyzetét a pályán. A visszajátszás elindítható és megállítható, választható időpont és lejátszási sebesség.\n3. Az elemzőpanelekben a tempó, a köridők egyenletessége és változása, a szektoridők, a referenciakörhöz mért időkülönbség és az etapok hasonlíthatók össze. Külön megjelenítés készül a helyezésváltozásokhoz és a versenyesemények idővonalához. A számításokat ellenőrzöm; a felület jelzi, ha az adatok hiányosak vagy nem összehasonlíthatók.\n4. Az elrendezésszerkesztőben a felhasználó hozzáadhat és törölhet paneleket, áthelyezheti és átméretezheti őket. Panelenként választhat versenyzőt és kört, és ugyanabból a megjelenítésből több példányt is használhat eltérő beállításokkal. Az összeállított elrendezés elmenthető és visszatölthető.\n5. Három előfizetési szint készül: ingyenes, Analyst és Pro. Ezek a használható panelekben és azok számában, a menthető elrendezések számában, az elemzési funkciókban és az AI-hozzáférésben térnek el. A fizetés tesztüzemben működik, az előfizetés váltható és lemondható. A jogosultságokat és a használati kereteket a szerver ellenőrzi.\n6. Az AI egy panelen összefoglalja a kiválasztott edzést vagy versenyt, egy másikon pedig magyarázatot ad két versenyző összehasonlításához. A chatbotnak az aktuális esemény adatairól lehet kérdéseket feltenni. A válaszok a számított mérőszámokra épülnek, és megjelölik a hivatkozott versenyzőket, köröket és értékeket.\n7. A kezdőoldal valódi adatokat jelenít meg, és innen elérhetők az alkalmazás fő funkciói. A pilóta- és konstruktőri bajnoki tabella automatikusan frissül. Egy egyszerű hírfolyam is készül, a források megjelölésével és az eredeti cikkekre mutató linkekkel.\n8. A tesztelés során ellenőrzöm a fő felhasználói folyamatokat, a számításokat, az elrendezések mentését és az előfizetési jogosultságokat. Az AI-válaszokat pontosság, válaszidő és költség alapján értékelem. A dokumentációban leírom a rendszer felépítését, adatmodelljét, fő adatfolyamait és a futtatás lépéseit.",
+          "feedback": "Your Text is Human Written",
+          "detected_language": "hu"
+        }
+      }
+    },
+    {
+      "service": "ZeroGPT",
+      "version": "developer-1",
+      "url": "https://www.zerogpt.com/",
+      "ai_percentage": 0,
+      "full_text_verified": true,
+      "input_characters": 3001,
+      "reported_words": 394,
+      "input_sha256": "c0e24b9a969fb7397a52164e7ebbf6612eaaf769e7132ea5441559fbe070d5c6",
+      "http_status": 200,
+      "screenshot": "feladatkiiras-zerogpt-uj.png",
+      "response": {
+        "success": true,
+        "code": 200,
+        "message": "detection result passed to proxy",
+        "data": {
+          "sentences": [],
+          "isHuman": 100,
+          "additional_feedback": "",
+          "h": [],
+          "hi": [],
+          "textWords": 394,
+          "aiWords": 0,
+          "fakePercentage": 0,
+          "specialIndexes": [],
+          "specialSentences": [],
+          "originalParagraph": "A PitWall Insights egy Formula–1-es telemetriaelemző webapp, amelyet önálló laborban kezdtem el fejleszteni. A szakdolgozatban ezt viszem tovább: a meglévő adatkezelésre és replay funkcióra építve egy szabadon összeállítható dashboardot, előfizetéses hozzáférést és AI-elemzést készítek. A dolgozat a teljes alkalmazást lefedi, és külön jelzi a korábban elkészült részeket.\nA frontend Reactet használ, a backend FastAPI-ra épül, az adatbázis PostgreSQL. A sessionök, vagyis az edzések és versenyek adatait FastF1-gyel töltöm be. A felhasználó ugyanazon a felületen tudja végignézni az adatokat, összevetni a köröket, és a kiválasztott widgetekből összeállítani a saját dashboardját.\nA megvalósítandó feladatok:\n1. A session kiválasztásától az adatbetöltésig végig használható folyamat készül. A backend eltárolja az adatokat, a UI pedig mutatja, hol tart az import. Ehhez tartozik a regisztráció, a login és a felhasználóhoz kötött mentett layoutok kezelése.\n2. A telemetria-widgetekben egymás mellé kerülhetnek a versenyzők sebesség-, gáz- és fékadatai, köridői és pályapozíciói. A replay indítható és megállítható; az idővonalon egy adott pontra lehet ugrani, és a lejátszás sebessége is állítható.\n3. Az elemzésben szerepel a pace, a köridők egyenletessége és alakulása, szektor-összehasonlítás, referenciakörhöz mért delta és stint-összehasonlítás. A helyezésváltozásokhoz és a versenyeseményekhez külön timeline készül. A számításokat ellenőrzöm, és a hiányzó vagy nem összevethető adatokat a felületen is jelzem.\n4. A layout builderben a felhasználó maga rakhatja össze a dashboardját. A panelek hozzáadhatók, törölhetők, drag-and-drop módon rendezhetők és átméretezhetők. Egy widget több példányban is használható, külön driver- és körbeállításokkal. A teljes layout menthető és újra betölthető.\n5. Free, Analyst és Pro tier készül, eltérő widget-hozzáféréssel, panel- és layoutlimitekkel, valamint elemzési és AI-keretekkel. A paywall a frontend mellett a backendben is érvényesül. A fizetést sandbox módban kötöm be; kipróbálható lesz a csomagváltás és az előfizetés lemondása is.\n6. Két AI-panel kerül a dashboardba: egy session summary és egy két versenyző összehasonlítását magyarázó nézet. Emellett chatbot válaszol a betöltött sessionről feltett kérdésekre. A válaszok a kiszámolt metrikákra támaszkodnak, és visszakereshető marad, melyik versenyző, kör és érték alapján készültek.\n7. A landing page-ről elérhetők lesznek a fő funkciók, valódi adatokkal és működő navigációval. A pilóta- és konstruktőri standings tábla automatikusan frissül. A news oldalra egyszerű hírfolyam kerül, minden hírnél feltüntetve a forrást és az eredeti cikk linkjét.\n8. A fő user flow-kat, a metrikák számítását, a layoutok mentését és a tierhez kötött hozzáférést tesztelem. Az AI-rész értékelésében a válaszok pontosságát, a response time-ot és a költséget nézem meg. A dokumentációban benne lesz az architektúra, az adatmodell, a fő adatfolyamok és a helyi futtatás menete.",
+          "feedback": "Your Text is Human Written",
+          "detected_language": "hu"
+        }
+      }
+    },
+    {
+      "service": "AIDetego",
+      "version": "prior-version",
+      "url": "https://aidetego.com/analyze",
+      "profile": "Academic",
+      "ai_percentage": 100,
+      "detected_language": "ES",
+      "input_characters": 3054,
+      "input_sha256": "27e4ce1dd70e474aa9dfbe5736ece734553bc0baf5ba317a404fc8fbe4818b53",
+      "screenshot": "feladatkiiras-ai-atfogalmazott.png",
+      "page_text": "Skip to content\n●\nAIDetego\nAnalyze\nHumanize\nCurrent language:\nEN\nFree AI Detector\n\nCheck your text for AI patterns – 16 modules, 100% local\n\n✓ 100% Free\n✓ Unlimited use\n✓ Up to 30,000 words\n✓ 100% local in browser\n\nPaste your text and get an instant detailed analysis. Our algorithm checks 16 different characteristics to detect if a text was written by AI.\n\nLightning Fast\n\nResults in under 2 seconds\n\n100% Private\n\nYour text never leaves your browser\n\n16 Modules\n\nDetailed breakdown of each signal\n\nGeneral\nAcademic\nLegal\nTechnical\nText for analysis\n\nEnter your text. Results and highlighted findings appear after analysis.\n\n389 / 30,000\n🇪🇸 ES\nAnalyze\n100%\nAI Probability\n389 words\n\nThis text was very likely generated by AI.\n\nDetected:\nMarkdown artifacts\nStrongest signals:\nZipf-Verteilung (90) ·\nInterpunktions-Analyse (65) ·\nLesbarkeits-Score (60)\nShow details\n\nAI detection is a probability, not proof.\n\nAI\nAIDetego\n\nAI text detection with respect for your privacy.\n\nProduct\nAnalyze\nHumanize\nResources\nAbout\nHow it Works\nContact\nLegal\nImprint\nPrivacy Policy\nTerms of Service\nTerms & Conditions\nAccessibility\nCookie Settings\n\n© 2026 AIDetego. All rights reserved.\n\nMade with ♥ in Germany"
+    },
+    {
+      "service": "AIDetego",
+      "version": "developer-1",
+      "url": "https://aidetego.com/analyze",
+      "profile": "Academic",
+      "ai_percentage": 100,
+      "detected_language": "ES",
+      "input_characters": 3001,
+      "input_sha256": "c0e24b9a969fb7397a52164e7ebbf6612eaaf769e7132ea5441559fbe070d5c6",
+      "screenshot": "feladatkiiras-ai-developer.png",
+      "page_text": "Skip to content\n●\nAIDetego\nAnalyze\nHumanize\nCurrent language:\nEN\nFree AI Detector\n\nCheck your text for AI patterns – 16 modules, 100% local\n\n✓ 100% Free\n✓ Unlimited use\n✓ Up to 30,000 words\n✓ 100% local in browser\n\nPaste your text and get an instant detailed analysis. Our algorithm checks 16 different characteristics to detect if a text was written by AI.\n\nLightning Fast\n\nResults in under 2 seconds\n\n100% Private\n\nYour text never leaves your browser\n\n16 Modules\n\nDetailed breakdown of each signal\n\nGeneral\nAcademic\nLegal\nTechnical\nText for analysis\n\nEnter your text. Results and highlighted findings appear after analysis.\n\n402 / 30,000\n🇪🇸 ES\nAnalyze\n100%\nAI Probability\n402 words\n\nThis text was very likely generated by AI.\n\nDetected:\nMarkdown artifacts\nStrongest signals:\nZipf-Verteilung (90) ·\nLesbarkeits-Score (60) ·\nInterpunktions-Analyse (50)\nShow details\n\nAI detection is a probability, not proof.\n\nAI\nAIDetego\n\nAI text detection with respect for your privacy.\n\nProduct\nAnalyze\nHumanize\nResources\nAbout\nHow it Works\nContact\nLegal\nImprint\nPrivacy Policy\nTerms of Service\nTerms & Conditions\nAccessibility\nCookie Settings\n\n© 2026 AIDetego. All rights reserved.\n\nMade with ♥ in Germany"
+    },
+    {
+      "service": "Smodin",
+      "version": "developer-1",
+      "url": "https://smodin.io/hu/ai-tartalomdetektor",
+      "displayed_ai_percentage": 85,
+      "returned_fragment_probability": 0,
+      "full_text_verified": false,
+      "input_characters": 3001,
+      "returned_text_characters": 1084,
+      "input_sha256": "c0e24b9a969fb7397a52164e7ebbf6612eaaf769e7132ea5441559fbe070d5c6",
+      "http_status": 201,
+      "screenshot": "feladatkiiras-smodin-uj.png",
+      "response": {
+        "text": "A PitWall Insights egy Formula–1-es telemetriaelemző webapp, amelyet önálló laborban kezdtem el fejleszteni. A szakdolgozatban ezt viszem tovább: a meglévő adatkezelésre és replay funkcióra építve egy szabadon összeállítható dashboardot, előfizetéses hozzáférést és AI-elemzést készítek. A dolgozat a teljes alkalmazást lefedi, és külön jelzi a korábban elkészült részeket.\n\nA frontend Reactet használ, a backend FastAPI-ra épül, az adatbázis PostgreSQL. A sessionök, vagyis az edzések és versenyek adatait FastF1-gyel töltöm be. A felhasználó ugyanazon a felületen tudja végignézni az adatokat, összevetni a köröket, és a kiválasztott widgetekből összeállítani a saját dashboardját.\n\nA megvalósítandó feladatok:\n\n1. A session kiválasztásától az adatbetöltésig végig használható folyamat készül. A backend eltárolja az adatokat, a UI pedig mutatja, hol tart az import. Ehhez tartozik a regisztráció, a login és a felhasználóhoz kötött mentett layoutok kezelése.\n\n2. A telemetria-widgetekben egymás mellé kerülhetnek a versenyzők sebesség-, gáz- és fékadatai, köridői és pályapozíciói.",
+        "completelyGeneratedProbability": 0,
+        "sentenceAnalysis": [
+          {
+            "sentence": "A PitWall Insights egy Formula–1-es telemetriaelemző webapp, amelyet önálló laborban kezdtem el fejleszteni.",
+            "index": [
+              0,
+              108
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A szakdolgozatban ezt viszem tovább: a meglévő adatkezelésre és replay funkcióra építve egy szabadon összeállítható dashboardot, előfizetéses hozzáférést és AI-elemzést készítek.",
+            "index": [
+              109,
+              287
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A dolgozat a teljes alkalmazást lefedi, és külön jelzi a korábban elkészült részeket.",
+            "index": [
+              288,
+              373
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A frontend Reactet használ, a backend FastAPI-ra épül, az adatbázis PostgreSQL.",
+            "index": [
+              375,
+              454
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A sessionök, vagyis az edzések és versenyek adatait FastF1-gyel töltöm be.",
+            "index": [
+              455,
+              529
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A felhasználó ugyanazon a felületen tudja végignézni az adatokat, összevetni a köröket, és a kiválasztott widgetekből összeállítani a saját dashboardját.",
+            "index": [
+              530,
+              683
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A megvalósítandó feladatok:",
+            "index": [
+              685,
+              712
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "1.",
+            "index": [
+              714,
+              716
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A session kiválasztásától az adatbetöltésig végig használható folyamat készül.",
+            "index": [
+              717,
+              795
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A backend eltárolja az adatokat, a UI pedig mutatja, hol tart az import.",
+            "index": [
+              796,
+              868
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "Ehhez tartozik a regisztráció, a login és a felhasználóhoz kötött mentett layoutok kezelése.",
+            "index": [
+              869,
+              961
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "2.",
+            "index": [
+              963,
+              965
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          },
+          {
+            "sentence": "A telemetria-widgetekben egymás mellé kerülhetnek a versenyzők sebesség-, gáz- és fékadatai, köridői és pályapozíciói.",
+            "index": [
+              966,
+              1084
+            ],
+            "aiScore": 0,
+            "impactScore": "none"
+          }
+        ]
+      }
+    },
+    {
+      "service": "ZeroGPT",
+      "version": "ai-panels-general",
+      "url": "https://www.zerogpt.com/",
+      "ai_percentage": 0,
+      "full_text_verified": true,
+      "input_characters": 3118,
+      "reported_words": 407,
+      "input_sha256": "f0926d9aa1a02a5255868a52fe1fa401ab4191739192a5e56bdfb1f3d3805e48",
+      "http_status": 200,
+      "screenshot": "feladatkiiras-zerogpt-ai-panelek.png",
+      "response": {
+        "success": true,
+        "code": 200,
+        "message": "detection result passed to proxy",
+        "data": {
+          "sentences": [],
+          "isHuman": 100,
+          "additional_feedback": "",
+          "h": [],
+          "hi": [],
+          "textWords": 407,
+          "aiWords": 0,
+          "fakePercentage": 0,
+          "specialIndexes": [],
+          "specialSentences": [],
+          "originalParagraph": "A PitWall Insights egy Formula–1-es telemetriaelemző webapp, amelyet önálló laborban kezdtem el fejleszteni. A szakdolgozatban ezt viszem tovább: a meglévő adatkezelésre és replay funkcióra építve egy szabadon összeállítható dashboardot, előfizetéses hozzáférést és AI-elemzést készítek. A dolgozat a teljes alkalmazást lefedi, és külön jelzi a korábban elkészült részeket.\nA frontend Reactet használ, a backend FastAPI-ra épül, az adatbázis PostgreSQL. A sessionök, vagyis az edzések és versenyek adatait FastF1-gyel töltöm be. A felhasználó ugyanazon a felületen tudja végignézni az adatokat, összevetni a köröket, és a kiválasztott widgetekből összeállítani a saját dashboardját.\nA megvalósítandó feladatok:\n1. A session kiválasztásától az adatbetöltésig végig használható folyamat készül. A backend eltárolja az adatokat, a UI pedig mutatja, hol tart az import. Ehhez tartozik a regisztráció, a login és a felhasználóhoz kötött mentett layoutok kezelése.\n2. A telemetria-widgetekben egymás mellé kerülhetnek a versenyzők sebesség-, gáz- és fékadatai, köridői és pályapozíciói. A replay indítható és megállítható; az idővonalon egy adott pontra lehet ugrani, és a lejátszás sebessége is állítható.\n3. Az elemzésben szerepel a pace, a köridők egyenletessége és alakulása, szektor-összehasonlítás, referenciakörhöz mért delta és stint-összehasonlítás. A helyezésváltozásokhoz és a versenyeseményekhez külön timeline készül. A számításokat ellenőrzöm, és a hiányzó vagy nem összevethető adatokat a felületen is jelzem.\n4. A layout builderben a felhasználó maga rakhatja össze a dashboardját. A panelek hozzáadhatók, törölhetők, drag-and-drop módon rendezhetők és átméretezhetők. Egy widget több példányban is használható, külön driver- és körbeállításokkal. A teljes layout menthető és újra betölthető.\n5. Free, Analyst és Pro tier készül, eltérő widget-hozzáféréssel, panel- és layoutlimitekkel, valamint elemzési és AI-keretekkel. A paywall a frontend mellett a backendben is érvényesül. A fizetést sandbox módban kötöm be; kipróbálható lesz a csomagváltás és az előfizetés lemondása is.\n6. A dashboardba AI-panelek is kerülnek, amelyek a feldolgozott telemetriaadatokból adnak szöveges magyarázatot a kiválasztott elemzési feladathoz. A válasz a panel beállításaihoz és a kiválasztott értékekhez igazodik, hogy a sok grafikon és szám mellett könnyebb legyen értelmezni az eredményeket. A magyarázatoknál visszakereshető, milyen adatokra épültek. A betöltött sessionről chatbotnak is lehet kérdéseket feltenni.\n7. A landing page-ről elérhetők lesznek a fő funkciók, valódi adatokkal és működő navigációval. A pilóta- és konstruktőri standings tábla automatikusan frissül. A news oldalra egyszerű hírfolyam kerül, minden hírnél feltüntetve a forrást és az eredeti cikk linkjét.\n8. A fő user flow-kat, a metrikák számítását, a layoutok mentését és a tierhez kötött hozzáférést tesztelem. Az AI-rész értékelésében a válaszok pontosságát, a response time-ot és a költséget nézem meg. A dokumentációban benne lesz az architektúra, az adatmodell, a fő adatfolyamok és a helyi futtatás menete.",
+          "feedback": "Your Text is Human Written",
+          "detected_language": "hu"
+        }
+      }
+    },
+    {
+      "service": "ZeroGPT",
+      "version": "race-analysis-2026-10-08",
+      "date": "2026-10-08",
+      "input_characters": 2984,
+      "input_sha256": "28715bc88b8adb9b585c65b44653c60c95994b77042cdbdc73bc66919c11b84c",
+      "full_text_submitted": true,
+      "screenshot": "feladatkiiras-zerogpt-race-analysis-2026-10-08.png",
+      "raw_result": "feladatkiiras-zerogpt-race-analysis-2026-10-08.json",
+      "http_status": 200,
+      "ai_percentage": 15.5,
+      "reported_words": 343,
+      "detected_language": "hu",
+      "full_text_verified": true
+    },
+    {
+      "service": "Smodin",
+      "version": "race-analysis-2026-10-08",
+      "date": "2026-10-08",
+      "input_characters": 2984,
+      "input_sha256": "28715bc88b8adb9b585c65b44653c60c95994b77042cdbdc73bc66919c11b84c",
+      "full_text_submitted": true,
+      "screenshot": "feladatkiiras-smodin-race-analysis-2026-10-08.png",
+      "raw_result": "feladatkiiras-smodin-race-analysis-2026-10-08.json",
+      "http_status": 201,
+      "ai_percentage": 81.0,
+      "api_ai_percentage": 49.01593252108716,
+      "analyzed_characters": 1076,
+      "full_text_verified": false,
+      "note": "The UI and API scores differ. The API returns analysis for a prefix only."
+    },
+    {
+      "service": "AIDetego",
+      "version": "race-analysis-2026-10-08",
+      "date": "2026-10-08",
+      "input_characters": 2984,
+      "input_sha256": "28715bc88b8adb9b585c65b44653c60c95994b77042cdbdc73bc66919c11b84c",
+      "full_text_submitted": true,
+      "screenshot": "feladatkiiras-aidetego-race-analysis-2026-10-08.png",
+      "raw_result": "feladatkiiras-aidetego-race-analysis-2026-10-08.json",
+      "ai_percentage": 100.0,
+      "detected_language": "ES",
+      "profile": "Academic",
+      "note": "Hungarian input was identified as Spanish (ES). UI-only result."
+    },
+    {
+      "service": "ZeroGPT",
+      "version": "race-analysis-final-2026-10-08",
+      "date": "2026-10-08",
+      "input_characters": 2982,
+      "input_sha256": "e61e0cda96c28eb0c51b7e7523e112a19ce596ce70733b51142e230b0dfa57b7",
+      "full_text_submitted": true,
+      "screenshot": "feladatkiiras-zerogpt-race-analysis-final-2026-10-08.png",
+      "raw_result": "feladatkiiras-zerogpt-race-analysis-final-2026-10-08.json",
+      "http_status": 200,
+      "ai_percentage": 6.7,
+      "reported_words": 344,
+      "detected_language": "hu",
+      "full_text_verified": true
+    },
+    {
+      "service": "Smodin",
+      "version": "race-analysis-final-2026-10-08",
+      "date": "2026-10-08",
+      "input_characters": 2982,
+      "input_sha256": "e61e0cda96c28eb0c51b7e7523e112a19ce596ce70733b51142e230b0dfa57b7",
+      "full_text_submitted": true,
+      "screenshot": "feladatkiiras-smodin-race-analysis-final-2026-10-08.png",
+      "raw_result": "feladatkiiras-smodin-race-analysis-final-2026-10-08.json",
+      "http_status": 201,
+      "ai_percentage": 93.0,
+      "api_ai_percentage": 48.63078375826252,
+      "analyzed_characters": 1069,
+      "full_text_verified": false,
+      "note": "The UI and API scores differ. The API returns analysis for a prefix only."
+    },
+    {
+      "service": "AIDetego",
+      "version": "race-analysis-final-2026-10-08",
+      "date": "2026-10-08",
+      "input_characters": 2982,
+      "input_sha256": "e61e0cda96c28eb0c51b7e7523e112a19ce596ce70733b51142e230b0dfa57b7",
+      "full_text_submitted": true,
+      "screenshot": "feladatkiiras-aidetego-race-analysis-final-2026-10-08.png",
+      "raw_result": "feladatkiiras-aidetego-race-analysis-final-2026-10-08.json",
+      "ai_percentage": 100.0,
+      "detected_language": "ES",
+      "profile": "Academic",
+      "note": "Hungarian input was identified as Spanish (ES). UI-only result."
+    }
+  ],
+  "current_version": "race-analysis-final-2026-10-08",
+  "last_scanned_body_sha256": "e61e0cda96c28eb0c51b7e7523e112a19ce596ce70733b51142e230b0dfa57b7",
+  "last_scanned_version": "race-analysis-final-2026-10-08",
+  "current_version_scan_status": "tested",
+  "updated_date": "2026-10-08",
+  "current_version_note": "All three final runs used the current assignment body. Only ZeroGPT returned a verified full-text analysis.",
+  "historical_results_date": "2026-10-06"
+}

@@ -49,21 +49,33 @@ const heroStats: Stat[] = [
   {
     value: "24",
     label: "Race weekends",
-    description: "Move through the full season and jump back into any weekend from one archive.",
+    description:
+      "Move through the full season and jump back into any weekend from one archive.",
   },
   {
     value: "20",
     label: "Drivers tracked",
-    description: "Keep the championship picture close whether the circuit is live or quiet.",
+    description:
+      "Keep the championship picture close whether the circuit is live or quiet.",
   },
   {
     value: "10",
     label: "Teams in view",
-    description: "Follow constructor momentum, storylines, and session context in one place.",
+    description:
+      "Follow constructor momentum, storylines, and session context in one place.",
   },
 ];
 
 const destinations: Destination[] = [
+  {
+    title: "Dashboard Builder",
+    body: "Find your perspective on a race. Explore reusable layouts for telemetry, strategy, and replay in your session workspace.",
+    to: "/dashboard-builder",
+    action: "Explore dashboard layouts",
+    pill: "Foundation preview",
+    tone: "focus",
+    highlights: ["Layout library", "Lookback", "Live & replay"],
+  },
   {
     title: "Live Race",
     body: "Open the race workspace for timing, gaps, tyre windows, and incident context the moment a session goes green.",
@@ -105,17 +117,20 @@ const destinations: Destination[] = [
 const storyCards: StoryCard[] = [
   {
     tag: "Video",
-    title: "Official race recaps, team radio highlights, and paddock interviews will land here.",
+    title:
+      "Official race recaps, team radio highlights, and paddock interviews will land here.",
     meta: "F1 channel wall",
   },
   {
     tag: "Headline",
-    title: "Weekend talking points, post-session notes, and major storylines will stack into one feed.",
+    title:
+      "Weekend talking points, post-session notes, and major storylines will stack into one feed.",
     meta: "News wall",
   },
   {
     tag: "Watch next",
-    title: "Feature videos, analysis clips, and press moments can sit alongside session context.",
+    title:
+      "Feature videos, analysis clips, and press moments can sit alongside session context.",
     meta: "Editorial surface",
   },
 ];
@@ -259,8 +274,14 @@ function HeroFocusPanel() {
 
       <div className="home-preview__board">
         {rows.map((row) => (
-          <div key={row.driver} className="home-preview__row" data-tone={row.tone}>
-            <span className="home-preview__position numeric-font">{row.position}</span>
+          <div
+            key={row.driver}
+            className="home-preview__row"
+            data-tone={row.tone}
+          >
+            <span className="home-preview__position numeric-font">
+              {row.position}
+            </span>
 
             <div className="home-preview__driver">
               <span className="home-preview__driver-name">{row.driver}</span>
@@ -268,7 +289,9 @@ function HeroFocusPanel() {
             </div>
 
             <div className="home-preview__lap">
-              <span className="home-preview__lap-time numeric-font">{row.points}</span>
+              <span className="home-preview__lap-time numeric-font">
+                {row.points}
+              </span>
               <span className="home-preview__lap-delta">
                 {liveRaceActive ? "Gap to lead" : "Championship points"}
               </span>
@@ -324,40 +347,47 @@ export function HomePage() {
       <section className="home-page__hero">
         <div className="surface-card home-hero__copy">
           <div className="home-hero__eyebrow">
-            <Pill label={liveRaceActive ? "Live race" : "Season hub"} tone={liveRaceActive ? "live" : "focus"} />
+            <Pill
+              label={liveRaceActive ? "Live race" : "Season hub"}
+              tone={liveRaceActive ? "live" : "focus"}
+            />
             <span>
-              Follow the weekend live, scan the news wall between sessions, rewind old races,
-              and keep the championship table close.
+              Follow the weekend live, scan the news wall between sessions,
+              rewind old races, and keep the championship table close.
             </span>
           </div>
 
-          <h1 className="home-hero__title">Live Race. Story Wall. Session Archive. Season Standings.</h1>
+          <h1 className="home-hero__title">
+            Your race.
+            <br />
+            Your perspective.
+          </h1>
 
           <p className="home-hero__lead">
-            Pitwall Insights is built to keep motorsport context in one place. Open the
-            live race when the circuit is active, drop into a story feed shaped like a
-            news wall when the track goes quiet, explore previous weekends, and move
-            straight to the drivers and constructors tables.
+            Follow the weekend, revisit a lap, and find the strategy behind the
+            result. Your sessions, dashboards, and championship picture,
+            together in one place.
           </p>
 
           <div className="home-hero__actions">
-            <Link to="/live" className="button-primary">
-              Open live race
+            <Link to="/sessions" className="button-primary">
+              Explore sessions
             </Link>
-            <Link to="/story-feed" className="button-secondary">
-              Open story feed
-            </Link>
-            <Link to="/sessions" className="button-secondary">
-              Browse sessions
+            <Link to="/dashboard-builder" className="button-secondary">
+              Dashboard Builder <span aria-hidden="true">↗</span>
             </Link>
           </div>
 
           <div className="home-hero__stats">
             {heroStats.map((stat) => (
               <article key={stat.label} className="home-stat-card">
-                <p className="home-stat-card__value numeric-font">{stat.value}</p>
+                <p className="home-stat-card__value numeric-font">
+                  {stat.value}
+                </p>
                 <span className="home-stat-card__label">{stat.label}</span>
-                <p className="home-stat-card__description">{stat.description}</p>
+                <p className="home-stat-card__description">
+                  {stat.description}
+                </p>
               </article>
             ))}
           </div>
@@ -370,31 +400,39 @@ export function HomePage() {
         <div className="home-section__header">
           <div className="home-section__heading">
             <Pill label="Explore" tone="ready" />
-            <h2 className="home-section__title">Choose the surface you want first</h2>
+            <h2 className="home-section__title">Find your next view</h2>
             <p className="home-section__lead">
-              The home page should feel like a fast launch point into the parts of the
-              product that matter most during and between race weekends.
+              From the first lap to the post-race analysis. Pick where you want
+              to go.
             </p>
           </div>
         </div>
 
         <div className="home-destination-grid">
           {destinations.map((destination) => (
-            <article key={destination.title} className="surface-card home-destination-card">
+            <article
+              key={destination.title}
+              className={`surface-card home-destination-card${destination.to === "/dashboard-builder" ? " home-destination-card--builder" : ""}`}
+            >
               <div className="home-destination-card__header">
                 <Pill label={destination.pill} tone={destination.tone} />
               </div>
-              <h3 className="home-destination-card__title">{destination.title}</h3>
+              <h3 className="home-destination-card__title">
+                {destination.title}
+              </h3>
               <p className="home-destination-card__body">{destination.body}</p>
               <div className="home-destination-card__meta">
                 {destination.highlights.map((highlight) => (
-                  <span key={highlight} className="home-destination-card__meta-item">
+                  <span
+                    key={highlight}
+                    className="home-destination-card__meta-item"
+                  >
                     {highlight}
                   </span>
                 ))}
               </div>
               <Link to={destination.to} className="home-destination-card__link">
-                {destination.action}
+                {destination.action} <span aria-hidden="true">↗</span>
               </Link>
             </article>
           ))}
@@ -406,11 +444,13 @@ export function HomePage() {
           <div className="home-section__header">
             <div className="home-section__heading">
               <Pill label="Story Feed" tone="improved" />
-              <h2 className="home-section__title">A news wall for the race weekend</h2>
+              <h2 className="home-section__title">
+                A news wall for the race weekend
+              </h2>
               <p className="home-section__lead">
-                Official F1 videos, breaking headlines, and storylines from the paddock
-                should live in one feed that feels as useful between sessions as live timing
-                does on race day.
+                Official F1 videos, breaking headlines, and storylines from the
+                paddock should live in one feed that feels as useful between
+                sessions as live timing does on race day.
               </p>
             </div>
           </div>
@@ -435,15 +475,17 @@ export function HomePage() {
             <Pill label="Session Explorer" tone="soon" />
             <h2 className="home-panel__title">Look back at previous races</h2>
             <p className="home-panel__body">
-              The session archive should make it easy to jump through past weekends and
-              pick up race, qualifying, or practice context without digging.
+              The session archive should make it easy to jump through past
+              weekends and pick up race, qualifying, or practice context without
+              digging.
             </p>
 
             <ul className="home-list">
               {archiveItems.map((item) => (
                 <li key={item.title} className="home-list__item">
                   <span className="home-list__item-title">
-                    <span className="numeric-font">{item.round}</span> {item.title}
+                    <span className="numeric-font">{item.round}</span>{" "}
+                    {item.title}
                   </span>
                   <span className="home-list__item-body">{item.note}</span>
                 </li>
@@ -457,21 +499,29 @@ export function HomePage() {
 
           <article className="surface-card home-panel">
             <Pill label="Standings" tone="focus" />
-            <h2 className="home-panel__title">Keep the season table within reach</h2>
+            <h2 className="home-panel__title">
+              Keep the season table within reach
+            </h2>
             <p className="home-panel__body">
-              When there is no live race running, standings become the quickest way to see
-              who owns the moment across drivers and constructors.
+              When there is no live race running, standings become the quickest
+              way to see who owns the moment across drivers and constructors.
             </p>
 
             <div className="home-standings-list">
               {standingsRows.map((row) => (
                 <div key={row.driver} className="home-standings-row">
-                  <span className="home-standings-row__position numeric-font">{row.position}</span>
+                  <span className="home-standings-row__position numeric-font">
+                    {row.position}
+                  </span>
                   <div className="home-standings-row__driver">
-                    <span className="home-standings-row__name">{row.driver}</span>
+                    <span className="home-standings-row__name">
+                      {row.driver}
+                    </span>
                     <span className="home-standings-row__team">{row.team}</span>
                   </div>
-                  <span className="home-standings-row__points numeric-font">{row.points}</span>
+                  <span className="home-standings-row__points numeric-font">
+                    {row.points}
+                  </span>
                 </div>
               ))}
             </div>
@@ -490,7 +540,9 @@ export function HomePage() {
               label={isAuthenticated ? "Signed in" : "Pitwall access"}
               tone={isAuthenticated ? "ready" : "ready"}
             />
-            <h2 className="home-final-cta__title">Pick up the weekend from any angle.</h2>
+            <h2 className="home-final-cta__title">
+              Pick up the weekend from any angle.
+            </h2>
             <p className="home-final-cta__body">
               {isAuthenticated
                 ? `You are signed in${data?.email ? ` as ${data.email}` : ""}. Jump straight into the live race, the story wall, the session archive, or sign out when you are done.`

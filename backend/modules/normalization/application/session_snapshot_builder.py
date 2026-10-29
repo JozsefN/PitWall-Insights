@@ -461,7 +461,9 @@ class FastF1SessionSnapshotBuilder:
                     rainfall=self._as_bool(row.get("Rainfall")),
                     track_temp_c=self._as_float(row.get("TrackTemp")),
                     wind_direction_deg=self._as_int(row.get("WindDirection")),
-                    wind_speed_kph=self._as_float(row.get("WindSpeed")),
+                    # FastF1 weather WindSpeed is m/s; our public/storage field is km/h.
+                    wind_speed_kph=(self._as_float(row.get("WindSpeed")) * 3.6
+                                    if self._as_float(row.get("WindSpeed")) is not None else None),
                 )
             )
         return payloads
@@ -507,15 +509,19 @@ class FastF1SessionSnapshotBuilder:
         payloads: list[SessionRaceControlMessagePayload] = []
         for row in bundle.race_control_messages:
             session_time_ms = self._extract_session_time_ms(row)
+            source_time_utc = self._as_datetime(row.get("Date")) or self._as_datetime(row.get("Time"))
+            origin = self._as_datetime(bundle.metadata.session_time_origin_utc)
+            if session_time_ms is None and source_time_utc is not None and origin is not None:
+                session_time_ms = int((source_time_utc-origin).total_seconds()*1000)
             message = self._as_text(row.get("Message"))
-            if session_time_ms is None or not message:
+            if session_time_ms is None or session_time_ms < 0 or not message:
                 continue
-            driver_number = self._as_text(row.get("DriverNumber") or row.get("Driver"))
+            driver_number = self._as_text(row.get("RacingNumber") or row.get("DriverNumber") or row.get("Driver"))
             participant = participants_by_number.get(driver_number) if driver_number else None
             payloads.append(
                 SessionRaceControlMessagePayload(
                     session_time_ms=session_time_ms,
-                    source_time_utc=self._as_datetime(row.get("Date")),
+                    source_time_utc=source_time_utc,
                     source_entry_key=participant.source_entry_key if participant else None,
                     category=self._as_text(row.get("Category")),
                     message=message,

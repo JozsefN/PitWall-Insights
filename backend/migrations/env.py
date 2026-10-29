@@ -15,6 +15,7 @@ from modules.telemetry_materialization.infrastructure.db_models import (  # noqa
 )
 from modules.identity_auth.infrastructure.db_models import UserRecord
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord  # noqa: F401
+from modules.feature_metrics.infrastructure.db_models import SessionAnalysisCacheRecord  # noqa: F401
 
 config = context.config
 

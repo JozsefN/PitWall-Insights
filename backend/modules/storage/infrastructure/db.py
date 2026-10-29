@@ -27,6 +27,7 @@ from modules.identity_auth.infrastructure import db_models as _identity_auth_db_
 from modules.session_domain.infrastructure import db_models as _session_domain_db_models  # noqa: E402,F401
 from modules.session_import.infrastructure import db_models as _session_import_db_models  # noqa: E402,F401
 from modules.telemetry_materialization.infrastructure import db_models as _telemetry_materialization_db_models  # noqa: E402,F401
+from modules.feature_metrics.infrastructure import db_models as _feature_metrics_db_models  # noqa: E402,F401
 
 
 def get_db() -> Generator[Session, None, None]:

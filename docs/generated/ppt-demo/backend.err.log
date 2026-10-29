@@ -1,0 +1,70 @@
+INFO:     Started server process [37320]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+core           INFO 	Loading data for Austrian Grand Prix - Race [v3.6.1]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for lap_count
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core           INFO 	Finished loading data for 20 drivers: ['63', '81', '55', '44', '1', '27', '11', '20', '3', '10', '16', '31', '18', '22', '23', '77', '24', '14', '2', '4']
+data        WARNING 	Failed to generate marker distance information: telemetry data has not been loaded
+core           INFO 	Loading data for Austrian Grand Prix - Race [v3.6.1]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for lap_count
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core           INFO 	Finished loading data for 20 drivers: ['63', '81', '55', '44', '1', '27', '11', '20', '3', '10', '16', '31', '18', '22', '23', '77', '24', '14', '2', '4']
+data        WARNING 	Failed to generate marker distance information: telemetry data has not been loaded
+core           INFO 	Loading data for Austrian Grand Prix - Race [v3.6.1]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for lap_count
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core           INFO 	Finished loading data for 20 drivers: ['63', '81', '55', '44', '1', '27', '11', '20', '3', '10', '16', '31', '18', '22', '23', '77', '24', '14', '2', '4']
+data        WARNING 	Failed to generate marker distance information: telemetry data has not been loaded
+core           INFO 	Loading data for Austrian Grand Prix - Race [v3.6.1]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for lap_count
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core           INFO 	Finished loading data for 20 drivers: ['63', '81', '55', '44', '1', '27', '11', '20', '3', '10', '16', '31', '18', '22', '23', '77', '24', '14', '2', '4']
+data        WARNING 	Failed to generate marker distance information: telemetry data has not been loaded
+core           INFO 	Loading data for Austrian Grand Prix - Race [v3.6.1]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for lap_count
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core           INFO 	Finished loading data for 20 drivers: ['63', '81', '55', '44', '1', '27', '11', '20', '3', '10', '16', '31', '18', '22', '23', '77', '24', '14', '2', '4']
+data        WARNING 	Failed to generate marker distance information: telemetry data has not been loaded
+core           INFO 	Loading data for Austrian Grand Prix - Race [v3.6.1]
+req            INFO 	Using cached data for session_info
+req            INFO 	Using cached data for driver_info
+req            INFO 	Using cached data for session_status_data
+req            INFO 	Using cached data for lap_count
+req            INFO 	Using cached data for track_status_data
+req            INFO 	Using cached data for _extended_timing_data
+req            INFO 	Using cached data for timing_app_data
+core           INFO 	Processing timing data...
+core           INFO 	Finished loading data for 20 drivers: ['63', '81', '55', '44', '1', '27', '11', '20', '3', '10', '16', '31', '18', '22', '23', '77', '24', '14', '2', '4']
+data        WARNING 	Failed to generate marker distance information: telemetry data has not been loaded

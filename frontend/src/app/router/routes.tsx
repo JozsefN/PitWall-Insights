@@ -9,6 +9,7 @@ import { SignupPage } from "../../pages/SignupPage";
 import { FeaturePlaceholderPage } from "../../pages/FeaturePlaceholderPage";
 import { SessionsExplorerPage } from "../../pages/SessionsExplorerPage";
 import { SessionWorkspacePage } from "../../pages/SessionWorkspacePage";
+import { DashboardBuilderPage } from "../../pages/DashboardBuilderPage";
 import { RequireAuth } from "../../features/auth/RequireAuth";
 
 export const routes: RouteObject[] = [
@@ -17,6 +18,17 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      {
+        path: "dashboard-builder",
+        element: (
+          <RequireAuth
+            title="Dashboard Builder"
+            description="Sign in to explore reusable session layouts and your saved dashboards."
+          >
+            <DashboardBuilderPage />
+          </RequireAuth>
+        ),
+      },
       {
         path: "sessions",
         element: (
@@ -136,7 +148,10 @@ export const routes: RouteObject[] = [
           />
         ),
       },
-      { path: "compare/:sessionId", element: <Navigate to="/standings" replace /> },
+      {
+        path: "compare/:sessionId",
+        element: <Navigate to="/standings" replace />,
+      },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "home", element: <Navigate to="/" replace /> },

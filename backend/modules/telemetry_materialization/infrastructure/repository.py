@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from itertools import chain
 
-from sqlalchemy import func
+from sqlalchemy import Column, MetaData, Table, func, select, literal_column, text
+from psycopg import sql
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session, joinedload
 
@@ -12,6 +14,7 @@ from modules.normalization.domain.models import (
     PositionSamplePayload,
     SessionSnapshot,
 )
+from modules.ingestion.domain.models import TelemetrySelection
 from modules.session_domain.domain.models import SessionImportRequest
 from modules.session_domain.infrastructure.models import (
     CarTelemetrySampleRecord,
@@ -23,6 +26,7 @@ from modules.session_domain.infrastructure.models import (
     SessionTickRecord,
 )
 from modules.session_domain.infrastructure.models.common import generate_uuid
+from modules.session_domain.infrastructure.race_control import refresh_race_control
 from modules.telemetry_materialization.domain.models import (
     TelemetryMaterializationEnsureResponse,
     TelemetryMaterializationJobRead,
@@ -32,6 +36,7 @@ from modules.telemetry_materialization.domain.models import (
 from modules.telemetry_materialization.infrastructure.db_models import (
     TelemetryCacheSegmentRecord,
     TelemetryMaterializationJobRecord,
+    TelemetryWorkerHeartbeatRecord,
 )
 
 BULK_INSERT_CHUNK_SIZE = 5000
@@ -41,17 +46,44 @@ class TelemetryMaterializationRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def _lock_session(self, session_id: str, purpose: str) -> None:
+        # Separate queue and write locks: readiness checks remain responsive
+        # while another worker persists a large session. Locks end with the txn.
+        self.db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+                        {"key": f"telemetry:{purpose}:{session_id}"})
+
+    def touch_worker(self, worker_id: str, *, hostname: str, process_id: int, started_at: datetime, now: datetime) -> None:
+        statement = pg_insert(TelemetryWorkerHeartbeatRecord).values(
+            worker_id=worker_id,hostname=hostname,process_id=process_id,started_at=started_at,heartbeat_at=now,
+        ).on_conflict_do_update(index_elements=["worker_id"],set_={"heartbeat_at":now,"started_at":started_at})
+        self.db.execute(statement)
+        self.db.query(TelemetryWorkerHeartbeatRecord).filter(TelemetryWorkerHeartbeatRecord.heartbeat_at < now-timedelta(days=1)).delete()
+        self.db.commit()
+
+    def worker_health(self, *, now: datetime) -> dict:
+        fresh_before = now-timedelta(seconds=45)
+        workers = self.db.query(func.count(TelemetryWorkerHeartbeatRecord.worker_id)).filter(
+            TelemetryWorkerHeartbeatRecord.heartbeat_at >= fresh_before).scalar()
+        last_seen = self.db.query(func.max(TelemetryWorkerHeartbeatRecord.heartbeat_at)).scalar()
+        counts = dict(self.db.query(TelemetryMaterializationJobRecord.status,func.count()).group_by(TelemetryMaterializationJobRecord.status).all())
+        oldest = self.db.query(func.min(TelemetryMaterializationJobRecord.created_at)).filter(TelemetryMaterializationJobRecord.status=="queued").scalar()
+        return {"status":"ready" if workers else "worker_offline", "active_workers":int(workers or 0),
+                "last_worker_seen_at":last_seen, "queued_jobs":counts.get("queued",0),
+                "running_jobs":counts.get("running",0),"oldest_queued_seconds":max(0,(now-oldest).total_seconds()) if oldest else 0,
+                "replay_startup_target_seconds":180}
+
     def ensure_materialization(
         self,
         request: TelemetryMaterializationRequest,
         *,
         expires_at: datetime,
     ) -> TelemetryMaterializationEnsureResponse:
+        self._lock_session(request.session_id, "ensure")
         self._assert_session_exists(request.session_id)
         self._assert_entries_belong_to_session(request.session_id, request.entry_ids)
 
         if not request.force_refresh:
-            self._backfill_completed_segments_from_existing_rows(request, expires_at=expires_at)
+            self._backfill_completed_segments_from_existing_rows(request, expires_at=expires_at, commit=False)
 
         ready_segments: list[TelemetrySegmentRead] = []
         missing_pairs: list[tuple[str, str]] = []
@@ -70,18 +102,20 @@ class TelemetryMaterializationRepository:
                     ready_segments.append(self.to_segment_model(segment))
 
         if not missing_pairs:
+            self.db.commit()
             return TelemetryMaterializationEnsureResponse(ready=True, segments=ready_segments)
 
         active_job = None if request.force_refresh else self._find_active_job_covering_pairs(request, missing_pairs)
         if active_job is not None:
-            self._cancel_queued_jobs_covered_by_record(active_job)
+            self._cancel_queued_jobs_covered_by_record(active_job, commit=False)
+            self.db.commit()
             return TelemetryMaterializationEnsureResponse(
                 ready=False,
                 job_id=active_job.id,
                 segments=self.list_segments_for_request(request),
             )
 
-        job = self.create_job(request, expires_at=expires_at)
+        job = self.create_job(request, expires_at=expires_at, commit=False)
         self.queue_segments(
             request.session_id,
             missing_pairs,
@@ -89,8 +123,10 @@ class TelemetryMaterializationRepository:
             lap_number=request.lap_number,
             expires_at=expires_at,
             force_refresh=request.force_refresh,
+            commit=False,
         )
-        self._cancel_queued_jobs_covered_by_request(request, keep_job_id=job.id)
+        self._cancel_queued_jobs_covered_by_request(request, keep_job_id=job.id, commit=False)
+        self.db.commit()
         return TelemetryMaterializationEnsureResponse(
             ready=False,
             job_id=job.id,
@@ -102,6 +138,7 @@ class TelemetryMaterializationRepository:
         request: TelemetryMaterializationRequest,
         *,
         expires_at: datetime,
+        commit: bool = True,
     ) -> TelemetryMaterializationJobRead:
         record = TelemetryMaterializationJobRecord(
             session_id=request.session_id,
@@ -113,7 +150,9 @@ class TelemetryMaterializationRepository:
             expires_at=expires_at,
         )
         self.db.add(record)
-        self.db.commit()
+        self.db.flush()
+        if commit:
+            self.db.commit()
         self.db.refresh(record)
         return self.to_job_model(record)
 
@@ -126,6 +165,7 @@ class TelemetryMaterializationRepository:
         lap_number: int | None,
         expires_at: datetime,
         force_refresh: bool,
+        commit: bool = True,
     ) -> None:
         lap_value = self._lap_value(scope, lap_number)
         for entry_id, kind in pairs:
@@ -151,7 +191,9 @@ class TelemetryMaterializationRepository:
             if force_refresh:
                 segment.row_count = 0
             self.db.add(segment)
-        self.db.commit()
+        self.db.flush()
+        if commit:
+            self.db.commit()
 
     def get_job(self, job_id: str) -> TelemetryMaterializationJobRead | None:
         record = self.db.get(TelemetryMaterializationJobRecord, job_id)
@@ -306,6 +348,16 @@ class TelemetryMaterializationRepository:
             import_profile="full",
         )
 
+    def build_telemetry_selection(self, job: TelemetryMaterializationJobRecord) -> TelemetrySelection:
+        numbers = self.db.query(SessionEntryRecord.car_number).filter(
+            SessionEntryRecord.session_id == job.session_id,
+            SessionEntryRecord.id.in_(job.entry_ids),
+        ).all()
+        return TelemetrySelection(
+            driver_numbers=frozenset(number for (number,) in numbers),
+            kinds=frozenset(job.kinds),
+        )
+
     def materialize_snapshot(
         self,
         job: TelemetryMaterializationJobRecord,
@@ -314,6 +366,7 @@ class TelemetryMaterializationRepository:
         source_version: str | None,
         heartbeat: Callable[[], None] | None = None,
     ) -> int:
+        self._lock_session(job.session_id, "persist")
         request = self.to_request(job)
         entry_source_keys = self._entry_source_keys(job.session_id, job.entry_ids)
         selected_source_keys = set(entry_source_keys.values())
@@ -325,6 +378,15 @@ class TelemetryMaterializationRepository:
             payload for payload in snapshot.position_samples
             if "position" in job.kinds and self._payload_matches(payload, selected_source_keys, request)
         ]
+
+        if job.scope == "session":
+            missing_kinds = [kind for kind, rows in (("car", selected_car), ("position", selected_position))
+                             if kind in job.kinds and not rows]
+            if missing_kinds:
+                raise ValueError(
+                    f"The data source returned no {' or '.join(missing_kinds)} telemetry for the selected drivers. "
+                    "Replay data is unavailable for this session; try another session or retry when the source is available."
+                )
 
         if job.force_refresh:
             self._delete_existing_rows(request)
@@ -358,6 +420,7 @@ class TelemetryMaterializationRepository:
             )
 
         self._mark_segments_completed(request, source_version=source_version)
+        refresh_race_control(self.db, job.session_id, getattr(snapshot, "race_control_messages", []))
         self._refresh_session_telemetry_status(job.session_id)
         self.db.commit()
         return rows_written
@@ -566,26 +629,38 @@ class TelemetryMaterializationRepository:
         conflict_constraint: str,
         heartbeat: Callable[[], None] | None = None,
     ) -> int:
-        total = 0
-        batch: list[dict] = []
-        for row in rows:
-            batch.append(row)
-            if len(batch) >= BULK_INSERT_CHUNK_SIZE:
-                total += self._execute_insert_batch(model, batch, conflict_constraint=conflict_constraint)
-                batch.clear()
-                if heartbeat is not None:
-                    heartbeat()
-
-        if batch:
-            total += self._execute_insert_batch(model, batch, conflict_constraint=conflict_constraint)
-            if heartbeat is not None:
-                heartbeat()
-        return total
-
-    def _execute_insert_batch(self, model: type, batch: list[dict], *, conflict_constraint: str) -> int:
-        statement = pg_insert(model.__table__).on_conflict_do_nothing(constraint=conflict_constraint)
-        result = self.db.execute(statement, batch)
-        return max(int(result.rowcount or 0), 0)
+        iterator = iter(rows)
+        first = next(iterator, None)
+        if first is None:
+            return 0
+        names = list(first)
+        target = model.__table__
+        # Stream COPY into a transaction-local staging table, then let the real
+        # table enforce its FKs and deduplication in one INSERT. No per-row SQL
+        # round trips, no giant parameter list, no application-side commit.
+        staging = Table(
+            "telemetry_stage_" + generate_uuid().replace("-", ""), MetaData(),
+            *(Column(name, target.c[name].type) for name in names),
+            schema="pg_temp", prefixes=["TEMPORARY"], postgresql_on_commit="DROP",
+        )
+        connection = self.db.connection()
+        staging.create(connection)
+        driver_connection = connection.connection.driver_connection
+        command = sql.SQL("COPY {} ({}) FROM STDIN").format(
+            sql.Identifier(staging.name), sql.SQL(", ").join(map(sql.Identifier, names)),
+        )
+        with driver_connection.cursor() as cursor:
+            with cursor.copy(command) as copy:
+                for index, row in enumerate(chain((first,), iterator), start=1):
+                    copy.write_row([row[name] for name in names])
+                    if heartbeat is not None and index % BULK_INSERT_CHUNK_SIZE == 0:
+                        heartbeat()
+        statement = pg_insert(target).from_select(names, select(*(staging.c[name] for name in names))).on_conflict_do_nothing(constraint=conflict_constraint)
+        written = statement.returning(literal_column("1")).cte("written")
+        count = self.db.execute(select(func.count()).select_from(written)).scalar_one()
+        if heartbeat is not None:
+            heartbeat()
+        return int(count)
 
     def _ensure_ticks(
         self,
@@ -602,10 +677,11 @@ class TelemetryMaterializationRepository:
             return {}
 
         existing = (
-            self.db.query(SessionTickRecord)
+            self.db.query(SessionTickRecord.session_time_ms, SessionTickRecord.id)
             .filter(
                 SessionTickRecord.session_id == session_id,
-                SessionTickRecord.session_time_ms.in_(list(payload_by_time.keys())),
+                SessionTickRecord.session_time_ms >= min(payload_by_time),
+                SessionTickRecord.session_time_ms <= max(payload_by_time),
             )
             .all()
         )
@@ -719,7 +795,7 @@ class TelemetryMaterializationRepository:
                     scope=job.scope,
                     lap_number=self._model_lap_number(job),
                 )
-                if segment is not None and segment.status != "completed":
+                if segment is not None and (segment.status != "completed" or segment.row_count == 0):
                     segment.status = "failed"
                     segment.error_message = error_message
                     segment.updated_at = now
@@ -730,6 +806,7 @@ class TelemetryMaterializationRepository:
         request: TelemetryMaterializationRequest,
         *,
         expires_at: datetime,
+        commit: bool = True,
     ) -> None:
         changed = False
         for entry_id in request.entry_ids:
@@ -773,7 +850,9 @@ class TelemetryMaterializationRepository:
                 self.db.add(exact_segment)
                 changed = True
         if changed:
-            self.db.commit()
+            self.db.flush()
+            if commit:
+                self.db.commit()
 
     def _find_satisfying_segment(
         self,

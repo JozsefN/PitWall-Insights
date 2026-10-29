@@ -12,12 +12,6 @@ class AuthService:
         self.repository = repository
 
     def signup(self, email: str, password: str) -> str:
-        print("EMAIL:", email)
-        print("PASSWORD RAW:", password)
-        print("PASSWORD REPR:", repr(password))
-        print("PASSWORD LENGTH:", len(password))
-        print("PASSWORD BYTES:", len(password.encode("utf-8")))
-
         existing = self.repository.get_user_by_email(email)
         if existing:
             raise ValueError("User already exists")

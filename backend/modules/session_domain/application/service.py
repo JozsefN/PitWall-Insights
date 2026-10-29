@@ -92,6 +92,7 @@ class SessionService:
         lap_number: int | None = None,
         session_time_from_ms: int | None = None,
         session_time_to_ms: int | None = None,
+        sample_interval_ms: int | None = None,
     ) -> list[CarTelemetrySampleModel]:
         return self.repository.list_car_telemetry(
             session_id,
@@ -101,6 +102,7 @@ class SessionService:
             lap_number=lap_number,
             session_time_from_ms=session_time_from_ms,
             session_time_to_ms=session_time_to_ms,
+            sample_interval_ms=sample_interval_ms,
         )
 
     def list_position_telemetry(
@@ -113,6 +115,7 @@ class SessionService:
         lap_number: int | None = None,
         session_time_from_ms: int | None = None,
         session_time_to_ms: int | None = None,
+        sample_interval_ms: int | None = None,
     ) -> list[PositionSampleModel]:
         return self.repository.list_position_telemetry(
             session_id,
@@ -122,7 +125,11 @@ class SessionService:
             lap_number=lap_number,
             session_time_from_ms=session_time_from_ms,
             session_time_to_ms=session_time_to_ms,
+            sample_interval_ms=sample_interval_ms,
         )
+
+    def get_replay_timeline(self, session_id: str) -> dict[str, int]:
+        return self.repository.get_replay_timeline(session_id)
 
     def list_ticks(
         self,

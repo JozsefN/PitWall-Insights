@@ -1,0 +1,120 @@
+{
+  "session_id": "83b766df-f250-4293-8b72-15f481ea039b",
+  "as_of_ms": 6146502,
+  "definitions": 67,
+  "results": 562,
+  "first_request_seconds": 0.329,
+  "cached_request_seconds": 0.031,
+  "cache_hit_on_repeat": true,
+  "recommendation_status": "conditional_model_ranking",
+  "plans_returned": 20,
+  "planning": {
+    "evaluated": 421,
+    "feasible": 400,
+    "scope": "configured_zero_one_two_stop_plans",
+    "objective": "minimum_modeled_elapsed_time",
+    "assumptions": [
+      "Conditional elapsed-time ranking, not guaranteed finishing position.",
+      "Planning starts at the next reachable pit-entry decision boundary; partial-lap travel is common to alternatives.",
+      "Future laps use the declared tyre curves and constant common base pace; no future fuel/weather/traffic/overtaking model is silently added.",
+      "Only an immediate stop uses the current SC/VSC pit-cost input; later stops use green cost. Future neutralisation duration is unknown.",
+      "Inventory and rules are supplied context, not automatically certified FIA eligibility."
+    ]
+  },
+  "pace_model_status": "unidentifiable",
+  "coverage": {
+    "selected_entries": 20,
+    "sampled_car_records": 7080,
+    "sampled_position_records": 7100,
+    "weather_records": 6,
+    "track_status_records": 17,
+    "race_control_records": 1,
+    "loaded_inputs": [
+      "car",
+      "laps",
+      "position",
+      "race_control",
+      "reference_line",
+      "track_status",
+      "weather"
+    ],
+    "position_units_supported": true,
+    "max_sample_gap_ms": 2000,
+    "reference_lap_id": "c6751a38-d01e-4809-b3d7-f15a0bd2f098",
+    "session_phase": "Started",
+    "race_start_utc": "2025-05-04T20:00:00+00:00",
+    "coordinate_frame": "fastf1:83b766df-f250-4293-8b72-15f481ea039b:xy_metres",
+    "season_year": 2025
+  },
+  "sample_values": [
+    {
+      "metric_id": "strategy_recent_pace_s",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "rival_entry_id": null,
+      "value": 92.523,
+      "unit": "s/lap",
+      "status": "estimated",
+      "sample_count": 5,
+      "bounds": null,
+      "as_of_ms": 6146502,
+      "support": {},
+      "warnings": []
+    },
+    {
+      "metric_id": "pit_latest_lane_duration_s",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "rival_entry_id": null,
+      "value": 22.44,
+      "unit": "s",
+      "status": "observed",
+      "sample_count": 1,
+      "bounds": null,
+      "as_of_ms": 6146502,
+      "support": {},
+      "warnings": []
+    },
+    {
+      "metric_id": "pit_latest_lane_excess_s",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "rival_entry_id": null,
+      "value": 0.036,
+      "unit": "s",
+      "status": "estimated",
+      "sample_count": 8,
+      "bounds": null,
+      "as_of_ms": 6146502,
+      "support": {},
+      "warnings": []
+    },
+    {
+      "metric_id": "pit_latest_stationary_duration_s",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "rival_entry_id": null,
+      "value": 2.7,
+      "unit": "s",
+      "status": "observed",
+      "sample_count": 1,
+      "bounds": null,
+      "as_of_ms": 6146502,
+      "support": {},
+      "warnings": []
+    },
+    {
+      "metric_id": "strategy_best_gain_vs_stay_out_s",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "rival_entry_id": null,
+      "value": -5.8,
+      "unit": "s",
+      "status": "assumed",
+      "sample_count": 400,
+      "bounds": null,
+      "as_of_ms": 6146502,
+      "support": {},
+      "warnings": []
+    }
+  ],
+  "scenario_coefficients_are_synthetic": true,
+  "warnings": [
+    "Real telemetry/context route validation does not validate the synthetic scenario as an optimal race strategy."
+  ]
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "name": "01_session_trends_full",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\layout-screenshots\\01_session_trends_full.png",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Asession-trends&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all",
+    "box": {
+      "x": 294,
+      "y": 717.9375,
+      "width": 1364,
+      "height": 681.734375
+    }
+  },
+  {
+    "name": "02_compare_lap_full",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\layout-screenshots\\02_compare_lap_full.png",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Acompare-lap&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee&lap=10",
+    "box": {
+      "x": 294,
+      "y": 694.9375,
+      "width": 1364,
+      "height": 705
+    }
+  },
+  {
+    "name": "03_stint_strategy_full",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\layout-screenshots\\03_stint_strategy_full.png",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=lookback&layout=builtin%3Astint-strategy&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all",
+    "box": {
+      "x": 294,
+      "y": 251.9375,
+      "width": 1364,
+      "height": 1148.171875
+    }
+  },
+  {
+    "name": "04_replay_command_full",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\layout-screenshots\\04_replay_command_full.png",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=simulation&layout=builtin%3Areplay-command&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all",
+    "box": {
+      "x": 294,
+      "y": 644.15625,
+      "width": 1364,
+      "height": 755.953125
+    }
+  },
+  {
+    "name": "05_replay_focus_full",
+    "path": "C:\\Users\\jozse\\OneDrive\\Dokumentumok\\Onlab\\PitWall-Insights\\docs\\generated\\ppt-demo\\layout-screenshots\\05_replay_focus_full.png",
+    "url": "http://127.0.0.1:5173/sessions/8f6959c6-fe38-4643-9213-8536113116b0?mode=simulation&layout=builtin%3Areplay-focus&drivers=c9decd5d-10a9-4e8f-87db-b71c930ef54a%2C2a477eca-0c7d-4d03-8d67-6b995b2f7cee%2C323de5c2-0b31-425c-8817-fca23e820655&lap=all",
+    "box": {
+      "x": 294,
+      "y": 428.15625,
+      "width": 1364,
+      "height": 972.171875
+    }
+  }
+]

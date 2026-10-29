@@ -1,0 +1,33 @@
+PitWall Insights – további tervek
+2026. október 5. – december 6.
+
+December első hetére szeretném az alkalmazást egy jól bemutatható állapotig elvinni. A fő irány a saját elrendezések összeállítása, több elemzőpanel, előfizetési lehetőség és néhány ténylegesen használható AI-funkció. Heti bontásban így tervezem a folytatást:
+
+# Október 5–11. – Tervezés, alapok
+Átnézem, mi működik most és hol vannak hiányosságok. Megtervezem, hogyan illeszkedjen a meglévő rendszerbe az elrendezésszerkesztő, az előfizetés és az AI. Elkezdem frissíteni az architektúra leírását és az ábrákat.
+
+# Október 12–18. – Saját elrendezések
+Elkészítem a felületet, ahol szabadon lehet paneleket hozzáadni, mozgatni és átméretezni. A panelekben külön lehessen versenyzőt vagy köröket választani, az összeállított elrendezést pedig elmenteni és később visszatölteni.
+
+# Október 19–25. – Több mérőszám és panel
+Bővítem az elemzéseket: szektorok összehasonlítása, körök közötti időkülönbség, etapok és helyezésváltozások megjelenítése. A meglévő tempó- és egyenletességi mutatók is kapnak saját megjelenítést. Közben ellenőrzöm és leírom a számításokat.
+
+# Október 26. – november 1. – Előfizetés
+Három szinttel számolok: ingyenes, Analyst és Pro. Ezeknél eltérne a menthető elrendezések és panelek száma, illetve a haladó elemzések és az AI elérhetősége. Tesztfizetéssel működő előfizetést készítek, tényleges jogosultság-ellenőrzéssel. A pontos árakat és kereteket még ki kell dolgozni.
+
+# November 2–8. – AI-panelek
+AI-panelek kerülnek a dashboardba, amelyek a feldolgozott telemetriaadatokból adnak magyarázatot a kiválasztott elemzési feladathoz. A válasz a panel beállításaihoz és a kiválasztott értékekhez igazodik, hogy a grafikonok és számok könnyebben érthetők legyenek. Azt is jelzem, milyen adatokra épült a magyarázat.
+
+# November 9–15. – Chatbot, körök értékelése
+Szeretnék egy chatbotot, amelytől az aktuális edzésről vagy versenyről lehet kérdezni. Ha belefér, a visszajátszáshoz is készül AI-panel, amely az addig megtett köröket értékeli, és kiemeli a fontos változásokat. A természetes nyelvű keresés a sessionválasztóban egy későbbi bővítés lehet.
+
+# November 16–22. – Kezdőoldal, tabella, hírek
+A kezdőoldalon a mintaadatokat valódi tartalomra cserélem. Elkészítem az automatikusan frissülő bajnoki tabellát és egy egyszerű hírfolyamot, az eredeti forrásokra mutató linkekkel. A verseny közbeni ideiglenes tabella és az AI-hírösszefoglaló csak akkor kerül be, ha marad rá idő.
+
+# November 23–29. – Tesztelés, javítások
+Ezen a héten már főleg a meglévő funkciókat tesztelem és javítom. Megnézem az AI-válaszok pontosságát, sebességét és költségét is. Ha megoldható, néhány felhasználóval is kipróbáltatom az alkalmazást, és az eredményeket felhasználom a dolgozatban.
+
+# November 30. – december 6. – Dokumentáció, bemutató
+Összerendezem a fejlesztői dokumentációt, véglegesítem az architektúraábrákat és a tesztelés eredményeit. Előkészítem a bemutatóhoz szükséges adatokat és a bemutató menetét, illetve javítom a még előkerülő hibákat.
+
+A dokumentációt közben, hetente szeretném vezetni. Ha valamelyik rész tovább tart, először az extra AI-funkciókból vennék vissza; a saját elrendezések, az elemzések, az alap AI és a szakdolgozati értékelés a fontosabbak.

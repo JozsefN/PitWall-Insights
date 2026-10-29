@@ -1,0 +1,16 @@
+{
+  "checked_at": "2026-10-18T20:20:08.638185+00:00",
+  "revision": "g3d048c5b167",
+  "worker": {
+    "status": "ready",
+    "active_workers": 1,
+    "last_worker_seen_at": "2026-10-18 20:20:06.546393+00:00",
+    "queued_jobs": 0,
+    "running_jobs": 0,
+    "oldest_queued_seconds": 0,
+    "replay_startup_target_seconds": 180
+  },
+  "remaining_test_schemas": 0,
+  "private_strategy_contexts": 0,
+  "private_strategy_cache_rows": 0
+}

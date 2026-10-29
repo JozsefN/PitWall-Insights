@@ -1,0 +1,297 @@
+{
+  "session_id": "36b12c42-daa3-49d7-8a66-62a57694a5b3",
+  "drivers": 20,
+  "cache_hit": false,
+  "isolated_database_materialization": true,
+  "preparation_seconds": 87.843,
+  "startup_seconds": 93.687,
+  "target_seconds": 180,
+  "timeline": {
+    "start_time_ms": 3469893,
+    "end_time_ms": 7956788
+  },
+  "sample_interval_ms": 500,
+  "rows_written": 1206220,
+  "samples": [
+    {
+      "car_number": "1",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "1",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "10",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "10",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "12",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "12",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "14",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "14",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "16",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "16",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "18",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "18",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "22",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "22",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "23",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "23",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "27",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "27",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "30",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "30",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "31",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "31",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "4",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "4",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "43",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "43",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "44",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "44",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "5",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "5",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "55",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "55",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "6",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "6",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "63",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "63",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "81",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "81",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    },
+    {
+      "car_number": "87",
+      "kind": "car",
+      "samples": 8890,
+      "first_ms": 3469939,
+      "last_ms": 7956596
+    },
+    {
+      "car_number": "87",
+      "kind": "position",
+      "samples": 8900,
+      "first_ms": 3470021,
+      "last_ms": 7956643
+    }
+  ]
+}

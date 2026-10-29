@@ -1,12 +1,17 @@
 import { apiClient } from "./client";
-import type { LayoutDto, LayoutMutationDto } from "../contracts/layouts.contracts";
+import type {
+  LayoutDto,
+  LayoutMutationDto,
+} from "../contracts/layouts.contracts";
 
 export async function listLayouts(): Promise<LayoutDto[]> {
   const { data } = await apiClient.get("/api/layouts");
   return data;
 }
 
-export async function createLayout(payload: LayoutMutationDto): Promise<LayoutDto> {
+export async function createLayout(
+  payload: LayoutMutationDto,
+): Promise<LayoutDto> {
   const { data } = await apiClient.post("/api/layouts", payload);
   return data;
 }
@@ -21,4 +26,17 @@ export async function updateLayout(
 
 export async function deleteLayout(layoutId: string): Promise<void> {
   await apiClient.delete(`/api/layouts/${layoutId}`);
+}
+
+export async function listLayoutFavorites(): Promise<string[]> {
+  const { data } = await apiClient.get("/api/layouts/favorites");
+  return data;
+}
+
+export async function setLayoutFavorite(payload: {
+  layoutId: string;
+  favorite: boolean;
+}): Promise<string[]> {
+  const { data } = await apiClient.put("/api/layouts/favorites", payload);
+  return data;
 }

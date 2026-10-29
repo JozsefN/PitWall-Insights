@@ -8,6 +8,15 @@ from sqlalchemy.orm import Mapped, mapped_column
 from modules.storage.infrastructure.base import Base
 
 
+class UserLayoutFavoriteRecord(Base):
+    __tablename__ = "user_layout_favorites"
+
+    owner_user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True,
+    )
+    layout_key: Mapped[str] = mapped_column(String(160), primary_key=True)
+
+
 class UserDashboardLayoutRecord(Base):
     __tablename__ = "user_dashboard_layouts"
     __table_args__ = (

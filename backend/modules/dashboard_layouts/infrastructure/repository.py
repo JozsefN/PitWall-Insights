@@ -3,13 +3,31 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert
 
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord
+from modules.dashboard_layouts.infrastructure.db_models import UserLayoutFavoriteRecord
 
 
 class DashboardLayoutRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
+
+    def list_favorites(self, user_id: str) -> list[str]:
+        return [row.layout_key for row in self.db.query(UserLayoutFavoriteRecord)
+                .filter_by(owner_user_id=user_id).order_by(UserLayoutFavoriteRecord.layout_key).all()]
+
+    def set_favorite(self, user_id: str, layout_key: str, favorite: bool) -> list[str]:
+        if favorite:
+            self.db.execute(insert(UserLayoutFavoriteRecord).values(
+                owner_user_id=user_id, layout_key=layout_key,
+            ).on_conflict_do_nothing())
+        else:
+            self.db.query(UserLayoutFavoriteRecord).filter_by(
+                owner_user_id=user_id, layout_key=layout_key,
+            ).delete()
+        self.db.commit()
+        return self.list_favorites(user_id)
 
     def list_for_user(self, user_id: str) -> list[UserDashboardLayoutRecord]:
         return (
@@ -64,10 +82,11 @@ class DashboardLayoutRepository:
         audience: str | None = None,
         schema_version: int | None = None,
         config_json: dict | None = None,
+        clear_description: bool = False,
     ) -> UserDashboardLayoutRecord:
         if name is not None:
             record.name = name
-        if description is not None:
+        if description is not None or clear_description:
             record.description = description
         if audience is not None:
             record.audience = audience
@@ -83,5 +102,8 @@ class DashboardLayoutRepository:
         return record
 
     def delete(self, record: UserDashboardLayoutRecord) -> None:
+        self.db.query(UserLayoutFavoriteRecord).filter_by(
+            owner_user_id=record.owner_user_id, layout_key=f"user:{record.id}",
+        ).delete()
         self.db.delete(record)
         self.db.commit()

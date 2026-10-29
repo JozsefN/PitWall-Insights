@@ -1,24 +1,11 @@
+import type widgetManifest from "../../../../shared/dashboard-widgets.json";
 import type { ComponentType } from "react";
 
-export type DashboardAudience =
-  | "session-lookback"
-  | "live-race";
+export type DashboardAudience = "session-lookback" | "live-race";
 
-export type SessionWorkspaceMode =
-  | "lookback"
-  | "simulation";
+export type SessionWorkspaceMode = "lookback" | "simulation";
 
-export type WidgetId =
-  | "health-overview"
-  | "sessions-summary"
-  | "telemetry-line-chart"
-  | "brake-trace-chart"
-  | "lap-time-trend"
-  | "stint-analysis"
-  | "lap-table"
-  | "session-track-map"
-  | "replay-track-map"
-  | "replay-driver-cards";
+export type WidgetId = keyof typeof widgetManifest.widgets;
 
 export type LayoutDirection = "row" | "column";
 
@@ -32,18 +19,41 @@ export type WidthMode =
   | "2/3"
   | "3/4";
 
-export type HeightMode =
-  | "auto"
-  | "fill"
-  | "sm"
-  | "md"
-  | "lg";
+export type HeightMode = "auto" | "fill" | "sm" | "md" | "lg";
 
-export type WidgetDefinition = {
-  id: WidgetId;
+export type WidgetPolicy = {
   title: string;
-  description?: string;
-  supportedAudiences?: DashboardAudience[];
+  description: string;
+  supportedAudiences: DashboardAudience[];
+  builderEnabled: boolean;
+  category: "platform" | "telemetry" | "strategy" | "track" | "replay";
+  previewKind:
+    | "status"
+    | "trace"
+    | "brake"
+    | "pace"
+    | "stints"
+    | "laps"
+    | "track"
+    | "driver-cards";
+  sizing: {
+    minW: number;
+    minH: number;
+    maxW: number;
+    maxH: number;
+    defaultW: number;
+    defaultH: number;
+    minAspect?: number;
+    maxAspect?: number;
+    compactBelowPx: number;
+    shortBelowPx: number;
+  };
+  accessTier: 0 | 1 | 2 | 3;
+  defaultOptions?: Record<string, unknown>;
+};
+
+export type WidgetDefinition = WidgetPolicy & {
+  id: WidgetId;
   component: ComponentType<{ options?: Record<string, unknown> }>;
 };
 
@@ -57,11 +67,16 @@ export type LayoutWidgetNode = {
   maxHeight?: number;
   grow?: number;
   className?: string;
+  instanceId?: string;
+  placement?: GridPlacement;
 };
+
+export type GridPlacement = { x: number; y: number; w: number; h: number };
 
 export type LayoutGroupNode = {
   type: "group";
   direction: LayoutDirection;
+  grid?: { columns: number; rowHeight: number };
   gap?: number;
   children: Array<LayoutGroupNode | LayoutWidgetNode>;
 };

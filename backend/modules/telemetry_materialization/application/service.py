@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import logging
+from threading import Event, Thread
+from time import perf_counter
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import settings
 from modules.ingestion.application.service import IngestionService
@@ -15,6 +18,8 @@ from modules.telemetry_materialization.domain.models import (
     TelemetryMaterializationRequest,
 )
 from modules.telemetry_materialization.infrastructure.repository import TelemetryMaterializationRepository
+
+logger = logging.getLogger("pitwall.telemetry")
 
 
 class TelemetryMaterializationService:
@@ -49,26 +54,46 @@ class TelemetryMaterializationService:
             return None
 
         job_id = job.id
+        started = perf_counter()
+        stop_heartbeat = Event()
+        heartbeat = self._build_job_heartbeat(job_id)
+        def keep_alive() -> None:
+            while not stop_heartbeat.wait(10):
+                try:
+                    heartbeat()
+                except Exception:
+                    logger.exception("Could not update telemetry job heartbeat %s", job_id)
+        heartbeat_thread = Thread(target=keep_alive, daemon=True)
+        heartbeat_thread.start()
         try:
             source, request = self.repository.build_session_import_request(job.session_id)
+            request.force_refresh = job.force_refresh
+            selection = self.repository.build_telemetry_selection(job)
             ingestion_service = IngestionService(source=build_session_source(source))
 
             self.repository.mark_stage(job_id, stage="loading_source", now=datetime.now(timezone.utc))
-            bundle = ingestion_service.load_session(request)
+            bundle = ingestion_service.load_session(request, telemetry_selection=selection)
+            loaded = perf_counter()
+            logger.info("Telemetry job %s source=%.2fs drivers=%s kinds=%s", job_id,
+                        loaded - started, len(selection.driver_numbers), sorted(selection.kinds))
 
             self.repository.mark_stage(job_id, stage="normalizing", now=datetime.now(timezone.utc))
             snapshot = self.normalization_service.build_snapshot(
                 bundle=bundle,
                 ttl_hours=settings.session_cache_ttl_hours,
             )
+            normalized = perf_counter()
 
             self.repository.mark_stage(job_id, stage="persisting", now=datetime.now(timezone.utc))
             rows_written = self.repository.materialize_snapshot(
                 job,
                 snapshot,
                 source_version=bundle.source_version,
-                heartbeat=self._build_job_heartbeat(job_id),
+                heartbeat=heartbeat,
             )
+            logger.info("Telemetry job %s normalize=%.2fs persist=%.2fs total=%.2fs rows=%s",
+                        job_id, normalized - loaded, perf_counter() - normalized,
+                        perf_counter() - started, rows_written)
 
             return self.repository.mark_completed(
                 job_id,
@@ -77,12 +102,16 @@ class TelemetryMaterializationService:
                 now=datetime.now(timezone.utc),
             )
         except Exception as exc:
+            logger.exception("Telemetry job %s failed after %.2fs", job_id, perf_counter() - started)
             self.db.rollback()
             return self.repository.mark_failed(
                 job_id,
                 error_message=str(exc),
                 now=datetime.now(timezone.utc),
             )
+        finally:
+            stop_heartbeat.set()
+            heartbeat_thread.join(timeout=2)
 
     def recover_stale_jobs(self) -> int:
         now = datetime.now(timezone.utc)
@@ -93,12 +122,10 @@ class TelemetryMaterializationService:
             max_attempts=settings.import_job_max_attempts,
         )
 
-    @staticmethod
-    def _build_job_heartbeat(job_id: str):
+    def _build_job_heartbeat(self, job_id: str):
+        factory = sessionmaker(bind=self.db.get_bind(), autoflush=False)
         def heartbeat() -> None:
-            from modules.storage.infrastructure.db import SessionLocal
-
-            heartbeat_db = SessionLocal()
+            heartbeat_db = factory()
             try:
                 TelemetryMaterializationRepository(heartbeat_db).touch_heartbeat(
                     job_id,

@@ -1,0 +1,100 @@
+{
+  "session_id": "83b766df-f250-4293-8b72-15f481ea039b",
+  "definitions": 137,
+  "metric_results": 2417,
+  "first_request_seconds": 0.047,
+  "first_request_cache_hit": true,
+  "cached_request_seconds": 0.031,
+  "state_request_seconds": 0.047,
+  "coverage": {
+    "loaded_inputs": [
+      "car",
+      "laps",
+      "position",
+      "race_control",
+      "reference_line",
+      "stints",
+      "track_status",
+      "weather"
+    ],
+    "weather_records": 94,
+    "reference_lap_id": "c6751a38-d01e-4809-b3d7-f15a0bd2f098",
+    "selected_entries": 20,
+    "max_sample_gap_ms": 2000,
+    "sampled_car_records": 213840,
+    "race_control_records": 55,
+    "track_status_records": 22,
+    "position_units_supported": true,
+    "sampled_position_records": 213820
+  },
+  "event_count": 2986,
+  "events_returned": 500,
+  "unavailable_metric_results": 30,
+  "state_entries": 20,
+  "fresh_positions": 20,
+  "reference_lap_id": "c6751a38-d01e-4809-b3d7-f15a0bd2f098",
+  "sample_metrics": [
+    {
+      "metric_id": "best_lap_ms",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "value": 90466.0,
+      "unit": "ms",
+      "status": "ok",
+      "confidence": 1.0,
+      "sample_count": 47,
+      "warnings": []
+    },
+    {
+      "metric_id": "max_speed_kph",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "value": 336.0,
+      "unit": "km/h",
+      "status": "ok",
+      "confidence": 1.0,
+      "sample_count": 10692,
+      "warnings": []
+    },
+    {
+      "metric_id": "reference_lap_length_m",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "value": 5348.096428,
+      "unit": "m",
+      "status": "ok",
+      "confidence": 0.8,
+      "sample_count": 10691,
+      "warnings": []
+    },
+    {
+      "metric_id": "possible_incident_count",
+      "entry_id": "ee1cb56d-ac4e-407b-9c9d-44e6c3113dc7",
+      "value": 0,
+      "unit": "candidates",
+      "status": "ok",
+      "confidence": 0.5,
+      "sample_count": 10692,
+      "warnings": [
+        "Heuristic candidate, never proof of a crash."
+      ]
+    },
+    {
+      "metric_id": "mean_wind_speed_kph",
+      "entry_id": null,
+      "value": 3.316293,
+      "unit": "km/h",
+      "status": "ok",
+      "confidence": 1.0,
+      "sample_count": 94,
+      "warnings": []
+    },
+    {
+      "metric_id": "race_control_message_count",
+      "entry_id": null,
+      "value": 55,
+      "unit": "messages",
+      "status": "ok",
+      "confidence": 1.0,
+      "sample_count": 55,
+      "warnings": []
+    }
+  ]
+}

@@ -7,7 +7,9 @@ from modules.identity_auth.application.schemas import (
     LoginRequest,
     SignUpRequest,
 )
-from modules.identity_auth.application.security import decode_access_token
+from modules.identity_auth.application.security import decode_access_token, create_access_token
+from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.identity_auth.domain.models import User
 from modules.identity_auth.application.service import AuthService
 from modules.identity_auth.infrastructure.repository import AuthRepository
 from modules.storage.infrastructure.db import get_db
@@ -63,7 +65,6 @@ def get_auth_session(
             user_id=None,
             email=None,
         )
-
     token = authorization.removeprefix("Bearer ").strip()
 
     try:
@@ -81,3 +82,9 @@ def get_auth_session(
             user_id=None,
             email=None,
         )
+
+
+@router.post("/refresh", response_model=AuthTokenResponse)
+def refresh_auth_token(user: User = Depends(require_current_user)) -> AuthTokenResponse:
+    """Renew active sessions only. Expired or invalid tokens still require sign-in."""
+    return AuthTokenResponse(access_token=create_access_token(user.id, user.email))

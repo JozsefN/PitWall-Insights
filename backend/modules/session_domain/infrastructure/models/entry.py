@@ -18,7 +18,6 @@ class SessionEntryRecord(StringIdMixin, Base):
     session_id: Mapped[str] = mapped_column(
         ForeignKey("event_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     driver_id: Mapped[str] = mapped_column(
         ForeignKey("drivers.id", ondelete="RESTRICT"),
@@ -73,7 +72,6 @@ class EntryResultRecord(StringIdMixin, Base):
     session_entry_id: Mapped[str] = mapped_column(
         ForeignKey("session_entries.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     position: Mapped[int | None] = mapped_column(Integer, nullable=True)
     classified_position: Mapped[str | None] = mapped_column(String(32), nullable=True)
@@ -99,7 +97,6 @@ class EntryLapRecord(StringIdMixin, Base):
     session_entry_id: Mapped[str] = mapped_column(
         ForeignKey("session_entries.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     lap_number: Mapped[int] = mapped_column(Integer, nullable=False)
     lap_position: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -143,7 +140,6 @@ class EntryStintRecord(StringIdMixin, Base):
     session_entry_id: Mapped[str] = mapped_column(
         ForeignKey("session_entries.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     stint_number: Mapped[int] = mapped_column(Integer, nullable=False)
     compound: Mapped[str | None] = mapped_column(String(32), nullable=True)

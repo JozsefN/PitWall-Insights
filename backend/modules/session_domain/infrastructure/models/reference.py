@@ -31,7 +31,6 @@ class WeekendRecord(StringIdMixin, Base):
     season_year: Mapped[int] = mapped_column(
         ForeignKey("seasons.year", ondelete="RESTRICT"),
         nullable=False,
-        index=True,
     )
     round_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
     event_name: Mapped[str] = mapped_column(String(255), nullable=False)

@@ -3,10 +3,11 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from threading import RLock
 from typing import Any
 
 from app.config import settings
-from modules.ingestion.domain.models import IngestionSourceStatus, SourceSessionBundle, SourceSessionMetadata
+from modules.ingestion.domain.models import IngestionSourceStatus, SourceSessionBundle, SourceSessionMetadata, TelemetrySelection
 from modules.ingestion.infrastructure.cache_paths import resolve_provider_cache_dir
 from modules.session_domain.domain.models import (
     SessionCatalogItem,
@@ -17,6 +18,10 @@ from modules.session_domain.domain.models import (
 
 class FastF1Adapter:
     source_name = "fastf1"
+    # Bounded to one parsed session per process, shared across short-lived adapters.
+    # FastF1's disk cache otherwise still requires repeated parsing for each job.
+    _parsed_session: tuple[tuple, Any] | None = None
+    _session_lock = RLock()
 
     def __init__(self, cache_dir: str | None = None) -> None:
         self.cache_dir = resolve_provider_cache_dir(
@@ -107,16 +112,28 @@ class FastF1Adapter:
         )
         return catalog_items
 
-    def load_session(self, request: SessionImportRequest) -> SourceSessionBundle:
+    def load_session(self, request: SessionImportRequest, *, telemetry_selection: TelemetrySelection | None = None) -> SourceSessionBundle:
         fastf1 = self._load_fastf1()
-        session = self._resolve_session(fastf1, request)
         include_telemetry = request.import_profile == "full"
-        session.load(
-            laps=True,
-            telemetry=include_telemetry,
-            weather=True,
-            messages=True,
-        )
+        key = (str(self.cache_dir), request.season_year, request.round_number,
+               request.session_name, request.source_session_key, include_telemetry)
+        with self._session_lock:
+            cached = type(self)._parsed_session
+            if cached is not None and cached[0] == key and not request.force_refresh:
+                session = cached[1]
+            else:
+                session = self._resolve_session(fastf1, request)
+                session.load(laps=True, telemetry=include_telemetry, weather=True, messages=True)
+                # FastF1 can swallow source errors and return a partial session.
+                # Do not hold that failure in memory across explicit retries.
+                complete = not include_telemetry
+                if include_telemetry:
+                    try:
+                        complete = all(any(len(rows) for rows in getattr(session, attr).values())
+                                       for attr in ("car_data", "pos_data"))
+                    except Exception:
+                        complete = False
+                type(self)._parsed_session = (key, session) if complete else None
 
         event = session.event
         event_name = self._as_text(event.get("EventName")) or f"Round {request.round_number}"
@@ -158,6 +175,8 @@ class FastF1Adapter:
             api_path=self._as_text(getattr(session, "api_path", None)),
             f1_api_support=getattr(session, "f1_api_support", None),
             actual_start_utc=self._as_datetime(getattr(session, "date", None)),
+            # t0 is the feed clock origin, often well before the race start.
+            session_time_origin_utc=self._as_datetime(getattr(session, "_t0_date", None)),
             session_info=self._coerce_mapping(getattr(session, "session_info", None)),
         )
 
@@ -168,8 +187,10 @@ class FastF1Adapter:
         session_status = self._to_records(getattr(session, "session_status", None))
         track_status = self._to_records(getattr(session, "track_status", None))
         race_control_messages = self._to_records(getattr(session, "race_control_messages", None))
-        car_telemetry = self._extract_telemetry(session, "car_data") if include_telemetry else {}
-        position_data = self._extract_telemetry(session, "pos_data") if include_telemetry else {}
+        kinds = telemetry_selection.kinds if telemetry_selection else {"car", "position"}
+        driver_numbers = telemetry_selection.driver_numbers if telemetry_selection else None
+        car_telemetry = self._extract_telemetry(session, "car_data", driver_numbers) if include_telemetry and "car" in kinds else {}
+        position_data = self._extract_telemetry(session, "pos_data", driver_numbers) if include_telemetry and "position" in kinds else {}
 
         return SourceSessionBundle(
             source=self.source_name,
@@ -321,7 +342,7 @@ class FastF1Adapter:
 
         return driver_rows
 
-    def _extract_telemetry(self, session: Any, attr_name: str) -> dict[str, list[dict[str, Any]]]:
+    def _extract_telemetry(self, session: Any, attr_name: str, driver_numbers: frozenset[str] | None = None) -> dict[str, list[dict[str, Any]]]:
         telemetry_by_driver: dict[str, list[dict[str, Any]]] = {}
         try:
             session_attr = getattr(session, attr_name, None)
@@ -331,6 +352,8 @@ class FastF1Adapter:
         for driver_number in getattr(session, "drivers", []):
             driver_key = self._as_text(driver_number)
             if not driver_key:
+                continue
+            if driver_numbers is not None and driver_key not in driver_numbers:
                 continue
             try:
                 telemetry = None

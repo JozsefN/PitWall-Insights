@@ -1,0 +1,177 @@
+.timing-panel {
+  min-width: 0;
+}
+.tyre-axis,
+.tyre-row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding-inline-end: 10px;
+}
+.tyre-axis {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding-block: 4px;
+}
+.tyre-axis > div {
+  position: relative;
+  height: 18px;
+}
+.tyre-axis > div span {
+  position: absolute;
+  translate: -50% 0;
+}
+.tyre-timeline,
+.timing-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.tyre-row {
+  min-height: 29px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+.tyre-row > strong {
+  padding-inline-start: 5px;
+  border-inline-start: 3px solid var(--timing-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.tyre-row__track {
+  position: relative;
+  height: 19px;
+  border-radius: 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-recessed) 0 calc(var(--lap-grid) - 1px),
+    var(--color-border-subtle) calc(var(--lap-grid) - 1px) var(--lap-grid)
+  );
+}
+.tyre-row__stint {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-inline: 1px solid var(--color-recessed);
+  border-radius: 4px;
+  background: var(--compound);
+  color: #18151b;
+  font-size: 11px;
+  font-weight: 750;
+}
+.timing-legend,
+.timing-details li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.timing-legend {
+  margin-top: 9px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.timing-legend--compound {
+  margin: 0 0 5px;
+}
+.timing-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.timing-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid var(--color-border-strong);
+}
+.timing-details {
+  margin-top: 9px;
+}
+.timing-details li {
+  padding-block: 5px;
+  border-top: 1px solid var(--color-border-subtle);
+  font-size: 13px;
+}
+.timing-details li span {
+  color: var(--color-text-secondary);
+}
+.timing-plot {
+  width: 100%;
+  height: 216px;
+  display: block;
+}
+.timing-plot text {
+  fill: var(--color-text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.timing-plot__grid,
+.timing-plot__series {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.timing-plot__grid {
+  stroke: var(--color-border-subtle);
+}
+.timing-plot__series {
+  stroke: color-mix(
+    in srgb,
+    var(--timing-accent) 70%,
+    var(--color-text-primary)
+  );
+  stroke-width: 1.7;
+}
+.timing-plot circle {
+  fill: var(--timing-accent);
+  stroke: var(--color-text-primary);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.timing-plot [data-emphasis="false"] {
+  opacity: 0.2;
+}
+.timing-board-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.timing-board {
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.79rem;
+  font-variant-numeric: tabular-nums;
+}
+.timing-board td,
+.timing-board th {
+  text-align: end;
+  padding: 7px 5px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.timing-board th:first-child {
+  text-align: start;
+}
+.timing-board th span {
+  color: var(--color-text-secondary);
+}
+.timing-board tr[data-leading="true"] {
+  background: var(--color-surface-muted);
+}
+.timing-board-driver {
+  display: inline-block;
+  min-width: 3.1em;
+  margin-inline-start: 3px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  text-align: center;
+}
+.timing-board td[data-faster="true"] {
+  color: var(--color-success);
+  font-weight: 700;
+}

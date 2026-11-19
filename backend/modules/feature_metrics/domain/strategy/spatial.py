@@ -34,6 +34,23 @@ def polygon_clearance(point, polygon):
     return distance if inside else -distance
 
 
+def mapped_terrain(clearances, error_m):
+    found = {
+        zone.kind
+        for zone, distance in clearances
+        if zone.kind in ("gravel", "runoff", "recovery") and distance > error_m
+    }
+    return next(iter(found)) if len(found) == 1 else None
+
+
+def nearest_recovery_distance(point, track):
+    if not track.recovery_points_m:
+        return None
+    return float(
+        np.min(np.linalg.norm(np.asarray(track.recovery_points_m) - point, axis=1))
+    )
+
+
 def motion(entry, data, request, context, result):
     cutoff = request.as_of_ms
     car = [row for row in entry.car if row["session_time_ms"] <= cutoff]
@@ -151,30 +168,36 @@ def motion(entry, data, request, context, result):
     recovery = None
     surface = "unknown"
     recovery_access = "unknown"
+    terrain = None
     track = context.track if context else None
     if point is not None and track:
-        zones = [zone for zone in track.zones if zone.kind == "racing_surface"]
-        if zones:
-            clearance = max(polygon_clearance(point, zone.polygon_m) for zone in zones)
+        clearances = [
+            (zone, polygon_clearance(point, zone.polygon_m))
+            for zone in track.zones
+            if zone.kind != "marshal_sector"
+        ]
+        surface_edges = [
+            distance for zone, distance in clearances if zone.kind == "racing_surface"
+        ]
+        if surface_edges:
+            clearance = max(surface_edges)
             surface = (
                 "on_track"
                 if clearance > track.position_error_m
                 else "off_track" if clearance < -track.position_error_m else "unknown"
             )
-        if track.recovery_points_m:
-            recovery = float(
-                np.min(
-                    np.linalg.norm(np.asarray(track.recovery_points_m) - point, axis=1)
-                )
-            )
+        if surface == "off_track":
+            terrain = mapped_terrain(clearances, track.position_error_m)
+        recovery = nearest_recovery_distance(point, track)
+        if recovery is not None:
             recovery_access = (
                 "near"
                 if recovery + track.position_error_m < 50
                 else "far" if recovery - track.position_error_m > 50 else "unknown"
             )
         in_pit = in_pit or any(
-            polygon_clearance(point, zone.polygon_m) > track.position_error_m
-            for zone in track.zones
+            distance > track.position_error_m
+            for zone, distance in clearances
             if zone.kind == "pit_lane"
         )
     state = (
@@ -185,7 +208,7 @@ def motion(entry, data, request, context, result):
             if in_pit
             else (
                 "stopped_in_recovery_zone"
-                if stop >= 4 and surface == "off_track" and recovery_access == "near"
+                if stop >= 4 and terrain == "recovery"
                 else (
                     "stationary_on_track"
                     if stop >= 4 and surface == "on_track"
@@ -232,6 +255,7 @@ def motion(entry, data, request, context, result):
         support={
             "surface": surface,
             "recovery_access": recovery_access,
+            "terrain": terrain,
             "fresh_position": fresh_position,
             "fresh_car": fresh_car,
         },
@@ -269,6 +293,7 @@ def motion(entry, data, request, context, result):
         stop_duration_s=stop,
         surface=surface,
         recovery_access=recovery_access,
+        terrain=terrain,
         in_pit=in_pit,
         state=state,
         collision=collision,

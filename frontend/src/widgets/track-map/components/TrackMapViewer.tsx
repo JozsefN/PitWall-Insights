@@ -1,30 +1,43 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { DriverSelect } from "../../../components/DriverSelect";
+import { driverOption } from "../../../components/driver-select-options";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type {
   TrackMapData,
   TrackMapMode,
+  TrackMapOverlay,
   TrackMapPoint,
   TrackMapTrace,
-  TrackMapTurnMarker,
 } from "../models";
 import {
   buildPaddedBaseViewBox,
   buildTrackBounds,
   buildTrackPath,
   buildViewBoxFromCenter,
-  calculateHeadingDeg,
   formatViewBox,
-  getTrackScale,
 } from "../utils/geometry";
 import { F1CarMarker } from "./F1CarMarker";
+import { CircuitSurfaceOverlay, WindField } from "./CircuitMapOverlays";
+import { mapOverlayColour } from "../utils/circuit-overlays";
+import { smoothTrackPath } from "../utils/track-curves";
+import { mapScaleBar, metresToMapUnits, replayCarDimensions } from "../utils/track-scale";
+import type { MappedRoad } from "../utils/mapped-road";
+import { pitPhaseAt, type PitMap } from "../utils/pit-map";
+import { PitLaneDrawing } from "./PitLaneDrawing";
 
-const ZOOM_LEVELS = [1, 1.35, 1.85, 2.6, 3.6, 5];
+const ZOOM_LEVELS = [1, 1.35, 1.85, 2.8, 4.5, 7, 11, 18];
+const OVERVIEW_ZOOM_LIMIT = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 
 type CameraTarget = "manual" | "pack" | string;
 
 type TrackMapViewerProps = {
   data: TrackMapData;
   mode: TrackMapMode;
+  seasonYear: number;
+  overlay?: TrackMapOverlay;
+  mappedRoad?: MappedRoad;
+  pits?: PitMap;
+  pitClockMs?: number;
 };
 
 type CameraPoint = {
@@ -32,93 +45,102 @@ type CameraPoint = {
   y: number;
 };
 
-type ViewBox = {
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
-};
-
 type DragState = {
   pointerId: number;
   clientX: number;
   clientY: number;
   center: CameraPoint;
-  viewBox: ViewBox;
+  unitsPerPixel: number;
 };
 
-export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
-  const rawGlowFilterId = useId();
-  const glowFilterId = rawGlowFilterId.replace(/:/g, "");
+export function TrackMapViewer({ data, mode, seasonYear, overlay, mappedRoad, pits, pitClockMs }: TrackMapViewerProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const [mapSize, setMapSize] = useState({ width: 720, height: 280 });
   const [zoomIndex, setZoomIndex] = useState(0);
-  const [cameraTarget, setCameraTarget] = useState<CameraTarget>(mode === "replay" ? "pack" : "manual");
+  const [cameraTarget, setCameraTarget] = useState<CameraTarget>("pack");
   const [manualCenter, setManualCenter] = useState<CameraPoint | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [showLines, setShowLines] = useState(true);
-  const [showPreviousLap, setShowPreviousLap] = useState(mode === "replay");
-  const zoom = ZOOM_LEVELS[zoomIndex] ?? 1;
-  const visibleTraces = useMemo(
-    () => data.traces.filter((trace) => trace.points.length > 0 || trace.currentPoint || trace.referencePoints.length > 0),
-    [data.traces],
-  );
-  const trackPoints = useMemo(() => {
-    if (data.outlinePoints.length > 0) {
-      return data.outlinePoints;
-    }
-
-    return visibleTraces
-      .map((trace) => trace.referencePoints.length > 0 ? trace.referencePoints : trace.points)
-      .sort((a, b) => b.length - a.length)[0] ?? [];
-  }, [data.outlinePoints, visibleTraces]);
-  const turnPoints = useMemo(
-    () => data.turnMarkers.map((marker) => markerToPoint(marker)),
-    [data.turnMarkers],
-  );
-  const allPoints = useMemo(
-    () => [
-      ...trackPoints,
-      ...turnPoints,
-      ...visibleTraces.flatMap((trace) => trace.referencePoints),
-      ...visibleTraces.flatMap((trace) => trace.previousLapPoints),
-      ...visibleTraces.flatMap((trace) => trace.points),
-      ...visibleTraces.flatMap((trace) => (trace.currentPoint ? [trace.currentPoint] : [])),
-    ],
-    [trackPoints, turnPoints, visibleTraces],
-  );
-  const bounds = useMemo(() => buildTrackBounds(allPoints), [allPoints]);
+  const [showPreviousLap, setShowPreviousLap] = useState(false);
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setMapSize({ width, height });
+    });
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, []);
+  const visibleTraces = data.traces;
+  const trackPoints = mappedRoad?.centre ?? data.outlinePoints;
+  const bounds = useMemo(() => {
+    if (trackPoints.length) return buildTrackBounds(pits ? [...trackPoints, ...pits.lane] : trackPoints);
+    if (!pits) return data.fallbackBounds ?? buildTrackBounds([]);
+    const fallback = data.fallbackBounds;
+    return buildTrackBounds(fallback ? [
+      { x: fallback.minX, y: fallback.minY },
+      { x: fallback.maxX, y: fallback.maxY },
+      ...pits.lane,
+    ] : pits.lane);
+  }, [trackPoints, data.fallbackBounds, pits]);
   const baseView = useMemo(() => buildPaddedBaseViewBox(bounds), [bounds]);
-  const defaultCenter = useMemo(
-    () => ({ x: baseView.centerX, y: baseView.centerY }),
-    [baseView.centerX, baseView.centerY],
-  );
-  const activeCameraTarget = resolveActiveCameraTarget(cameraTarget, visibleTraces, mode);
-  const followedPoint = resolveCameraTargetPoint(activeCameraTarget, visibleTraces);
-  const cameraCenter = followedPoint ?? manualCenter ?? defaultCenter;
+  const pitView = useMemo(() => pits ? buildPaddedBaseViewBox(buildTrackBounds(pits.lane)) : undefined, [pits]);
+  const { lengthM, widthM } = replayCarDimensions(seasonYear);
+  const carLength = metresToMapUnits(lengthM);
+  const carWidth = metresToMapUnits(widthM);
+  const fitUnitsPerPixel = Math.max(baseView.width / mapSize.width, baseView.height / mapSize.height);
+  // Scale the camera to keep the smallest panels legible with the same car and road geometry.
+  const closeUpCarPixels = Math.min(72, Math.max(40, Math.min(mapSize.width, mapSize.height) * 0.28));
+  const closeUpZoom = Math.max(2 * OVERVIEW_ZOOM_LIMIT, closeUpCarPixels * fitUnitsPerPixel / carLength);
+  const zoomLevels = mode === "replay"
+    ? [...ZOOM_LEVELS, Math.sqrt(OVERVIEW_ZOOM_LIMIT * closeUpZoom), closeUpZoom]
+    : ZOOM_LEVELS;
+  const zoom = zoomLevels[zoomIndex] ?? 1;
+  const choices = data.drivers ?? visibleTraces.map((trace) => ({
+    key: trace.key,
+    label: trace.entry.driver_name || trace.label,
+    entry: trace.entry,
+  }));
+  const focused = choices.some((driver) => driver.key === cameraTarget);
+  const focusingPits = cameraTarget === "pits" && pitView != null;
+  const activeCameraTarget = focused || focusingPits || cameraTarget === "manual" ? cameraTarget : "pack";
+  const focusedTrace = focused ? visibleTraces.find((trace) => trace.key === cameraTarget) : undefined;
+  const defaultCenter = { x: baseView.centerX, y: baseView.centerY };
+  const cameraCenter = focusingPits ? { x: pitView.centerX, y: pitView.centerY } : focusedTrace?.currentPoint ?? manualCenter ?? defaultCenter;
   const viewBoxObject = buildViewBoxFromCenter(bounds, zoom, cameraCenter);
   const viewBox = formatViewBox(viewBoxObject);
-  const scale = getTrackScale(allPoints);
-  const zoomDamping = Math.sqrt(zoom);
-  const trackStroke = Math.max((scale * 0.018) / zoomDamping, 20);
-  const laneStroke = Math.max(trackStroke * 0.68, 14);
-  const racingStroke = Math.max((scale * 0.0045) / zoomDamping, 4);
-  const previousStroke = Math.max(racingStroke * 0.74, 3);
-  const dotRadius = Math.max((scale * 0.008) / zoomDamping, 7);
-  const carSize = Math.max((scale * 0.024) / zoomDamping, 26);
-  const labelFontSize = Math.max((scale * 0.012) / zoomDamping, 13);
-  const turnFontSize = Math.max((scale * 0.011) / zoomDamping, 12);
-  const showCars = zoom >= 1.35;
-  const trackPath = buildTrackPath(trackPoints);
-  const focusedTrace = visibleTraces.find((trace) => trace.key === activeCameraTarget) ?? null;
-  const lineTraces =
-    activeCameraTarget !== "pack" && focusedTrace
-      ? [focusedTrace, ...visibleTraces.filter((trace) => trace.key !== focusedTrace.key)]
-      : visibleTraces;
+  const unitPerPixel = fitUnitsPerPixel / zoom;
+  const dotRadius = 3.5 * unitPerPixel;
+  const scaleBar = zoom >= 2.8 ? mapScaleBar(unitPerPixel) : undefined;
+  const labelFontSize = 12 * unitPerPixel;
+  const showCars = carLength / unitPerPixel >= 9;
+  const boxCount = (focusingPits || zoom >= 4.5) && pits
+    ? pits.boxes.filter(({ knownAtMs }) => pitClockMs == null || knownAtMs <= pitClockMs).length : 0;
+  const smallSelection = choices.length <= 4;
+  const lineTraces = mode === "lookback" || smallSelection
+    ? visibleTraces
+    : focusedTrace ? [focusedTrace] : [];
+  const legend = smallSelection ? visibleTraces : focusedTrace ? [focusedTrace] : [];
+  const canShowTrails = mode === "lookback" || smallSelection || focused;
+  const labelTraces = smallSelection || zoom >= 4.5 ? visibleTraces : focusedTrace ? [focusedTrace] : [];
+  const labels = placeDriverLabels(
+    labelTraces, activeCameraTarget, viewBoxObject, labelFontSize, zoom >= 4.5,
+    showCars ? { length: carLength, width: carWidth } : undefined,
+  );
+
+  function pitPhase(trace: TrackMapTrace) {
+    return mode === "replay" && trace.currentPoint ? pitPhaseAt(pits?.byDriver.get(trace.key), trace.currentPoint.sessionTimeMs) : undefined;
+  }
 
   const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
-    if (event.button !== 0) {
+    if (event.button !== 0 || zoomIndex === 0) {
       return;
     }
+    const transform = event.currentTarget.getScreenCTM();
+    if (!transform) return;
+    const scale = Math.hypot(transform.a, transform.b);
+    if (!scale) return;
 
     event.currentTarget.setPointerCapture(event.pointerId);
     setCameraTarget("manual");
@@ -128,7 +150,7 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
       clientX: event.clientX,
       clientY: event.clientY,
       center: cameraCenter,
-      viewBox: viewBoxObject,
+      unitsPerPixel: 1 / scale,
     });
   };
 
@@ -137,9 +159,8 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
       return;
     }
 
-    const rect = svgRef.current.getBoundingClientRect();
-    const deltaX = rect.width > 0 ? ((event.clientX - dragState.clientX) / rect.width) * dragState.viewBox.width : 0;
-    const deltaY = rect.height > 0 ? ((event.clientY - dragState.clientY) / rect.height) * dragState.viewBox.height : 0;
+    const deltaX = (event.clientX - dragState.clientX) * dragState.unitsPerPixel;
+    const deltaY = (event.clientY - dragState.clientY) * dragState.unitsPerPixel;
 
     setManualCenter({
       x: dragState.center.x - deltaX,
@@ -157,7 +178,7 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
   const resetCamera = () => {
     setZoomIndex(0);
     setManualCenter(null);
-    setCameraTarget(mode === "replay" ? "pack" : "manual");
+    setCameraTarget("pack");
   };
 
   return (
@@ -165,27 +186,33 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
       <div className="track-map-viewer__toolbar">
         <div className="track-map-viewer__meta" aria-label="Track map state">
           <span>{data.detail}</span>
-          <span>{visibleTraces.length} drivers</span>
-          <span>{`${zoom.toFixed(2)}x`}</span>
+          <span>{visibleTraces.length} {visibleTraces.length === 1 ? "driver" : "drivers"}</span>
+          {zoom > 1 ? <span>{`${Math.round(zoom * 100)}% zoom`}</span> : null}
         </div>
         <div className="track-map-viewer__controls" aria-label="Track map controls">
           <label className="track-map-focus-select">
             <span>Focus</span>
-            <select
+            <DriverSelect
+              aria-label="Focus"
               value={activeCameraTarget}
-              onChange={(event) => {
-                setCameraTarget(event.target.value);
+              onChange={(target) => {
+                setCameraTarget(target);
                 setManualCenter(null);
+                if (target === "pits" && pitView) {
+                  const pitUnitsPerPixel = Math.max(pitView.width / mapSize.width, pitView.height / mapSize.height);
+                  const fitZoom = fitUnitsPerPixel / pitUnitsPerPixel;
+                  setZoomIndex(Math.max(1, zoomLevels.findLastIndex((step) => step <= fitZoom)));
+                } else {
+                  setZoomIndex(target === "pack" ? 0 : target === "manual" ? zoomIndex : Math.max(zoomIndex, 2));
+                }
               }}
-            >
-              <option value="manual">Manual</option>
-              <option value="pack">Pack</option>
-              {visibleTraces.map((trace) => (
-                <option key={trace.key} value={trace.key}>
-                  {trace.shortLabel}
-                </option>
-              ))}
-            </select>
+              options={[
+                ...(activeCameraTarget === "manual" ? [{ value: "manual", label: "Manual view" }] : []),
+                { value: "pack", label: "Whole circuit" },
+                ...(pitView ? [{ value: "pits", label: "Pit lane" }] : []),
+                ...choices.map((driver) => driverOption(driver.entry, driver.key)),
+              ]}
+            />
           </label>
           <button
             type="button"
@@ -205,42 +232,30 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
             disabled={zoomIndex === 0 && manualCenter == null && activeCameraTarget === (mode === "replay" ? "pack" : "manual")}
             onClick={resetCamera}
           >
-            0
+            Fit
           </button>
           <button
             type="button"
             className="track-map-control-button"
             aria-label="Zoom in"
             title="Zoom in"
-            disabled={zoomIndex === ZOOM_LEVELS.length - 1}
-            onClick={() => setZoomIndex((current) => Math.min(ZOOM_LEVELS.length - 1, current + 1))}
+            disabled={zoomIndex === zoomLevels.length - 1}
+            onClick={() => setZoomIndex((current) => Math.min(zoomLevels.length - 1, current + 1))}
           >
             +
           </button>
           <button
             type="button"
-            className={`track-map-control-button${activeCameraTarget !== "manual" ? " is-active" : ""}`}
-            aria-label="Follow selected target"
-            aria-pressed={activeCameraTarget !== "manual"}
-            title="Follow selected target"
-            onClick={() => {
-              setCameraTarget((current) => current === "manual" ? "pack" : "manual");
-              setManualCenter(null);
-            }}
-          >
-            F
-          </button>
-          <button
-            type="button"
-            className={`track-map-control-button${showLines ? " is-active" : ""}`}
+            className={`track-map-control-button${showLines && canShowTrails ? " is-active" : ""}`}
             aria-label="Show racing lines"
-            aria-pressed={showLines}
-            title="Show racing lines"
+            aria-pressed={showLines && canShowTrails}
+            disabled={!canShowTrails}
+            title={canShowTrails ? "Show racing lines" : "Focus a driver to show their trail"}
             onClick={() => setShowLines((current) => !current)}
           >
-            L
+            Trails
           </button>
-          {mode === "replay" ? (
+          {mode === "replay" && focused ? (
             <button
               type="button"
               className={`track-map-control-button${showPreviousLap ? " is-active" : ""}`}
@@ -249,7 +264,7 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
               title="Show previous lap ghost"
               onClick={() => setShowPreviousLap((current) => !current)}
             >
-              P
+              Previous lap
             </button>
           ) : null}
         </div>
@@ -260,6 +275,7 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
           ref={svgRef}
           viewBox={viewBox}
           className={`track-map-viewer__svg${dragState ? " is-dragging" : ""}`}
+          data-zoomed={zoomIndex > 0}
           aria-label="Top-down track map"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -267,58 +283,14 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
           onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerEnd}
         >
-          <defs>
-            <filter id={glowFilterId} x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="6" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          <rect
-            x={baseView.minX}
-            y={baseView.minY}
-            width={baseView.width}
-            height={baseView.height}
-            className="track-map-viewer__background"
+          <CircuitDrawing
+            points={trackPoints}
+            overlay={overlay}
+            radius={dotRadius}
+            closeUp={zoom >= 2.8}
+            edges={mappedRoad?.edges ?? data.illustratedEdges}
+            mapped={Boolean(mappedRoad)}
           />
-
-          {trackPath ? (
-            <>
-              <path
-                d={trackPath}
-                className="track-map-viewer__track-shadow"
-                strokeWidth={trackStroke * 1.32}
-              />
-              <path
-                d={trackPath}
-                className="track-map-viewer__track-surface"
-                strokeWidth={trackStroke}
-              />
-              <path
-                d={trackPath}
-                className="track-map-viewer__track-lane"
-                strokeWidth={laneStroke}
-              />
-              <path
-                d={trackPath}
-                className="track-map-viewer__track-center"
-                strokeWidth={Math.max(racingStroke * 0.38, 2)}
-              />
-              <StartFinishMarker points={trackPoints} strokeWidth={trackStroke} />
-            </>
-          ) : null}
-
-          {data.turnMarkers.map((marker) => (
-            <TurnMarker
-              key={marker.key}
-              marker={marker}
-              fontSize={turnFontSize}
-              radius={Math.max(dotRadius * 1.05, 9)}
-            />
-          ))}
 
           {showLines && showPreviousLap
             ? lineTraces.map((trace) =>
@@ -328,7 +300,8 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
                     d={buildTrackPath(trace.previousLapPoints, false)}
                     className="track-map-viewer__previous-line"
                     stroke={trace.color}
-                    strokeWidth={previousStroke}
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
                   />
                 ) : null,
               )
@@ -339,235 +312,190 @@ export function TrackMapViewer({ data, mode }: TrackMapViewerProps) {
                 trace.points.length > 1 ? (
                   <path
                     key={`${trace.key}-line`}
-                    d={buildTrackPath(trace.points, false)}
+                    d={smoothTrackPath(trace.points, false, metresToMapUnits(0.85))}
                     className="track-map-viewer__racing-line"
                     stroke={trace.color}
-                    strokeWidth={racingStroke}
-                    filter={`url(#${glowFilterId})`}
+                    strokeWidth="2"
+                    vectorEffect="non-scaling-stroke"
                   />
                 ) : null,
               )
             : null}
 
-          {visibleTraces.map((trace, index) =>
-            trace.currentPoint ? (
-              <g key={`${trace.key}-position`}>
-                <circle
-                  cx={trace.currentPoint.x}
-                  cy={trace.currentPoint.y}
-                  r={dotRadius}
-                  fill={trace.color}
-                  className="track-map-viewer__driver-dot"
-                  filter={`url(#${glowFilterId})`}
-                />
+          {pits ? <PitLaneDrawing data={pits} boxCount={boxCount} unitPerPixel={unitPerPixel} /> : null}
+          {visibleTraces.map((trace) => {
+            if (!trace.currentPoint) return null;
+            const point = trace.currentPoint;
+            const phase = pitPhase(trace);
+            return (
+              <g key={`${trace.key}-position`} data-pit-phase={phase} data-track-driver={trace.key}>
+                <title>{trace.entry.driver_name || trace.label}{phase === "box" ? " · In pit box" : phase ? " · In pit lane" : ""}</title>
                 {showCars ? (
                   <F1CarMarker
-                    point={trace.currentPoint}
+                    point={point}
                     headingDeg={trace.headingDeg}
                     color={trace.color}
                     label={trace.label}
-                    size={carSize}
+                    length={carLength}
+                    width={carWidth}
                   />
-                ) : null}
-                <DriverLabel
-                  trace={trace}
-                  index={index}
-                  fontSize={labelFontSize}
-                  offsetBase={dotRadius}
-                  zoom={zoom}
-                />
+                ) : (
+                  <circle cx={point.x} cy={point.y} r={dotRadius} fill={trace.color} className="track-map-viewer__driver-dot" />
+                )}
               </g>
-            ) : null,
-          )}
+            );
+          })}
+          {labels.map((label) => <DriverLabel key={label.key} label={label} fontSize={labelFontSize} />)}
         </svg>
-      </div>
-
-      <div className="track-map-viewer__legend">
-        {visibleTraces.slice(0, 12).map((trace) => (
-          <span key={trace.key} className="track-map-driver-chip">
-            <i style={{ backgroundColor: trace.color }} />
-            <span>{trace.label}</span>
-            <small>{formatTraceDetail(trace)}</small>
-          </span>
-        ))}
-        {visibleTraces.length > 12 ? (
-          <span className="track-map-driver-chip track-map-driver-chip--muted">
-            +{visibleTraces.length - 12}
-          </span>
+        {mode === "replay" && visibleTraces.length === 0 ? (
+          <p className="track-map-viewer__waiting">No current car positions. Jump to a racing lap to follow the field.</p>
+        ) : null}
+        {overlay?.layer === "weather" && overlay.weather ? <WindField weather={overlay.weather} /> : null}
+        {scaleBar ? (
+          <div className="track-map-viewer__scale" title="Distance in the replay coordinate frame">
+            <span>{scaleBar.metres} m</span>
+            <i style={{ width: scaleBar.widthPx }} aria-hidden="true" />
+          </div>
         ) : null}
       </div>
+
+      {focusingPits && pits?.source === "pit_reports" ? <p className="track-map-pits__note">Pit lane and team markers are estimated from recorded stops.</p> : null}
+      {legend.length ? <div className="track-map-viewer__legend">
+        {legend.map((trace) => {
+          const phase = pitPhase(trace);
+          return (
+            <span key={trace.key} className="track-map-driver-chip">
+              <i style={{ backgroundColor: trace.color }} />
+              <span>{trace.entry.driver_name || trace.label}</span>
+              <small>{phase === "box" ? "In pit box" : phase ? "In pit lane" : formatTraceDetail(trace)}</small>
+            </span>
+          );
+        })}
+      </div> : null}
     </div>
   );
 }
 
-function StartFinishMarker({
+const CircuitDrawing = memo(function CircuitDrawing({
   points,
-  strokeWidth,
-}: {
-  points: TrackMapPoint[];
-  strokeWidth: number;
-}) {
-  const first = points[0];
-  const markerPoints = points.slice(0, 4);
-
-  if (!first || markerPoints.length < 2) {
-    return null;
-  }
-
-  const heading = calculateHeadingDeg(markerPoints, first) + 90;
-  const markerLength = strokeWidth * 1.45;
-
-  return (
-    <g transform={`translate(${first.x} ${first.y}) rotate(${heading})`} className="track-map-viewer__start-finish">
-      <line x1={-markerLength / 2} y1="0" x2={markerLength / 2} y2="0" strokeWidth={Math.max(strokeWidth * 0.08, 2)} />
-      <text x={markerLength * 0.58} y={-strokeWidth * 0.14} fontSize={Math.max(strokeWidth * 0.42, 12)}>
-        S/F
-      </text>
-    </g>
-  );
-}
-
-function TurnMarker({
-  marker,
-  fontSize,
+  overlay,
   radius,
+  closeUp,
+  edges,
+  mapped,
 }: {
-  marker: TrackMapTurnMarker;
-  fontSize: number;
+  points: MappedRoad["centre"];
+  overlay?: TrackMapOverlay;
   radius: number;
+  closeUp: boolean;
+  edges?: MappedRoad["edges"];
+  mapped: boolean;
 }) {
-  const angle = ((marker.angleDeg ?? 0) * Math.PI) / 180;
-  const offsetX = Math.cos(angle) * radius * 2.2;
-  const offsetY = Math.sin(angle) * radius * 2.2;
-
+  const path = useMemo(() => smoothTrackPath(points, true, metresToMapUnits(1.5)), [points]);
+  const road = useMemo(() => edges
+    ? `${smoothTrackPath(edges.left, true, metresToMapUnits(0.6))} ${smoothTrackPath(edges.right, true, metresToMapUnits(0.6))}`
+    : "", [edges]);
+  const colour = mapOverlayColour(overlay);
+  const hasMeasuredSurface = overlay?.layer === "surface" && overlay.surface?.zones.some(({ kind }) => kind === "racing_surface");
+  const showRoad = Boolean(road) && closeUp && !hasMeasuredSurface;
   return (
-    <g
-      className="track-map-viewer__turn-marker"
-      transform={`translate(${marker.x + offsetX} ${marker.y + offsetY})`}
-    >
-      <rect
-        x={-radius}
-        y={-radius}
-        width={radius * 2}
-        height={radius * 2}
-        rx={Math.max(radius * 0.24, 3)}
-      />
-      <text y={fontSize * 0.34} fontSize={fontSize}>
-        {marker.label}
-      </text>
-    </g>
+    <>
+      {showRoad ? (
+        <path d={road} fillRule="evenodd" className="track-map-viewer__illustrated-road" data-road-source={mapped ? "mapped" : "illustrated"} vectorEffect="non-scaling-stroke" />
+      ) : null}
+      {path && (colour || (!showRoad && !hasMeasuredSurface)) ? (
+        <path
+          data-circuit-overlay={colour ? overlay?.layer : undefined}
+          d={path}
+          className="track-map-viewer__track-center"
+          style={colour ? { stroke: colour } : undefined}
+          vectorEffect="non-scaling-stroke"
+        />
+      ) : null}
+      {overlay ? <CircuitSurfaceOverlay overlay={overlay} radius={Math.max(radius * 0.6, 3)} /> : null}
+    </>
   );
-}
+});
 
-function DriverLabel({
-  trace,
-  index,
-  fontSize,
-  offsetBase,
-  zoom,
-}: {
-  trace: TrackMapTrace;
-  index: number;
-  fontSize: number;
-  offsetBase: number;
-  zoom: number;
-}) {
-  if (!trace.currentPoint) {
-    return null;
-  }
+type PlacedDriverLabel = {
+  key: string;
+  label: string;
+  point: TrackMapPoint;
+  anchorY: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
-  const label = trace.shortLabel;
-  const width = Math.max(label.length * fontSize * 0.72 + fontSize * 1.2, fontSize * 2.8);
-  const height = fontSize * 1.55;
-  const offset = buildLabelOffset(index, offsetBase, zoom);
-
-  return (
-    <g
-      className="track-map-viewer__driver-label-chip"
-      transform={`translate(${trace.currentPoint.x + offset.x} ${trace.currentPoint.y + offset.y})`}
-    >
-      <rect
-        x={0}
-        y={-height / 2}
-        width={width}
-        height={height}
-        rx={height * 0.34}
-      />
-      <text x={fontSize * 0.58} y={fontSize * 0.36} fontSize={fontSize}>
-        {label}
-      </text>
-    </g>
-  );
-}
-
-function resolveCameraTargetPoint(target: CameraTarget, traces: TrackMapTrace[]): CameraPoint | null {
-  if (target === "manual") {
-    return null;
-  }
-
-  if (target === "pack") {
-    return getAverageCurrentPoint(traces);
-  }
-
-  const trace = traces.find((candidate) => candidate.key === target);
-  return trace?.currentPoint ? { x: trace.currentPoint.x, y: trace.currentPoint.y } : null;
-}
-
-function resolveActiveCameraTarget(
-  target: CameraTarget,
+function placeDriverLabels(
   traces: TrackMapTrace[],
-  mode: TrackMapMode,
-): CameraTarget {
-  if (target === "manual" || target === "pack") {
-    return target;
+  focus: string,
+  view: ReturnType<typeof buildViewBoxFromCenter>,
+  fontSize: number,
+  showNames: boolean,
+  car?: { length: number; width: number },
+) {
+  const labels: PlacedDriverLabel[] = [];
+  const center = { x: view.minX + view.width / 2, y: view.minY + view.height / 2 };
+  const candidates = traces
+    .filter(({ currentPoint }) =>
+      currentPoint &&
+      currentPoint.x >= view.minX && currentPoint.x <= view.minX + view.width &&
+      currentPoint.y >= view.minY && currentPoint.y <= view.minY + view.height,
+    )
+    .sort((a, b) =>
+      Number(b.key === focus) - Number(a.key === focus) ||
+      distanceFromCenter(a.currentPoint!) - distanceFromCenter(b.currentPoint!),
+    );
+  function distanceFromCenter(point: TrackMapPoint) {
+    return Math.hypot(point.x - center.x, point.y - center.y);
   }
 
-  return traces.some((trace) => trace.key === target)
-    ? target
-    : mode === "replay"
-      ? "pack"
-      : "manual";
-}
-
-function getAverageCurrentPoint(traces: TrackMapTrace[]) {
-  const points = traces
-    .map((trace) => trace.currentPoint)
-    .filter((point): point is TrackMapPoint => point !== null);
-
-  if (points.length === 0) {
-    return null;
+  const height = fontSize * 1.55;
+  for (const trace of candidates) {
+    if (labels.length === 5) break;
+    const point = trace.currentPoint!;
+    const label = showNames ? trace.entry.driver_name || trace.label : trace.shortLabel;
+    const width = Math.min(view.width * 0.75, (label.length * 0.64 + 1.2) * fontSize);
+    const x = Math.min(Math.max(point.x - width / 2, view.minX + fontSize / 3), view.minX + view.width - width - fontSize / 3);
+    const heading = trace.headingDeg * Math.PI / 180;
+    const carHalfHeight = car ? (Math.abs(Math.sin(heading)) * car.length + Math.abs(Math.cos(heading)) * car.width) / 2 : 0;
+    const anchorY = point.y - Math.max(fontSize * 0.35, carHalfHeight + fontSize * 0.15);
+    for (const row of [0, 1, 2]) {
+      const y = anchorY - height - fontSize * 0.35 - row * height * 1.13;
+      if (y < view.minY) continue;
+      const collides = labels.some((other) =>
+        x < other.x + other.width + fontSize / 4 && x + width + fontSize / 4 > other.x &&
+        y < other.y + other.height + fontSize / 4 && y + height + fontSize / 4 > other.y,
+      );
+      if (!collides) {
+        labels.push({ key: trace.key, label, point, anchorY, x, y, width, height });
+        break;
+      }
+    }
   }
-
-  const x = points.reduce((sum, point) => sum + point.x, 0) / points.length;
-  const y = points.reduce((sum, point) => sum + point.y, 0) / points.length;
-
-  return { x, y };
+  return labels;
 }
 
-function buildLabelOffset(index: number, offsetBase: number, zoom: number) {
-  const offsetDistance = offsetBase * (zoom < 1.35 ? 2.5 : 1.9);
-  const angle = ((index % 8) / 8) * Math.PI * 2 - Math.PI / 5;
-
-  return {
-    x: Math.cos(angle) * offsetDistance + offsetBase * 1.2,
-    y: Math.sin(angle) * offsetDistance - offsetBase * 0.6,
-  };
+function DriverLabel({ label, fontSize }: { label: PlacedDriverLabel; fontSize: number }) {
+  return (
+    <g className="track-map-viewer__driver-label-chip" data-entry-id={label.key} pointerEvents="none">
+      <line
+        x1={label.point.x} y1={label.anchorY}
+        x2={label.x + label.width / 2} y2={label.y + label.height}
+        strokeWidth="1" vectorEffect="non-scaling-stroke"
+      />
+      <rect x={label.x} y={label.y} width={label.width} height={label.height} rx={fontSize * 0.38} />
+      <text x={label.x + label.width / 2} y={label.y + fontSize * 1.07} fontSize={fontSize} textAnchor="middle">
+        {label.label}
+      </text>
+    </g>
+  );
 }
 
 function formatTraceDetail(trace: TrackMapTrace) {
   const lap = trace.lapNumber == null ? trace.detail : `L${trace.lapNumber}`;
   const progress = trace.progressPct == null ? "" : ` ${Math.round(trace.progressPct)}%`;
   return `${lap}${progress}`;
-}
-
-function markerToPoint(marker: TrackMapTurnMarker): TrackMapPoint {
-  return {
-    x: marker.x,
-    y: marker.y,
-    z: null,
-    sessionTimeMs: 0,
-    sampleSeq: 0,
-    lapNumber: null,
-    trackStatus: null,
-  };
 }

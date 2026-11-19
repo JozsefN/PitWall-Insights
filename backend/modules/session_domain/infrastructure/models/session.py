@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import JSONB
 
 from modules.session_domain.infrastructure.models.common import StringIdMixin
 from modules.storage.infrastructure.base import Base
@@ -19,6 +20,10 @@ class EventSessionRecord(StringIdMixin, Base):
     )
 
     source: Mapped[str] = mapped_column(String(32), nullable=False)
+    owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    data_provider: Mapped[str | None] = mapped_column(String(32))
+    session_time_origin_utc: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    source_details: Mapped[dict | None] = mapped_column(JSONB, deferred=True)
     source_session_key: Mapped[str] = mapped_column(String(255), nullable=False)
     weekend_id: Mapped[str] = mapped_column(
         ForeignKey("event_weekends.id", ondelete="CASCADE"),

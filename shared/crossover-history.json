@@ -1,0 +1,119 @@
+{
+  "races": [
+    {
+      "race": 9141,
+      "warmup": {
+        "SLICK:2": 0.021,
+        "SLICK:3": 0.0
+      },
+      "available_after": 1690729200.0,
+      "conditions": {}
+    },
+    {
+      "race": 9149,
+      "warmup": {
+        "INTERMEDIATE:2": 0.0,
+        "SLICK:2": 0.078,
+        "INTERMEDIATE:3": 0.197,
+        "SLICK:3": 0.091
+      },
+      "available_after": 1693148400.0,
+      "conditions": {
+        "rain": {
+          "SLICK:INTERMEDIATE": 21.445
+        },
+        "dry": {
+          "SLICK:INTERMEDIATE": 7.496
+        }
+      }
+    },
+    {
+      "race": 9531,
+      "warmup": {
+        "INTERMEDIATE:2": 0.727,
+        "SLICK:2": 0.894,
+        "INTERMEDIATE:3": 0.889,
+        "SLICK:3": 0.397
+      },
+      "available_after": 1717963200.0,
+      "conditions": {
+        "heavy": {
+          "INTERMEDIATE:WET": 2.558
+        },
+        "dry": {
+          "SLICK:INTERMEDIATE": 2.187
+        }
+      }
+    },
+    {
+      "race": 9558,
+      "warmup": {
+        "INTERMEDIATE:2": 0.257,
+        "SLICK:2": 1.341,
+        "INTERMEDIATE:3": 0.119,
+        "SLICK:3": 0.632
+      },
+      "available_after": 1720368000.0,
+      "conditions": {
+        "rain": {
+          "SLICK:INTERMEDIATE": -2.954
+        },
+        "dry": {
+          "SLICK:INTERMEDIATE": -3.021
+        }
+      }
+    },
+    {
+      "race": 9636,
+      "warmup": {
+        "INTERMEDIATE:2": 0.755,
+        "INTERMEDIATE:3": 0.542
+      },
+      "available_after": 1730655000.0,
+      "conditions": {
+        "heavy": {
+          "INTERMEDIATE:WET": 4.74
+        }
+      }
+    },
+    {
+      "race": 9693,
+      "warmup": {
+        "INTERMEDIATE:2": 0.097,
+        "INTERMEDIATE:3": 1.749
+      },
+      "available_after": 1742104800.0,
+      "conditions": {
+        "rain": {
+          "SLICK:INTERMEDIATE": 7.569
+        }
+      }
+    },
+    {
+      "race": 9947,
+      "warmup": {
+        "INTERMEDIATE:3": 0.0,
+        "SLICK:3": 0.0,
+        "INTERMEDIATE:2": 0.339
+      },
+      "available_after": 1751817600.0,
+      "conditions": {
+        "dry": {
+          "SLICK:INTERMEDIATE": 1.183
+        },
+        "rain": {
+          "SLICK:INTERMEDIATE": -5.867
+        }
+      }
+    },
+    {
+      "race": 10014,
+      "warmup": {
+        "SLICK:2": 0.0,
+        "SLICK:3": 0.0
+      },
+      "available_after": 1744563600.0,
+      "conditions": {}
+    }
+  ]
+}

@@ -1,24 +1,20 @@
 import { useMemo } from "react";
-import {
-  useWorkspaceEntryLapsResource,
-  useWorkspacePositionTelemetryResource,
-} from "../../../features/sessions/session-data.hooks";
 import { useSessionWorkspace } from "../../../features/sessions/SessionWorkspaceContext";
-import { replaySampleInterval } from "../../../features/sessions/replay-timeline";
+import { illustratedRoadWidthLimitM } from "../utils/track-scale";
+import { sessionCircuit } from "../../../features/circuits/circuit-catalog";
+import { useWorkspaceReplayData } from "../../../features/sessions/workspace-replay-data";
 import {
-  formatSessionClock,
   getEntryAccent,
   getEntryDisplayName,
 } from "../../../features/sessions/session-utils";
-import { useSessionCircuitCornersQuery } from "../../../data/queries/sessions.queries";
 import { WidgetCard } from "../../shared/WidgetCard";
 import {
   WidgetEmpty,
   WidgetError,
   WidgetLoading,
 } from "../../shared/WidgetState";
-import { TrackMapViewer } from "../components/TrackMapViewer";
-import { buildTrackMapTurnMarkers } from "../utils/circuit-corners";
+import { CircuitMapLayers } from "../components/CircuitMapLayers";
+import type { TrackMapWidgetOptions } from "../models";
 import type { TrackMapEntryInput } from "../utils/track-map-data";
 import { prepareReplayTrackMapData } from "../utils/track-map-data";
 
@@ -31,34 +27,10 @@ export function ReplayTrackMapWidget({
     typeof options?.title === "string" ? options.title : "Replay Track Map";
 
   const workspace = useSessionWorkspace();
-  const entryIds =
-    workspace.selectedDriverIds.length > 0
-      ? workspace.selectedDriverIds
-      : workspace.entries.map((entry) => entry.id);
-  const positions = useWorkspacePositionTelemetryResource({
-    entryIds,
-    scope: "session",
-    limit: 20000,
-    sampleIntervalMs: replaySampleInterval(
-      workspace.replay.minTimeMs,
-      workspace.replay.maxTimeMs,
-    ),
-    sessionTimeFromMs: workspace.replay.minTimeMs,
-    sessionTimeToMs: workspace.replay.maxTimeMs || undefined,
-    enabled: entryIds.length > 0 && workspace.replay.ticks.length > 0,
-  });
-  const laps = useWorkspaceEntryLapsResource({
-    entryIds,
-    enabled: entryIds.length > 0,
-  });
-  const corners = useSessionCircuitCornersQuery(
-    workspace.sessionId,
-    entryIds.length > 0,
-  );
-  const turnMarkers = useMemo(
-    () => buildTrackMapTurnMarkers(corners.data),
-    [corners.data],
-  );
+  const circuit = sessionCircuit(workspace.session);
+  const widthLimitM = illustratedRoadWidthLimitM(circuit);
+  const { position: positions, laps } = useWorkspaceReplayData();
+  const entryIds = positions.entryIds;
   const entryIdsKey = entryIds.join(",");
   const prepareFrame = useMemo(() => {
     const selectedIds = new Set(entryIdsKey.split(","));
@@ -72,23 +44,31 @@ export function ReplayTrackMapWidget({
         laps: laps.dataByEntryId[entry.id] ?? [],
       }));
 
-    return prepareReplayTrackMapData(inputs, turnMarkers);
+    return prepareReplayTrackMapData(inputs, widthLimitM);
   }, [
     laps.dataByEntryId,
     positions.dataByEntryId,
     workspace.entries,
     entryIdsKey,
-    turnMarkers,
+    widthLimitM,
   ]);
   const data = useMemo(
-    () => prepareFrame(workspace.replay.currentTimeMs),
-    [prepareFrame, workspace.replay.currentTimeMs],
+    () => prepareFrame(workspace.replay.minTimeMs),
+    [prepareFrame, workspace.replay.minTimeMs],
   );
 
   if (workspace.entries.length === 0) {
     return (
       <WidgetCard title={title}>
         <WidgetEmpty message="No session entries were available for replay mode." />
+      </WidgetCard>
+    );
+  }
+
+  if (entryIds.length === 0) {
+    return (
+      <WidgetCard title={title}>
+        <WidgetEmpty message="Choose drivers to load their track positions." />
       </WidgetCard>
     );
   }
@@ -118,14 +98,18 @@ export function ReplayTrackMapWidget({
   }
 
   return (
-    <WidgetCard
-      title={title}
-      description={`Top-down replay at ${formatSessionClock(workspace.replay.currentTimeMs)} with current-lap trails.`}
-    >
-      {data.outlinePoints.length === 0 && data.traces.length === 0 ? (
+    <WidgetCard title={title}>
+      {data.outlinePoints.length === 0 && !data.drivers?.length ? (
         <WidgetEmpty message="Position telemetry was not available for replay mode." />
       ) : (
-        <TrackMapViewer data={data} mode="replay" />
+        <CircuitMapLayers
+          key={workspace.selectedLayout?.id}
+          data={data}
+          circuit={circuit}
+          mode="replay"
+          replayFrame={prepareFrame}
+          options={(options ?? {}) as TrackMapWidgetOptions}
+        />
       )}
     </WidgetCard>
   );

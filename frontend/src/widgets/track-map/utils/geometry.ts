@@ -65,27 +65,7 @@ export function downsampleTrackPoints(points: TrackMapPoint[], maxPoints = 420) 
   return points.filter((_, index) => index % step === 0 || index === points.length - 1);
 }
 
-export function smoothTrackPoints(points: TrackMapPoint[], windowSize = 3) {
-  if (points.length < windowSize * 2 + 1) {
-    return points;
-  }
-
-  return points.map((point, index) => {
-    const from = Math.max(0, index - windowSize);
-    const to = Math.min(points.length - 1, index + windowSize);
-    const slice = points.slice(from, to + 1);
-    const x = slice.reduce((sum, item) => sum + item.x, 0) / slice.length;
-    const y = slice.reduce((sum, item) => sum + item.y, 0) / slice.length;
-
-    return {
-      ...point,
-      x,
-      y,
-    };
-  });
-}
-
-export function buildTrackBounds(points: TrackMapPoint[]): TrackMapBounds {
+export function buildTrackBounds(points: readonly Pick<TrackMapPoint, "x" | "y">[]): TrackMapBounds {
   if (points.length === 0) {
     return {
       minX: 0,
@@ -97,10 +77,13 @@ export function buildTrackBounds(points: TrackMapPoint[]): TrackMapBounds {
     };
   }
 
-  const minX = Math.min(...points.map((point) => point.x));
-  const maxX = Math.max(...points.map((point) => point.x));
-  const minY = Math.min(...points.map((point) => point.y));
-  const maxY = Math.max(...points.map((point) => point.y));
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const { x, y } of points) {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  }
   const width = Math.max(maxX - minX, 100);
   const height = Math.max(maxY - minY, 100);
 
@@ -112,25 +95,6 @@ export function buildTrackBounds(points: TrackMapPoint[]): TrackMapBounds {
     width,
     height,
   };
-}
-
-export function buildZoomedViewBox(
-  bounds: TrackMapBounds,
-  zoom: number,
-  focusPoint: TrackMapPoint | null,
-) {
-  const paddingX = Math.max(bounds.width * 0.12, 30);
-  const paddingY = Math.max(bounds.height * 0.12, 30);
-  const baseWidth = bounds.width + paddingX * 2;
-  const baseHeight = bounds.height + paddingY * 2;
-  const width = baseWidth / zoom;
-  const height = baseHeight / zoom;
-  const centerX = focusPoint?.x ?? bounds.minX + bounds.width / 2;
-  const centerY = focusPoint?.y ?? bounds.minY + bounds.height / 2;
-  const minX = clamp(centerX - width / 2, bounds.minX - paddingX, bounds.maxX + paddingX - width);
-  const minY = clamp(centerY - height / 2, bounds.minY - paddingY, bounds.maxY + paddingY - height);
-
-  return `${minX} ${minY} ${width} ${height}`;
 }
 
 export function buildPaddedBaseViewBox(bounds: TrackMapBounds) {
@@ -206,24 +170,19 @@ export function calculateHeadingDeg(points: TrackMapPoint[], point: TrackMapPoin
   return (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI;
 }
 
-export function findPointAtTime(points: TrackMapPoint[], currentTimeMs: number) {
-  let candidate: TrackMapPoint | null = null;
-
-  for (const point of points) {
-    if (point.sessionTimeMs <= currentTimeMs) {
-      candidate = point;
-      continue;
-    }
-
-    break;
+export function nextPointIndex(points: readonly { sessionTimeMs: number }[], currentTimeMs: number) {
+  let start = 0;
+  let end = points.length;
+  while (start < end) {
+    const mid = (start + end) >>> 1;
+    if (points[mid].sessionTimeMs <= currentTimeMs) start = mid + 1;
+    else end = mid;
   }
-
-  return candidate;
+  return start;
 }
 
-export function getTrackScale(points: TrackMapPoint[]) {
-  const bounds = buildTrackBounds(points);
-  return Math.max(bounds.width, bounds.height);
+export function findPointAtTime(points: TrackMapPoint[], currentTimeMs: number) {
+  return points[nextPointIndex(points, currentTimeMs) - 1] ?? null;
 }
 
 function resolveSampleLap(
@@ -256,7 +215,9 @@ function hasUsablePosition(sample: PositionSampleDto) {
     return false;
   }
 
-  return Number(sample.x) !== 0 || Number(sample.y) !== 0;
+  const x = Number(sample.x);
+  const y = Number(sample.y);
+  return Number.isFinite(x) && Number.isFinite(y) && (x !== 0 || y !== 0);
 }
 
 function resolveLapEndTime(lap: EntryLapDto) {

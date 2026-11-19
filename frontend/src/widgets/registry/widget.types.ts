@@ -2,6 +2,7 @@ import type widgetManifest from "../../../../shared/dashboard-widgets.json";
 import type { ComponentType } from "react";
 
 export type DashboardAudience = "session-lookback" | "live-race";
+export type SessionKind = "race" | "sprint" | "qualifying" | "practice" | "other";
 
 export type SessionWorkspaceMode = "lookback" | "simulation";
 
@@ -25,8 +26,17 @@ export type WidgetPolicy = {
   title: string;
   description: string;
   supportedAudiences: DashboardAudience[];
+  sessionKinds?: SessionKind[];
+  availabilityNote?: string;
   builderEnabled: boolean;
-  category: "platform" | "telemetry" | "strategy" | "track" | "replay";
+  category:
+    | "platform"
+    | "telemetry"
+    | "strategy"
+    | "track"
+    | "replay"
+    | "race"
+    | "engineering";
   previewKind:
     | "status"
     | "trace"
@@ -35,7 +45,11 @@ export type WidgetPolicy = {
     | "stints"
     | "laps"
     | "track"
-    | "driver-cards";
+    | "driver-cards"
+    | "tyre-timeline"
+    | "position-history"
+    | "notifications"
+    | "insights";
   sizing: {
     minW: number;
     minH: number;
@@ -49,6 +63,10 @@ export type WidgetPolicy = {
     shortBelowPx: number;
   };
   accessTier: 0 | 1 | 2 | 3;
+  plannedAccessTier?: 0 | 1 | 2 | 3;
+  searchTerms?: string[];
+  previewLabels?: string[];
+  previewDetail?: "trend" | "table" | "timing-bars" | "lap-bars" | "delta-bars";
   defaultOptions?: Record<string, unknown>;
 };
 
@@ -92,6 +110,8 @@ export type DashboardSection = {
 
 export type DashboardConfig = {
   id: string;
+  enabledAudiences?: DashboardAudience[];
+  sessionKind?: SessionKind;
   title?: string;
   subtitle?: string;
   sections: DashboardSection[];

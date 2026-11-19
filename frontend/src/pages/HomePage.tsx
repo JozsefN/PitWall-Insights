@@ -345,28 +345,18 @@ export function HomePage() {
   return (
     <div className="home-page">
       <section className="home-page__hero">
-        <div className="surface-card home-hero__copy">
+        <div className="feature-banner home-hero__copy">
           <div className="home-hero__eyebrow">
             <Pill
               label={liveRaceActive ? "Live race" : "Season hub"}
               tone={liveRaceActive ? "live" : "focus"}
             />
-            <span>
-              Follow the weekend live, scan the news wall between sessions,
-              rewind old races, and keep the championship table close.
-            </span>
           </div>
 
-          <h1 className="home-hero__title">
-            Your race.
-            <br />
-            Your perspective.
-          </h1>
+          <h1 className="home-hero__title feature-banner__title">PitWall Insights</h1>
 
-          <p className="home-hero__lead">
-            Follow the weekend, revisit a lap, and find the strategy behind the
-            result. Your sessions, dashboards, and championship picture,
-            together in one place.
+          <p className="home-hero__lead feature-banner__detail">
+            Replay a race, compare laps and build a dashboard for the data you follow.
           </p>
 
           <div className="home-hero__actions">

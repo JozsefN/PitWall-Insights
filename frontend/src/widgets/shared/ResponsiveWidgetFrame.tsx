@@ -13,7 +13,12 @@ export function ResponsiveWidgetFrame({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const policy = widgetCatalog[widgetId];
-  const [mode, setMode] = useState({ compact: false, short: false });
+  const [mode, setMode] = useState({
+    compact: false,
+    short: false,
+    width: 0,
+    height: 0,
+  });
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
@@ -22,10 +27,15 @@ export function ResponsiveWidgetFrame({
       const short =
         entry.contentRect.height > 0 &&
         entry.contentRect.height < policy.sizing.shortBelowPx;
+      const width = Math.round(entry.contentRect.width);
+      const height = Math.round(entry.contentRect.height);
       setMode((previous) =>
-        previous.compact === compact && previous.short === short
+        previous.compact === compact &&
+        previous.short === short &&
+        previous.width === width &&
+        previous.height === height
           ? previous
-          : { compact, short },
+          : { compact, short, width, height },
       );
     });
     observer.observe(node);

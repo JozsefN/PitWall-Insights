@@ -276,6 +276,23 @@ class StrategyMathTests(unittest.TestCase):
             100,
             places=5,
         )
+        for index, row in enumerate(context.incident_history):
+            row.terrain = "gravel" if index < 30 else "recovery"
+        for terrain, cohort_n in (("gravel", 30), ("recovery", 10)):
+            scoped = Values(390000)
+            evidence = incident_risk(
+                data,
+                StrategyRequest(as_of_ms=390000, focus_entry_id="a"),
+                context,
+                {**state, "terrain": terrain},
+                scoped,
+            )
+            self.assertEqual(evidence["cohort_n"], cohort_n)
+            self.assertEqual(evidence["probability_available"], terrain == "gravel")
+            if terrain == "recovery":
+                self.assertIn(
+                    "Too few historical incidents", evidence["unavailable_reason"]
+                )
 
     def test_matched_gap_closing_rate_catch_time_and_distance(self):
         data = data_fixture(370000)

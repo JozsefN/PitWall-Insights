@@ -40,7 +40,7 @@ class ImportJobService:
         )
         return self.job_repository.create_job(
             request,
-            source=source or settings.ingestion_source,
+            source=source or "openf1",
             expires_at=expires_at,
             created_by_user_id=created_by_user_id,
         )
@@ -61,7 +61,7 @@ class ImportJobService:
         job_id = job.id
         try:
             request = self.job_repository.to_import_request(job)
-            ingestion_service = IngestionService(source=build_session_source(job.source))
+            ingestion_service = IngestionService(source=build_session_source(job.source, db=self.db, user_id=job.created_by_user_id))
 
             self.job_repository.mark_stage(job_id, stage="loading_source", now=datetime.now(timezone.utc))
             bundle = ingestion_service.load_session(request)

@@ -28,6 +28,8 @@ from modules.session_domain.infrastructure import db_models as _session_domain_d
 from modules.session_import.infrastructure import db_models as _session_import_db_models  # noqa: E402,F401
 from modules.telemetry_materialization.infrastructure import db_models as _telemetry_materialization_db_models  # noqa: E402,F401
 from modules.feature_metrics.infrastructure import db_models as _feature_metrics_db_models  # noqa: E402,F401
+from modules.account_profile.infrastructure import db_models as _account_profile_models  # noqa: E402,F401
+from modules.provider_connections.infrastructure import db_models as _provider_connection_models  # noqa: E402,F401
 
 
 def get_db() -> Generator[Session, None, None]:

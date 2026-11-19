@@ -13,6 +13,7 @@ def incident_risk(data, request, context, state, result):
     rows = []
     elapsed = state.get("stop_duration_s", 0)
     stop_bin = "4_10" if elapsed < 10 else "10_30" if elapsed < 30 else "30_plus"
+    terrain = state.get("terrain")
     if start is not None and start.tzinfo is not None and track:
         rows = [
             row
@@ -25,6 +26,7 @@ def incident_risk(data, request, context, state, result):
             and row.surface == state["surface"]
             and row.recovery_access == state["recovery_access"]
             and row.elapsed_stop_bin == stop_bin
+            and (terrain is None or row.terrain == terrain)
         ]
     rows.sort(key=lambda row: row.observed_at_utc)
     result.put(
@@ -50,6 +52,7 @@ def incident_risk(data, request, context, state, result):
             "surface": state["surface"],
             "recovery_access": state["recovery_access"],
             "elapsed_stop_bin": stop_bin,
+            "terrain": terrain,
         },
         "calibration_status": "empirical_cohort_not_externally_validated",
         "not_aggregate_next_lap_hazard": True,
@@ -153,13 +156,23 @@ def incident_risk(data, request, context, state, result):
             "Chronological prequential score within this supplied cohort; no claim of independently verified calibration."
         ],
     )
+    probability_available = result.get("incident_sc_probability_pct", None) is not None
+    reason = None
+    if not active:
+        reason = "No qualifying incident at this replay time"
+    elif not track:
+        reason = "A registered circuit profile is required"
+    elif len(rows) < request.min_probability_cohort:
+        reason = "Too few historical incidents with comparable surface, access and stop duration"
+    elif not probability_available:
+        reason = "The matched cohort lacks complete safety-car occurrence labels"
     return dict(
         evidence,
         active_incident=active,
-        probability_available=result.get("incident_sc_probability_pct", None)
-        is not None,
+        probability_available=probability_available,
         response_distribution_available=result.get(
             "incident_response_distribution_pct", None
         )
         is not None,
+        unavailable_reason=reason,
     )

@@ -1,0 +1,189 @@
+.qualifying-lap {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.qualifying-lap p,
+.qualifying-lap h4 {
+  margin: 0;
+}
+.qualifying-lap__refresh {
+  padding: 6px 10px;
+  border-inline-start: 2px solid var(--color-focus);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+.qualifying-lap__controls,
+.qualifying-lap__modes,
+.qualifying-lap__legend,
+.qualifying-lap__splits {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.qualifying-lap__controls {
+  gap: 12px;
+}
+.qualifying-lap__controls label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.qualifying-lap__controls select {
+  min-height: 34px;
+  max-width: 100%;
+  color: var(--color-text-primary);
+  background: var(--color-control);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 7px;
+  padding: 4px 8px;
+}
+.qualifying-lap__modes {
+  align-self: end;
+}
+.qualifying-lap__modes [aria-pressed="true"],
+.qualifying-lap__splits [aria-pressed="true"] {
+  border-color: var(--color-focus);
+  background: var(--color-selection);
+}
+.qualifying-lap__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(270px, 1fr);
+  gap: 12px;
+}
+.qualifying-lap__map,
+.qualifying-lap__timing {
+  min-width: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 10px;
+  background: var(--color-bg-primary);
+  padding: 10px;
+}
+.qualifying-lap__map svg,
+.qualifying-lap__map-empty {
+  display: block;
+  width: 100%;
+  height: clamp(200px, 44cqh, 300px);
+}
+.qualifying-lap__map-empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.qualifying-lap__outline,
+.qualifying-lap__split,
+.qualifying-lap__hit {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.qualifying-lap__outline {
+  stroke: var(--color-border-strong);
+  stroke-width: 10px;
+}
+.qualifying-lap__split {
+  stroke: var(--split-colour, var(--color-text-muted));
+  stroke-width: 4px;
+}
+.qualifying-lap__hit {
+  stroke: transparent;
+  stroke-width: 16px;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.qualifying-lap g[data-current="true"] .qualifying-lap__split,
+.qualifying-lap g:hover .qualifying-lap__split {
+  stroke-width: 7px;
+}
+.qualifying-lap [data-split-colour="purple"] {
+  --split-colour: #b16af0;
+}
+.qualifying-lap [data-split-colour="green"] {
+  --split-colour: #27a773;
+}
+.qualifying-lap [data-split-colour="yellow"] {
+  --split-colour: #d29824;
+}
+.qualifying-lap__legend {
+  font-size: 12px;
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 8px;
+  margin-bottom: 8px;
+}
+.qualifying-lap__legend span::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-inline-end: 4px;
+  background: var(--split-colour, var(--color-text-muted));
+}
+.qualifying-lap__splits {
+  gap: 4px;
+}
+.qualifying-lap__splits button {
+  min-width: 28px;
+  height: 30px;
+  border: 1px solid var(--color-border-strong);
+  border-bottom: 3px solid var(--split-colour, var(--color-text-muted));
+  border-radius: 5px;
+  background: var(--color-control);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.qualifying-lap__timing {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  font-size: 13px;
+}
+.qualifying-lap__table {
+  max-height: 275px;
+  overflow: auto;
+}
+.qualifying-lap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.qualifying-lap th,
+.qualifying-lap td {
+  padding: 6px 4px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.qualifying-lap th:first-child {
+  text-align: left;
+}
+.qualifying-lap thead {
+  position: sticky;
+  top: 0;
+  background: var(--color-bg-primary);
+}
+.qualifying-lap tbody th {
+  border-inline-start: 3px solid var(--team-colour, transparent);
+}
+.qualifying-lap tr[data-focus-driver="true"] {
+  background: var(--color-selection);
+}
+.qualifying-lap__note,
+.qualifying-lap small {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+@container panel (max-width: 650px) {
+  .qualifying-lap__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qualifying-lap__map svg,
+  .qualifying-lap__map-empty {
+    height: 190px;
+  }
+}

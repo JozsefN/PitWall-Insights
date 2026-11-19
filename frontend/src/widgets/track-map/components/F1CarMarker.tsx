@@ -5,7 +5,8 @@ type F1CarMarkerProps = {
   headingDeg: number;
   color: string;
   label: string;
-  size: number;
+  length: number;
+  width: number;
 };
 
 export function F1CarMarker({
@@ -13,26 +14,24 @@ export function F1CarMarker({
   headingDeg,
   color,
   label,
-  size,
+  length,
+  width,
 }: F1CarMarkerProps) {
-  const scale = size / 28;
-
   return (
     <g
       className="track-map-car"
-      transform={`translate(${point.x} ${point.y}) rotate(${headingDeg}) scale(${scale})`}
+      transform={`translate(${point.x} ${point.y}) rotate(${headingDeg}) scale(${length} ${width})`}
       aria-label={label}
     >
-      <rect x="-18" y="-9" width="7" height="18" rx="2" fill="#070b11" stroke="rgba(255,255,255,0.5)" strokeWidth="1.2" />
-      <rect x="12" y="-10" width="5" height="20" rx="2" fill="#070b11" stroke="rgba(255,255,255,0.5)" strokeWidth="1.2" />
-      <rect x="-10" y="-6" width="21" height="12" rx="5" fill={color} stroke="rgba(255,255,255,0.7)" strokeWidth="1.1" />
-      <path d="M 9 -5 L 21 0 L 9 5 Z" fill={color} stroke="rgba(255,255,255,0.7)" strokeWidth="1.1" />
-      <rect x="-17" y="-12" width="9" height="5" rx="2" fill="#070b11" />
-      <rect x="-17" y="7" width="9" height="5" rx="2" fill="#070b11" />
-      <rect x="5" y="-13" width="8" height="5" rx="2" fill="#070b11" />
-      <rect x="5" y="8" width="8" height="5" rx="2" fill="#070b11" />
-      <ellipse cx="-1" cy="0" rx="4" ry="3" fill="rgba(255,255,255,0.85)" />
-      <circle cx="21" cy="0" r="2.8" fill="rgba(255,255,255,0.92)" />
+      <path d="M -.39 -.5 H -.25 V -.3 H -.39 Z M -.39 .3 H -.25 V .5 H -.39 Z M .24 -.5 H .37 V -.31 H .24 Z M .24 .31 H .37 V .5 H .24 Z" fill="#171611" />
+      <path
+        d="M -.5 -.4 H -.39 V -.21 L -.17 -.27 H -.06 Q .06 -.20 .14 -.09 H .37 V -.43 H .44 V -.075 L .5 0 L .44 .075 V .43 H .37 V .09 H .14 Q .06 .20 -.06 .27 H -.17 L -.39 .21 V .4 H -.5 Z"
+        fill={color}
+        stroke="#faf6e9"
+        strokeWidth="0.65"
+        vectorEffect="non-scaling-stroke"
+      />
+      <ellipse cx="0.01" cy="0" rx="0.092" ry="0.105" fill="#241d19" />
     </g>
   );
 }

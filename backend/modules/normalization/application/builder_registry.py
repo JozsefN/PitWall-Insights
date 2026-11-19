@@ -1,13 +1,14 @@
 from collections.abc import Callable, Mapping
 
 from modules.normalization.application.ports import SessionSnapshotBuilderPort
-from modules.normalization.application.session_snapshot_builder import FastF1SessionSnapshotBuilder
+from modules.normalization.application.session_snapshot_builder import SessionSnapshotBuilder
 
 
 SnapshotBuilderFactory = Callable[[], SessionSnapshotBuilderPort]
 
 _SNAPSHOT_BUILDER_FACTORIES: Mapping[str, SnapshotBuilderFactory] = {
-    FastF1SessionSnapshotBuilder.source_name: FastF1SessionSnapshotBuilder,
+    SessionSnapshotBuilder.source_name: SessionSnapshotBuilder,
+    "fastf1": SessionSnapshotBuilder,
 }
 
 

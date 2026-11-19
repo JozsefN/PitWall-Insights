@@ -1,0 +1,98 @@
+.availability-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  margin: 0.2rem 0;
+  text-transform: none;
+}
+.availability-tags > span {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 5px;
+  padding: 0.18rem 0.4rem;
+  color: var(--color-text-secondary);
+  background: var(--color-selection);
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.layout-availability-message {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--color-danger);
+  border-radius: 8px;
+  color: var(--color-orange);
+  background: var(--color-warning-surface);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.layout-availability-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+.layout-unavailable-list {
+  margin-top: 0.8rem;
+}
+.layout-unavailable-list summary {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+.layout-unavailable-list ul {
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.layout-unavailable-list li {
+  border-top: 1px solid var(--color-border-strong);
+  padding: 0.55rem 0;
+  font-size: 13px;
+}
+.layout-unavailable-list li p {
+  margin: 0.25rem 0;
+}
+.editor-library__widget[data-blocked="true"] {
+  border-style: dashed;
+}
+.editor-library__widget[data-blocked="true"] .editor-library__thumbnail {
+  opacity: 0.55;
+}
+.editor-panel[data-restricted="true"] {
+  border-color: var(--color-danger);
+}
+.editor-panel__body .editor-panel__restriction {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 1rem;
+  color: var(--color-orange);
+  background: var(--color-warning-surface);
+  text-align: center;
+  font-size: 16px;
+}
+.editor-library .editor-compatibility-filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+}
+.editor-library .editor-compatibility-filter input {
+  width: 14px;
+  height: 14px;
+  min-height: 0;
+  padding: 0;
+  accent-color: #72adf0;
+}
+.editor-metadata.editor-availability-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.5fr);
+  align-items: start;
+}
+.editor-availability-summary {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .editor-metadata.editor-availability-controls {
+    grid-template-columns: 1fr;
+  }
+}

@@ -67,6 +67,7 @@ class StrategyService:
         )
         if context:
             self.provider.validate_context(session_id, context)
+        context = self.provider.source_context(session_id, request.as_of_ms, context)
         fingerprint = self.provider.fingerprint(session_id)
         key = digest(
             [

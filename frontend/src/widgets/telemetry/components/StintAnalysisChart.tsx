@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { formatLapTime } from "../../../features/sessions/session-utils";
 import { WidgetEmpty } from "../../shared/WidgetState";
+import { useTelemetryPlotSize } from "../../shared/widget-size";
 import type {
   PlottedStintPoint,
   StintSeries,
@@ -21,7 +22,6 @@ import { TrackStatusSummary } from "./TrackStatusSummary";
 type StintAnalysisChartProps = {
   series: StintSeries[];
   statusBands: TrackStatusBand[];
-  hiddenStintKeys: Set<string>;
   showTrend: boolean;
   emptyMessage: string;
 };
@@ -29,21 +29,20 @@ type StintAnalysisChartProps = {
 export function StintAnalysisChart({
   series,
   statusBands,
-  hiddenStintKeys,
   showTrend,
   emptyMessage,
 }: StintAnalysisChartProps) {
-  const [hoveredPoint, setHoveredPoint] = useState<PlottedStintPoint | null>(null);
-  const activeSeries = series.filter((item) => !hiddenStintKeys.has(item.key) && item.points.length > 0);
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const activeSeries = series.filter((item) => item.points.length > 0);
+  const { width, height } = useTelemetryPlotSize();
 
   if (activeSeries.length === 0) {
     return <WidgetEmpty message={emptyMessage} />;
   }
 
-  const width = 900;
-  const height = 380;
+  const dense = activeSeries.length > 8;
   const plot = {
-    left: 76,
+    left: width < 480 ? 55 : 76,
     right: 28,
     top: 28,
     bottom: 48,
@@ -61,7 +60,7 @@ export function StintAnalysisChart({
   const scaleX = (lapNumber: number) => scaleNumber(lapNumber, minLap, maxLap, plot.left, width - plot.right);
   const scaleY = (valueMs: number) => scaleNumber(valueMs, yDomainMin, yDomainMax, height - plot.bottom, plot.top);
   const yTicks = buildTimeTicks(yDomainMin, yDomainMax, 6);
-  const xTicks = buildLapTicks(minLap, maxLap, 9);
+  const xTicks = buildLapTicks(minLap, maxLap, width < 480 ? 5 : 9);
   const plottedSeries = activeSeries.map((item) => ({
     ...item,
     points: item.points.map((point) => ({
@@ -70,10 +69,12 @@ export function StintAnalysisChart({
       plotY: scaleY(point.lapTimeMs),
     })),
   }));
+  const hoveredPoint = hoveredKey && plottedSeries
+    .flatMap((item) => item.points).find((point) => point.key === hoveredKey);
 
   return (
-    <div className="stint-chart">
-      <div className="stint-chart__legend">
+    <div className="stint-chart" data-dense={dense}>
+      <div className="stint-chart__legend comparison-legend" tabIndex={dense ? 0 : undefined} aria-label="Plotted stints">
         {activeSeries.map((item) => (
           <span key={item.key} className="stint-chip">
             <i style={{ backgroundColor: item.driverColor }} />
@@ -86,10 +87,12 @@ export function StintAnalysisChart({
 
       <svg
         viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        style={{ height }}
         className="stint-chart__svg"
         role="img"
         aria-label="Stint analysis chart"
-        onMouseLeave={() => setHoveredPoint(null)}
+        onMouseLeave={() => setHoveredKey(null)}
       >
         <rect x="0" y="0" width={width} height={height} rx="12" className="stint-chart__bg" />
 
@@ -169,6 +172,7 @@ export function StintAnalysisChart({
             d={buildPlotPath(item.points)}
             fill="none"
             stroke={item.driverColor}
+            data-entry-id={item.entryId}
             className="stint-chart__line"
           />
         ))}
@@ -197,10 +201,10 @@ export function StintAnalysisChart({
                 r={5}
                 fill={getCompoundColor(point.compound)}
                 className={`stint-chart__point stint-chart__point--${point.statusKind}`}
-                tabIndex={0}
-                onMouseEnter={() => setHoveredPoint(point)}
-                onFocus={() => setHoveredPoint(point)}
-                onBlur={() => setHoveredPoint(null)}
+                tabIndex={dense ? undefined : 0}
+                onMouseEnter={() => setHoveredKey(point.key)}
+                onFocus={() => setHoveredKey(point.key)}
+                onBlur={() => setHoveredKey(null)}
               >
                 <title>{`${point.driverLabel} stint ${point.stintNumber} lap ${point.lapNumber}: ${formatLapTime(point.lapTimeMs)}`}</title>
               </circle>
@@ -209,7 +213,7 @@ export function StintAnalysisChart({
           )),
         )}
 
-        {hoveredPoint ? <StintPointTooltip point={hoveredPoint} width={width} plot={plot} /> : null}
+        {hoveredPoint ? <StintPointTooltip point={hoveredPoint} width={width} height={height} /> : null}
       </svg>
     </div>
   );
@@ -218,16 +222,17 @@ export function StintAnalysisChart({
 function StintPointTooltip({
   point,
   width,
-  plot,
+  height,
 }: {
   point: PlottedStintPoint;
   width: number;
-  plot: { left: number; right: number; top: number; bottom: number };
+  height: number;
 }) {
   const tooltipWidth = 234;
   const tooltipHeight = 136;
-  const x = point.plotX + tooltipWidth + 18 > width - plot.right ? point.plotX - tooltipWidth - 14 : point.plotX + 14;
-  const y = Math.max(plot.top + 8, point.plotY - tooltipHeight - 12);
+  const left = point.plotX + tooltipWidth + 18 > width ? point.plotX - tooltipWidth - 14 : point.plotX + 14;
+  const x = Math.max(4, Math.min(width - tooltipWidth - 4, left));
+  const y = Math.max(4, Math.min(height - tooltipHeight - 4, point.plotY - tooltipHeight - 12));
   const delta =
     point.deltaFromFirstMs == null
       ? "N/A"

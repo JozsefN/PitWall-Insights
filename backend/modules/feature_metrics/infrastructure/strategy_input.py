@@ -61,7 +61,7 @@ class StrategyInputProvider(AnalysisInputProvider):
                 if session.scheduled_start_utc
                 else None
             ),
-            coordinate_frame=f"fastf1:{session_id}:xy_metres",
+            coordinate_frame=f"{session.data_provider or session.source}:{session_id}:xy_metres",
             season_year=self.db.scalar(
                 select(WeekendRecord.season_year).where(
                     WeekendRecord.id == session.weekend_id
@@ -83,6 +83,32 @@ class StrategyInputProvider(AnalysisInputProvider):
         if cutoff is not None and record.known_at_ms > cutoff:
             raise ValueError("Context was not known at decision time")
         return record, StrategyContext.model_validate(record.payload)
+
+    def source_context(self, session_id, cutoff, context=None):
+        """Use native historical pit reports without requiring a manual research import."""
+        from modules.feature_metrics.infrastructure.openf1_context import normalize_pit_reports
+        session = self.session(session_id)
+        details = session.source_details or {}
+        rows = details.get("pit_stops") or []
+        if not rows or not session.session_time_origin_utc:
+            return context
+        by_car = {entry.car_number: entry.id for entry in self.entries(session_id)}
+        reports = []
+        for row in rows:
+            try:
+                normalized = normalize_pit_reports([row], entries_by_car=by_car,
+                    clock_origin=session.session_time_origin_utc, session_key=int(session.session_key))
+                reports.extend(v for v in normalized if v.known_at_ms <= cutoff)
+            except (ValueError, KeyError, TypeError):
+                continue  # A malformed optional source report cannot invalidate all strategy inputs.
+        if not reports:
+            return context
+        if context:
+            explicit = {(v.entry_id, v.lap_number) for v in context.pit_observations}
+            return context.model_copy(update={"pit_observations": [*context.pit_observations, *(v for v in reports if (v.entry_id,v.lap_number) not in explicit)]})
+        return StrategyContext(known_at_ms=max(v.known_at_ms for v in reports),
+            source_note="Native OpenF1 pit reports; conservative publication margin, not an original-arrival reconstruction",
+            pit_observations=reports)
 
     def validate_context(self, session_id, context):
         session = self.session(session_id)

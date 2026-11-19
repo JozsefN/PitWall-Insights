@@ -11,6 +11,7 @@ import { SessionsExplorerPage } from "../../pages/SessionsExplorerPage";
 import { SessionWorkspacePage } from "../../pages/SessionWorkspacePage";
 import { DashboardBuilderPage } from "../../pages/DashboardBuilderPage";
 import { RequireAuth } from "../../features/auth/RequireAuth";
+import { ProfilePage } from "../../pages/ProfilePage";
 
 export const routes: RouteObject[] = [
   {
@@ -18,6 +19,7 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: "profile", element: <RequireAuth><ProfilePage /></RequireAuth> },
       {
         path: "dashboard-builder",
         element: (

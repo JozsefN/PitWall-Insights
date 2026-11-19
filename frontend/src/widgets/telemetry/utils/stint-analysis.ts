@@ -32,13 +32,6 @@ export function buildStintAnalysis(
       .map(([stintNumber, laps]) => buildStintSeries(entry, index, stintNumber, laps, filters))
       .filter((stint): stint is StintSeries => stint != null);
   });
-  const visibleLapCount = series.reduce((sum, stint) => sum + stint.visibleLapCount, 0);
-  const hiddenLapCount = series.reduce((sum, stint) => sum + stint.hiddenLapCount, 0);
-  const medianCandidates = series.filter((stint) => stint.medianLapMs != null);
-  const degradationCandidates = series.filter(
-    (stint) => stint.degradationMsPerLap != null && stint.degradationMsPerLap > 0,
-  );
-
   return {
     series,
     statusBands: buildTrackStatusBands({
@@ -47,6 +40,18 @@ export function buildStintAnalysis(
       events: trackStatusEvents,
       currentTimeLimitMs,
     }),
+  };
+}
+
+export function summarizeStints(series: StintSeries[]) {
+  const visibleLapCount = series.reduce((sum, stint) => sum + stint.visibleLapCount, 0);
+  const hiddenLapCount = series.reduce((sum, stint) => sum + stint.hiddenLapCount, 0);
+  const medianCandidates = series.filter((stint) => stint.medianLapMs != null);
+  const degradationCandidates = series.filter(
+    (stint) => stint.degradationMsPerLap != null && stint.degradationMsPerLap > 0,
+  );
+
+  return {
     visibleLapCount,
     hiddenLapCount,
     bestMedian:
@@ -54,7 +59,7 @@ export function buildStintAnalysis(
         (left, right) => Number(left.medianLapMs) - Number(right.medianLapMs),
       )[0] ?? null,
     longestStint:
-      [...series].sort(
+      series.filter((stint) => stint.visibleLapCount > 0).sort(
         (left, right) => right.lapTo - right.lapFrom - (left.lapTo - left.lapFrom),
       )[0] ?? null,
     highestDegradation:

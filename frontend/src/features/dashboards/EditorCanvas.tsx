@@ -2,7 +2,9 @@ import { useRef, useState } from "react";
 import type { PointerEvent, KeyboardEvent } from "react";
 import { widgetRegistry } from "../../widgets/registry/widget.registry";
 import type {
+  DashboardAudience,
   GridPlacement,
+  SessionKind,
   WidgetId,
 } from "../../widgets/registry/widget.types";
 import {
@@ -20,9 +22,12 @@ import {
 } from "../../widgets/registry/widget.catalog";
 import { DesignScale } from "./DesignScale";
 import { TierBadge } from "./TierBadge";
+import { sessionKinds, widgetBlockReason } from "./compatibility";
 
 type Props = {
   section: EditorSection;
+  modes: DashboardAudience[];
+  sessionKind?: SessionKind;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onPlacement: (id: string, placement: GridPlacement) => void;
@@ -43,6 +48,8 @@ type Gesture = {
 
 export function EditorCanvas({
   section,
+  modes,
+  sessionKind,
   selectedId,
   onSelect,
   onPlacement,
@@ -220,6 +227,11 @@ export function EditorCanvas({
             const box =
               ghost?.id === widget.instanceId ? ghost.box : widget.placement;
             const definition = widgetRegistry[widget.widgetId];
+            const restriction = widgetBlockReason(
+              widget.widgetId,
+              modes,
+              sessionKind ? [sessionKind] : sessionKinds,
+            );
             const title =
               typeof widget.options?.title === "string"
                 ? widget.options.title
@@ -229,6 +241,7 @@ export function EditorCanvas({
                 key={widget.instanceId}
                 data-testid="editor-widget"
                 data-widget-id={widget.instanceId}
+                data-restricted={Boolean(restriction)}
                 className={`editor-panel${selectedId === widget.instanceId ? " is-selected" : ""}${ghost?.id === widget.instanceId && !ghost.valid ? " is-colliding" : ""}`}
                 style={{
                   gridColumn: `${box.x + 1} / span ${box.w}`,
@@ -267,19 +280,25 @@ export function EditorCanvas({
                   onClick={() => onSelect(widget.instanceId)}
                   aria-label={`Configure ${title}`}
                 >
-                  <WidgetBlueprint
-                    widgetId={widget.widgetId}
-                    options={widget.options}
-                    width={
-                      box.w * ((dashboardGrid.designWidth + GRID_GAP) / 12) -
-                      GRID_GAP -
-                      2
-                    }
-                    height={
-                      box.h * (GRID_ROW_HEIGHT + GRID_GAP) - GRID_GAP - 40
-                    }
-                    header={false}
-                  />
+                  {restriction ? (
+                    <span className="editor-panel__restriction">
+                      {restriction}
+                    </span>
+                  ) : (
+                    <WidgetBlueprint
+                      widgetId={widget.widgetId}
+                      options={widget.options}
+                      width={
+                        box.w * ((dashboardGrid.designWidth + GRID_GAP) / 12) -
+                        GRID_GAP -
+                        2
+                      }
+                      height={
+                        box.h * (GRID_ROW_HEIGHT + GRID_GAP) - GRID_GAP - 40
+                      }
+                      header={false}
+                    />
+                  )}
                 </button>
                 <span className="editor-panel__size">
                   {box.w} × {box.h}

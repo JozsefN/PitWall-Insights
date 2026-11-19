@@ -2,12 +2,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   getSession,
   getReplayTimeline,
+  getSessionPitMap,
+  getSessionTimingTower,
   importSession,
   listCarTelemetry,
   listEntryLaps,
   listPositionTelemetry,
   listSessionCatalog,
-  listSessionCircuitCorners,
   listSessionEntries,
   listSessionTrackStatusEvents,
   listSessionTicks,
@@ -19,17 +20,39 @@ import type {
 } from "../contracts/sessions.contracts";
 import { buildReplayClock } from "../../features/sessions/replay-timeline";
 
+export function useSessionTimingTowerQuery(sessionId: string) {
+  return useQuery({
+    queryKey: ["sessions", sessionId, "timing-tower"],
+    queryFn: ({ signal }) => getSessionTimingTower(sessionId, signal),
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
 export function useSessionReplayTimelineQuery(
   sessionId?: string,
   enabled = true,
 ) {
   return useQuery({
+    ...sessionTimeBoundsOptions(sessionId, enabled),
+    select: (data) => buildReplayClock(data.start_time_ms, data.end_time_ms),
+  });
+}
+
+export function useSessionTimeBoundsQuery(sessionId?: string, enabled = true) {
+  return useQuery(sessionTimeBoundsOptions(sessionId, enabled));
+}
+
+function sessionTimeBoundsOptions(
+  sessionId: string | undefined,
+  enabled: boolean,
+) {
+  return {
     queryKey: ["sessions", sessionId, "replay-timeline"],
     queryFn: () => getReplayTimeline(sessionId as string),
-    select: (data) => buildReplayClock(data.start_time_ms, data.end_time_ms),
     enabled: Boolean(sessionId) && enabled,
     staleTime: Infinity,
-  });
+  };
 }
 
 export function useSessionsQuery() {
@@ -73,15 +96,13 @@ export function useSessionEntriesQuery(sessionId?: string, enabled = true) {
   });
 }
 
-export function useSessionCircuitCornersQuery(
-  sessionId?: string,
-  enabled = true,
-) {
+export function useSessionPitMapQuery(sessionId: string, enabled: boolean) {
   return useQuery({
-    queryKey: ["sessions", sessionId, "circuit-corners"],
-    queryFn: () => listSessionCircuitCorners(sessionId as string),
-    enabled: Boolean(sessionId) && enabled,
-    staleTime: 1000 * 60 * 60,
+    queryKey: ["sessions", sessionId, "pit-map"],
+    queryFn: ({ signal }) => getSessionPitMap(sessionId, signal),
+    enabled,
+    staleTime: 30_000,
+    retry: false,
   });
 }
 

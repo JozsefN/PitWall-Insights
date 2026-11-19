@@ -119,8 +119,14 @@ function buildEventBands(
       continue;
     }
 
-    const startLapValue = getLapValueAtTime(startLap, startTimeMs, "start");
-    const endLapValue = getLapValueAtTime(endLap, endTimeMs, "end");
+    const startLapComplete = lapFinishedAt(startLap, currentTimeLimitMs);
+    const endLapComplete = lapFinishedAt(endLap, currentTimeLimitMs);
+    const startLapValue = startLapComplete
+      ? getLapValueAtTime(startLap, startTimeMs, "start")
+      : startLap.lap_number - 0.5;
+    const endLapValue = endLapComplete
+      ? getLapValueAtTime(endLap, endTimeMs, "end")
+      : endLap.lap_number - 0.5;
 
     bands.push({
       key: `event:${event.id}`,
@@ -134,8 +140,8 @@ function buildEventBands(
       startTimeMs,
       endTimeMs,
       durationMs: endTimeMs == null ? null : Math.max(0, endTimeMs - startTimeMs),
-      startSector: getSectorAtTime(startLap, startTimeMs),
-      endSector: getSectorAtTime(endLap, endTimeMs),
+      startSector: startLapComplete ? getSectorAtTime(startLap, startTimeMs) : null,
+      endSector: endLapComplete ? getSectorAtTime(endLap, endTimeMs) : null,
       kind,
       label: getTrackStatusLabel(event.status),
       message: event.message,
@@ -154,6 +160,7 @@ function buildLapFallbackBands(
 
   for (const entry of entries) {
     for (const lap of trimLapsForTime(lapsByEntryId[entry.id] ?? [], currentTimeLimitMs)) {
+      if (!lapFinishedAt(lap, currentTimeLimitMs)) continue;
       const kind = getTrackStatusKind(lap.track_status);
       if (kind === "green") {
         continue;
@@ -240,6 +247,11 @@ function trimLapsForTime(laps: EntryLapDto[], currentTimeLimitMs?: number) {
       lap.lap_start_time_ms != null &&
       lap.lap_start_time_ms <= currentTimeLimitMs,
   );
+}
+
+function lapFinishedAt(lap: EntryLapDto, currentTimeLimitMs?: number) {
+  return currentTimeLimitMs == null ||
+    (lap.lap_end_time_ms != null && lap.lap_end_time_ms <= currentTimeLimitMs);
 }
 
 function getLapTimingScore(lap: EntryLapDto) {

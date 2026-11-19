@@ -6,6 +6,8 @@ import type {
 export {
   getResolvedLayoutById,
   resolveWorkspaceLayouts,
+  resolveAllLayouts,
+  checkLayoutInSession,
   toUserLayoutRecord,
 } from "../dashboards/layout-catalog";
 export type { ResolvedLayoutRecord } from "../dashboards/layout-catalog";

@@ -5,10 +5,21 @@ import {
   widgetSizeError,
   fitWidgetSize,
 } from "../src/widgets/registry/widget.catalog.ts";
-import type { WidgetId } from "../src/widgets/registry/widget.types.ts";
+import type {
+  LayoutRecord,
+  WidgetId,
+} from "../src/widgets/registry/widget.types.ts";
+import {
+  classifySession,
+  layoutCompatibilityReason,
+  sessionKinds,
+  supportedSessionKinds,
+  widgetBlockReason,
+} from "../src/features/dashboards/compatibility.ts";
 import {
   canPlace,
   clampResize,
+  draftCompatibilityError,
   draftError,
   draftFromLayout,
   draftToConfig,
@@ -18,6 +29,105 @@ import {
   overlaps,
   validPlacement,
 } from "../src/features/dashboards/editor-model.ts";
+
+test("session names distinguish sprint qualifying, sprint and Grand Prix", () => {
+  assert.equal(
+    classifySession({ session_name: "Sprint Shootout" }),
+    "qualifying",
+  );
+  assert.equal(
+    classifySession({ session_name: "Sprint Qualifying" }),
+    "qualifying",
+  );
+  assert.equal(
+    classifySession({ session_name: "Sprint", session_type: "Race" }),
+    "sprint",
+  );
+  assert.equal(classifySession({ session_name: "Race" }), "race");
+  assert.equal(classifySession({ session_name: "Practice 2" }), "practice");
+});
+
+test("qualifying results and race tactics have explicit restrictions", () => {
+  assert.match(
+    widgetBlockReason("wake-exposure", ["session-lookback"], ["race"])!,
+    /Replay only/,
+  );
+  assert.match(
+    widgetBlockReason("wake-exposure", ["live-race"], ["sprint"])!,
+    /Grand Prix only/,
+  );
+  assert.equal(
+    widgetBlockReason("wake-exposure", ["live-race"], ["race"]),
+    undefined,
+  );
+  assert.match(
+    widgetBlockReason("lookback-driver-cards", ["live-race"], ["qualifying"])!,
+    /Lookback only/,
+  );
+  assert.match(
+    widgetBlockReason(
+      "lookback-driver-cards",
+      ["session-lookback"],
+      ["practice"],
+    )!,
+    /Qualifying only/,
+  );
+  assert.equal(
+    widgetBlockReason("lap-segment-review", ["session-lookback"], ["practice"]),
+    undefined,
+  );
+  assert.deepEqual(
+    supportedSessionKinds(["lookback-driver-cards", "stint-analysis"]),
+    [],
+  );
+  for (const policy of Object.values(widgetCatalog)) {
+    if (!policy.builderEnabled) continue;
+    assert.ok(policy.availabilityNote);
+    assert.ok(policy.supportedAudiences.length);
+    assert.ok(
+      policy.sessionKinds?.length &&
+        policy.sessionKinds.every((kind) => sessionKinds.includes(kind)),
+    );
+  }
+});
+
+test("legacy saved mode can expand to both modes without changing panel positions or IDs", () => {
+  const draft = emptyDraft("session-lookback");
+  const panel = newWidget("weather-history", { x: 2, y: 3, w: 6, h: 8 });
+  draft.sections[0].widgets.push(panel);
+  const config = draftToConfig(draft, "weather");
+  const saved: LayoutRecord = {
+    config,
+    audience: draft.audience,
+    id: "user:weather",
+    name: "Weather",
+    description: null,
+    source: "user",
+    schemaVersion: 2,
+  };
+  assert.match(
+    layoutCompatibilityReason(saved, "live-race", "race")!,
+    /Saved for Lookback only/,
+  );
+  const edited = draftFromLayout(saved);
+  assert.equal(edited.sections[0].widgets[0].instanceId, panel.instanceId);
+  edited.enabledAudiences = ["session-lookback", "live-race"];
+  assert.equal(draftCompatibilityError(edited), null);
+  const updated = draftToConfig(edited, config.id);
+  assert.deepEqual(updated.sections, config.sections);
+  assert.equal(
+    layoutCompatibilityReason(
+      { ...saved, config: updated },
+      "live-race",
+      "race",
+    ),
+    undefined,
+  );
+  edited.sections[0].widgets.push(
+    newWidget("lap-table", { x: 2, y: 11, w: 6, h: 5 }),
+  );
+  assert.match(draftCompatibilityError(edited)!, /Lap Table.*Lookback only/);
+});
 
 test("placements reject overlap, out of bounds, fractional and non-finite geometry", () => {
   const box = { x: 0, y: 0, w: 6, h: 5 };
@@ -143,7 +253,7 @@ test("draft round trips keep widget options, placements, sections and instance i
     h: 6,
   });
   assert.equal(restored.sections[0].title, "Pace view");
-  assert.notEqual(
+  assert.equal(
     restored.sections[0].widgets[0].instanceId,
     draft.sections[0].widgets[0].instanceId,
   );
@@ -232,12 +342,22 @@ test("every session widget has a usable default, explicit size policy and distin
         "laps",
         "track",
         "driver-cards",
+        "tyre-timeline",
+        "position-history",
+        "notifications",
+        "insights",
       ].includes(policy.previewKind),
     );
     assert.ok(
-      ["platform", "telemetry", "strategy", "track", "replay"].includes(
-        policy.category,
-      ),
+      [
+        "platform",
+        "telemetry",
+        "strategy",
+        "track",
+        "replay",
+        "race",
+        "engineering",
+      ].includes(policy.category),
     );
     assert.ok(
       policy.sizing.compactBelowPx > 0 && policy.sizing.shortBelowPx > 0,
@@ -287,7 +407,7 @@ test("chart size and shape constraints apply to resizing and draft validation", 
   draft.sections[0].widgets = [
     newWidget("replay-track-map", { x: 0, y: 0, w: 6, h: 5 }),
   ];
-  assert.match(draftError(draft)!, /audience/);
+  assert.match(draftError(draft)!, /Replay only/);
 });
 
 test("optional maximum aspect ratios fit a taller layout without changing the policy", () => {

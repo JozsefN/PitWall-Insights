@@ -16,6 +16,10 @@ from modules.feature_metrics.application.calculation_guard import (
     AnalysisChangedError,
 )
 from modules.decision_engine.application.strategy_service import StrategyService
+from modules.decision_engine.application.replay_strategy_service import (
+    ReplayStrategyRequest,
+    ReplayStrategyService,
+)
 
 router = APIRouter(prefix="/api/strategy", tags=["strategy"])
 
@@ -53,6 +57,15 @@ def evaluate(
     db: Session = Depends(get_db),
 ):
     return mapped(lambda: StrategyService(db).evaluate(session_id, user.id, request))
+
+
+@router.post(
+    "/sessions/{session_id}/replay", dependencies=[Depends(require_current_user)]
+)
+def replay_strategy(
+    session_id: str, request: ReplayStrategyRequest, db: Session = Depends(get_db)
+):
+    return mapped(lambda: ReplayStrategyService(db).evaluate(session_id, request))
 
 
 @router.post("/sessions/{session_id}/contexts", status_code=201)

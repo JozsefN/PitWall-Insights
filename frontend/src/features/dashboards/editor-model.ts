@@ -11,8 +11,15 @@ import type {
   LayoutRecord,
   LayoutWidgetNode,
   SectionLayoutNode,
+  SessionKind,
   WidgetId,
 } from "../../widgets/registry/widget.types";
+import {
+  sessionKindLabel,
+  sessionKinds,
+  supportedSessionKinds,
+  widgetBlockReason,
+} from "./compatibility.ts";
 
 export const GRID_COLUMNS = dashboardGrid.columns;
 export const GRID_ROW_HEIGHT = dashboardGrid.rowHeight;
@@ -31,14 +38,20 @@ export type EditorDraft = {
   name: string;
   description: string;
   audience: DashboardAudience;
+  enabledAudiences?: DashboardAudience[];
+  sessionKind?: SessionKind;
   sections: EditorSection[];
 };
 
-export function emptyDraft(audience: DashboardAudience): EditorDraft {
+export function emptyDraft(
+  audience: DashboardAudience,
+  sessionKind?: SessionKind,
+): EditorDraft {
   return {
     name: "",
     description: "",
     audience,
+    sessionKind,
     sections: [{ id: crypto.randomUUID(), title: "", widgets: [] }],
   };
 }
@@ -241,6 +254,8 @@ export function draftFromLayout(
     name: copy ? `${layout.name} copy`.slice(0, 160) : layout.name,
     description: layout.description ?? "",
     audience: layout.audience,
+    enabledAudiences: layout.config.enabledAudiences,
+    sessionKind: layout.config.sessionKind,
     sections: layout.config.sections.map((section) => {
       const widgets: EditorWidget[] = [];
       const nodes =
@@ -265,7 +280,8 @@ export function draftFromLayout(
           throw new Error("This layout exceeds the editor's 200-row limit.");
         widgets.push({
           ...structuredClone(node),
-          instanceId: crypto.randomUUID(),
+          instanceId:
+            (copy ? undefined : node.instanceId) ?? crypto.randomUUID(),
           placement,
         });
       }
@@ -282,6 +298,8 @@ export function draftFromLayout(
 export function draftToConfig(draft: EditorDraft, id: string): DashboardConfig {
   return {
     id,
+    enabledAudiences: draft.enabledAudiences,
+    sessionKind: draft.sessionKind,
     title: draft.name.trim(),
     subtitle: draft.description.trim(),
     sections: draft.sections.map((section) => ({
@@ -305,14 +323,40 @@ export function draftToConfig(draft: EditorDraft, id: string): DashboardConfig {
   };
 }
 
-export function draftError(draft: EditorDraft): string | null {
+export function draftCompatibilityError(draft: EditorDraft): string | null {
+  const kinds = draft.sessionKind ? [draft.sessionKind] : sessionKinds;
   for (const section of draft.sections)
     for (const widget of section.widgets) {
-      const policy = widgetCatalog[widget.widgetId];
-      if (!policy?.builderEnabled)
-        return "Remove platform or unavailable widgets before saving this session layout.";
-      if (!policy.supportedAudiences.includes(draft.audience))
-        return `${policy.title} is not available for this dashboard audience.`;
+      const reason = widgetBlockReason(
+        widget.widgetId,
+        draft.enabledAudiences ?? [draft.audience],
+        kinds,
+      );
+      if (reason)
+        return (
+          reason +
+          (draft.sessionKind
+            ? ` Current target: ${sessionKindLabel[draft.sessionKind]}.`
+            : "")
+        );
+    }
+  if (
+    !supportedSessionKinds(
+      draft.sections.flatMap((section) =>
+        section.widgets.map((widget) => widget.widgetId),
+      ),
+      draft.sessionKind,
+    ).length
+  )
+    return "None of the session types supports every panel in this layout. Remove the conflicting panel or change the session target.";
+  return null;
+}
+
+export function draftError(draft: EditorDraft): string | null {
+  const incompatibility = draftCompatibilityError(draft);
+  if (incompatibility) return incompatibility;
+  for (const section of draft.sections)
+    for (const widget of section.widgets) {
       const sizeError = widgetSizeError(widget.widgetId, widget.placement);
       if (sizeError) return sizeError;
     }

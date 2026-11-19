@@ -71,7 +71,15 @@
         "metricLabel": "Speed",
         "unit": "kph",
         "requiresLap": true
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Select drivers. The trace can use a selected lap or the session."
     },
     "brake-trace-chart": {
       "title": "Brake Trace",
@@ -96,7 +104,15 @@
       },
       "defaultOptions": {
         "requiresLap": true
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Select drivers. Some layouts also require a specific lap."
     },
     "lap-time-trend": {
       "title": "Driver Lap Pace",
@@ -118,7 +134,15 @@
         "compactBelowPx": 420,
         "minAspect": 1.25,
         "shortBelowPx": 340
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Compares completed laps across the session."
     },
     "stint-analysis": {
       "title": "Stint Analysis",
@@ -141,7 +165,13 @@
         "compactBelowPx": 420,
         "minAspect": 1.4,
         "shortBelowPx": 340
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "practice"
+      ],
+      "availabilityNote": "Requires comparable timed stint laps. Replay shows completed laps at the clock."
     },
     "lap-table": {
       "title": "Lap Table",
@@ -162,7 +192,15 @@
         "defaultH": 6,
         "compactBelowPx": 420,
         "shortBelowPx": 340
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Shows completed lap records from the whole session."
     },
     "session-track-map": {
       "title": "Session Track Map",
@@ -183,7 +221,15 @@
         "defaultH": 6,
         "compactBelowPx": 420,
         "shortBelowPx": 340
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Shows recorded position traces for the selected drivers."
     },
     "replay-track-map": {
       "title": "Replay Track Map",
@@ -204,11 +250,19 @@
         "defaultH": 7,
         "compactBelowPx": 420,
         "shortBelowPx": 340
-      }
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Requires position telemetry and a replay timeline."
     },
     "replay-driver-cards": {
       "title": "Replay Driver Cards",
-      "description": "Live-style driver telemetry cards.",
+      "description": "Driver portraits, trailing speed traces and pedal activity at the replay clock.",
       "category": "replay",
       "previewKind": "driver-cards",
       "builderEnabled": true,
@@ -225,7 +279,1111 @@
         "defaultH": 6,
         "compactBelowPx": 420,
         "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Requires selected drivers and car telemetry at the replay clock."
+    },
+    "tyre-timeline": {
+      "title": "Tyre timeline",
+      "description": "See when each driver changed compound and compare the lengths of their tyre runs.",
+      "category": "strategy",
+      "previewKind": "tyre-timeline",
+      "builderEnabled": true,
+      "supportedAudiences": ["session-lookback", "live-race"],
+      "sessionKinds": ["race", "sprint", "qualifying", "practice"],
+      "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 4, "maxW": 12, "maxH": 20, "defaultW": 7, "defaultH": 7, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["compound", "tires", "tyre age", "stints", "pit stop"],
+      "availabilityNote": "Uses lap and compound records. Replay shows compounds from completed laps."
+    },
+    "position-history": {
+      "title": "Position history",
+      "description": "Follow gains and losses in running order by completed lap.",
+      "category": "race",
+      "previewKind": "position-history",
+      "builderEnabled": true,
+      "supportedAudiences": ["session-lookback", "live-race"],
+      "sessionKinds": ["race", "sprint"],
+      "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 5, "maxW": 12, "maxH": 20, "defaultW": 7, "defaultH": 7, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["positions", "race order", "gains", "rank", "timing"],
+      "availabilityNote": "Race and sprint only. Replay uses only positions from completed laps."
+    },
+    "replay-timing-board": {
+      "title": "Replay timing board",
+      "description": "Rank each selected driver’s best completed lap and compare its sector times against the leading lap.",
+      "category": "telemetry", "previewKind": "laps",
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race", "sprint", "qualifying", "practice"], "accessTier": 0,
+      "sizing": {"minW": 5, "minH": 5, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["qualifying", "lap time", "sector", "leaderboard"],
+      "availabilityNote": "Replay only. Timing becomes visible when a valid lap completes."
+    },
+    "rival-comparison": {
+      "title": "Rival gaps & lap comparison",
+      "description": "Compare current and pre-pit gaps, recent lap pace and individual sectors against likely rivals.",
+      "category": "strategy", "previewKind": "insights", "previewDetail": "delta-bars", "previewLabels": ["Sector 1", "Sector 2", "Sector 3"],
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 5, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["rival", "sector", "gap", "championship", "grid", "pace"],
+      "availabilityNote": "Grand Prix replay. Compare sectors after three matched clean laps."
+    },
+    "rival-pit-scenarios": {
+      "title": "Rival pit scenarios",
+      "description": "Compare boxing, extending and finishing as a rival pits or stays out.",
+      "category": "strategy", "previewKind": "insights", "previewDetail": "timing-bars", "previewLabels": ["Box", "Extend", "Finish"],
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["rival", "undercut", "rejoin", "pit or stay", "pit strategy"],
+      "availabilityNote": "Dry Grand Prix replay. Requires a current timing gap and a feasible plan for both drivers."
+    },
+    "tyre-crossover": {
+      "title": "Tyre crossover",
+      "description": "Compare slick, intermediate and wet pace using newly completed sectors from the field.",
+      "category": "strategy", "previewKind": "insights", "previewDetail": "delta-bars", "previewLabels": ["Slicks", "Intermediates", "Full wets"],
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "sizing": {"minW": 5, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["rain", "wet weather", "tyre crossover", "slicks", "intermediates", "out-lap"],
+      "availabilityNote": "Grand Prix replay. Uses matched timing sectors from the whole field. An optional rain scenario compares earlier races."
+    },
+    "strategy-call": {
+      "title": "Strategy call",
+      "description": "See the fastest supported route to the flag, the first pit window and the margin over the next call.",
+      "category": "strategy", "previewKind": "insights", "previewDetail": "timing-bars",
+      "previewLabels": ["Current set", "Next set", "Pit window"],
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["best strategy", "pit stop", "undercut", "box", "stay out"],
+      "availabilityNote": "For dry Grand Prix replay. Plans need comparable tyre runs, known tyre ages and a same-circuit pit benchmark."
+    },
+    "intervention-risk": {
+      "title": "Race warnings & safety car",
+      "description": "See incident warnings and compare the odds of the first intervention over the next two minutes.",
+      "category": "race", "previewKind": "notifications",
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["safety car", "VSC", "contact", "stopped", "yellow", "retirement"],
+      "availabilityNote": "Grand Prix replay. A percentage needs an active race-control episode and enough earlier comparable episodes."
+    },
+    "tyre-outlook": {
+      "title": "Tyre outlook",
+      "description": "Compare observed tyre ages and measured pace changes across compounds and this driver’s current set.",
+      "category": "strategy", "previewKind": "insights", "previewDetail": "timing-bars",
+      "previewLabels": ["Soft", "Medium", "Hard"],
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "sizing": {"minW": 4, "minH": 5, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
+      "searchTerms": ["compound", "degradation", "tyre life", "practice", "stint"],
+      "availabilityNote": "Grand Prix replay. Uses clean recorded dry long runs. Same-weekend practice and earlier same-circuit races enrich the estimates when imported."
+    },
+    "race-notifications": {
+      "title": "Race notifications",
+      "description": "Race control, reported events and optional detection candidates.",
+      "category": "race",
+      "previewKind": "notifications",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "includeCandidates": true,
+        "minSeverity": "info",
+        "driverScope": "all",
+        "maxItems": "auto",
+        "lookbackMinutes": 5
+      },
+      "searchTerms": [
+        "lockup",
+        "lock up",
+        "crash",
+        "yellow",
+        "flag",
+        "overtake",
+        "notification",
+        "message",
+        "safety car",
+        "best lap"
+      ],
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Shows recent race-control messages and supported events at the replay clock."
+    },
+    "driver-overview": {
+      "title": "Driver overview",
+      "description": "Current running, recent pace and the next car ahead.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Speed",
+        "Headway",
+        "Recent pace",
+        "Tyre age"
+      ],
+      "previewDetail": "trend",
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Uses current race speed, pace and gap reports."
+    },
+    "battle-radar": {
+      "title": "Battle radar",
+      "description": "Running-order neighbours from fresh timing reports.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "searchTerms": [
+        "nearby cars",
+        "rival",
+        "distance",
+        "ahead"
+      ],
+      "previewLabels": [
+        "Nearby reports",
+        "Headway",
+        "Closing rate",
+        "Defence index"
+      ],
+      "previewDetail": "table",
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Requires fresh running order and race intervals."
+    },
+    "wake-exposure": {
+      "title": "Wake & traffic",
+      "description": "Following exposure and aerodynamic sensitivity scenarios.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 2,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "searchTerms": [
+        "dirty air",
+        "tow",
+        "slipstream",
+        "aero",
+        "nearby cars"
+      ],
+      "previewLabels": [
+        "Headway distance",
+        "Close following",
+        "Wake scenario",
+        "Corner sensitivity"
+      ],
+      "previewDetail": "trend",
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Requires a fresh race gap and car telemetry. Following effects are estimated."
+    },
+    "tyre-workload": {
+      "title": "Tyre workload",
+      "description": "Relative workload and cooling scenarios, without temperature or wear claims.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 2,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "searchTerms": [
+        "tire",
+        "tyre wear",
+        "temperature",
+        "degradation"
+      ],
+      "previewLabels": [
+        "Tyre age",
+        "Thermal-load index",
+        "Corner workload",
+        "Traction workload"
+      ],
+      "previewDetail": "trend",
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Uses the recent race window and needs car and position telemetry."
+    },
+    "braking-analysis": {
+      "title": "Braking analysis",
+      "description": "Brake episodes, deceleration and energy dissipated per unit mass.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 2,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "searchTerms": [
+        "brake",
+        "lockup",
+        "braking point",
+        "deceleration"
+      ],
+      "previewLabels": [
+        "Brake episodes",
+        "Peak deceleration",
+        "Kinetic energy",
+        "Onset shift"
+      ],
+      "previewDetail": "table",
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Uses recent braking episodes around the replay clock."
+    },
+    "pace-context": {
+      "title": "Pace context",
+      "description": "Comparable completed laps and traffic association.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 2,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Last lap",
+        "Traffic laps"
+      ],
+      "previewDetail": "delta-bars",
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Requires comparable completed laps. Traffic comparisons need race interval coverage."
+    },
+    "closing-gaps": {
+      "title": "Gap evolution",
+      "description": "Measured headways, closing trends and a 10-second extrapolation.",
+      "category": "strategy",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Headway",
+        "Closing rate",
+        "10s gap scenario",
+        "Catch scenario"
+      ],
+      "previewDetail": "trend",
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Requires a stable car ahead and fresh race intervals."
+    },
+    "overtake-opportunities": {
+      "title": "Attack & defence",
+      "description": "Relative opportunity indices with DRS and tow context.",
+      "category": "strategy",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Attack index",
+        "Defence index",
+        "DRS exposure",
+        "Tow exposure"
+      ],
+      "previewDetail": "table",
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Uses current race gaps and traffic evidence."
+    },
+    "pit-scenarios": {
+      "title": "Pit scenarios",
+      "description": "Assumed net pit loss, adjacent-car margins and reported visit durations.",
+      "category": "strategy",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "searchTerms": [
+        "undercut",
+        "overcut",
+        "pit window",
+        "strategy"
+      ],
+      "previewLabels": [
+        "Pit loss assumption",
+        "Exit margin",
+        "Reported visit",
+        "Fresh-tyre scenario"
+      ],
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Uses a current race gap for hypothetical pit timing."
+    },
+    "incident-watch": {
+      "title": "Incident watch",
+      "description": "Stopped-car and abrupt-slowdown candidates alongside official reports.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Supported stop",
+        "Slowdown candidates",
+        "Concern index",
+        "Sample age"
+      ],
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Shows recent incident candidates and reported warnings at the replay clock."
+    },
+    "track-conditions": {
+      "title": "Track & weather",
+      "description": "Reported track state and weather with explicit wind limitations.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Air / track temp",
+        "Air density",
+        "Wind magnitude",
+        "Airspeed bounds"
+      ],
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Uses track flags and weather near the replay clock. Use Rain & wind history for a lookback."
+    },
+    "stint-performance": {
+      "title": "Stint performance",
+      "description": "Tyre age, completed-lap trend and workload context.",
+      "category": "strategy",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Tyre age",
+        "Pace trend",
+        "Consistency",
+        "Workload pressure"
+      ],
+      "previewDetail": "lap-bars",
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "practice"
+      ],
+      "availabilityNote": "Requires comparable laps from a stint. Workload estimates are shown in replay."
+    },
+    "driver-comparison": {
+      "title": "Driver comparison",
+      "description": "Compare two selected drivers using the same cutoff and assumptions.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 2,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "previewLabels": [
+        "Recent pace A / B",
+        "Tyre age A / B",
+        "Trend A / B",
+        "Coverage A / B"
+      ],
+      "previewDetail": "table",
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Select at least two drivers. Current telemetry metrics are shown in replay."
+    },
+    "model-quality": {
+      "title": "Model evidence",
+      "description": "Coverage, freshness, modelling assumptions and limitations.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 2,
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 7,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "defaultOptions": {
+        "showSupport": true,
+        "showRanges": true
+      },
+      "searchTerms": [
+        "engineer",
+        "assumptions",
+        "coverage",
+        "confidence",
+        "uncertainty"
+      ],
+      "previewLabels": [
+        "Sample coverage",
+        "Gap coverage",
+        "Sample age",
+        "Neutralisation"
+      ],
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Reports coverage and sample freshness for the replay window."
+    },
+    "lookback-driver-cards": {
+      "title": "Qualifying driver cards",
+      "description": "Driver portraits, best clean laps, Q1/Q2/Q3 results and provider segment colours.",
+      "category": "race",
+      "previewKind": "driver-cards",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "searchTerms": [
+        "qualifying",
+        "photo",
+        "headshot"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "qualifying"
+      ],
+      "availabilityNote": "Shows final qualifying phase results and source segment colours."
+    },
+    "qualifying-lap-map": {
+      "title": "Qualifying Lap Map",
+      "description": "Follow a timed lap around the circuit and compare its sectors or minisectors with the whole field.",
+      "category": "track",
+      "previewKind": "track",
+      "builderEnabled": true,
+      "supportedAudiences": ["session-lookback"],
+      "sessionKinds": ["qualifying"],
+      "accessTier": 0,
+      "availabilityNote": "Qualifying only. Official sectors use timing data. Minisectors need position telemetry.",
+      "previewLabels": ["Split colours", "Field timing"],
+      "searchTerms": ["lap time", "sector", "minisector", "qualifying", "circuit"],
+      "sizing": {
+        "minW": 6,
+        "minH": 7,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 10,
+        "compactBelowPx": 650,
+        "shortBelowPx": 390
       }
+    },
+    "lap-segment-review": {
+      "title": "Lap segment comparison",
+      "description": "Compare equal-distance times, minimum speed, throttle and brake use across chosen laps.",
+      "category": "engineering",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "previewLabels": [
+        "Segment time",
+        "Minimum speed",
+        "Throttle",
+        "Brake use"
+      ],
+      "searchTerms": [
+        "minisector",
+        "qualifying",
+        "pace loss"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Compare chosen completed laps. Prepare their telemetry if needed."
+    },
+    "team-radio": {
+      "title": "Team radio",
+      "description": "Published driver-engineer clips with a driver and replay time.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "previewLabels": [
+        "Driver",
+        "Recorded time",
+        "Source clip",
+        "Replay cutoff"
+      ],
+      "searchTerms": [
+        "message",
+        "audio",
+        "engineer"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Requires published clips. Replay follows the message timestamps."
+    },
+    "racecraft-review": {
+      "title": "Passes & battles",
+      "description": "Sustained passes, close battles and closing trends with pace and tyre context.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "previewDetail": "timing-bars",
+      "previewLabels": [
+        "A → B",
+        "C → D",
+        "E → F"
+      ],
+      "searchTerms": [
+        "overtake",
+        "rival",
+        "closing"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Needs fresh race gaps and running order for active battles and closing trends."
+    },
+    "race-pace-forecast": {
+      "title": "Race pace & projection",
+      "description": "Comparable race pace, practice long runs, track evolution and projected ordering.",
+      "category": "strategy",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "previewDetail": "timing-bars",
+      "previewLabels": [
+        "P1 · DRV A",
+        "P2 · DRV B",
+        "P3 · DRV C"
+      ],
+      "searchTerms": [
+        "fuel",
+        "rubber",
+        "tyre degradation",
+        "lapped traffic"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Requires a running race, fresh gaps and completed clean laps."
+    },
+    "pit-benchmark": {
+      "title": "Pit loss & rejoin",
+      "description": "Historic net pit loss, separate service times and estimated rejoin order.",
+      "category": "strategy",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 1,
+      "previewDetail": "timing-bars",
+      "previewLabels": [
+        "Net loss",
+        "Pit lane",
+        "Service"
+      ],
+      "searchTerms": [
+        "undercut",
+        "bad stop",
+        "front wing",
+        "repair"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race"
+      ],
+      "availabilityNote": "Rejoin scenarios need current race gaps and comparable green-flag stops."
+    },
+    "incident-reports": {
+      "title": "Contact & track limits",
+      "description": "Race-control reports about contact, damage and track limits.",
+      "category": "race",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "previewLabels": [
+        "Contact",
+        "Damage",
+        "Track limits",
+        "Driver"
+      ],
+      "searchTerms": [
+        "crash",
+        "contact",
+        "penalties"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Shows available race-control reports. Replay follows the report timestamps."
+    },
+    "weather-history": {
+      "title": "Rain & wind history",
+      "description": "Circuit rain flags, wind bearings and track temperature over time.",
+      "category": "track",
+      "previewKind": "insights",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "previewLabels": [
+        "Rain flag",
+        "Wind bearing",
+        "Wind speed",
+        "Temperature"
+      ],
+      "searchTerms": [
+        "weather",
+        "wet",
+        "windmap"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Shows circuit rain flags and wind from the available weather reports."
+    },
+    "track-surface": {
+      "title": "Track surface map",
+      "description": "Registered circuit polygons for racing surface, pit lane, runoff and gravel.",
+      "category": "track",
+      "previewKind": "track",
+      "builderEnabled": true,
+      "supportedAudiences": [
+        "session-lookback",
+        "live-race"
+      ],
+      "accessTier": 0,
+      "plannedAccessTier": 0,
+      "previewLabels": [
+        "Racing surface",
+        "Pit lane",
+        "Runoff",
+        "Gravel"
+      ],
+      "searchTerms": [
+        "map",
+        "off track",
+        "gravel trap",
+        "track limits"
+      ],
+      "sizing": {
+        "minW": 4,
+        "minH": 4,
+        "maxW": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 8,
+        "compactBelowPx": 420,
+        "shortBelowPx": 340
+      },
+      "sessionKinds": [
+        "race",
+        "sprint",
+        "qualifying",
+        "practice",
+        "other"
+      ],
+      "availabilityNote": "Requires a registered track profile for this session. Car markers need fresh replay positions."
     }
   }
 }

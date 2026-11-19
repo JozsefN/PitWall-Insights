@@ -1,5 +1,15 @@
 import type { SessionTickDto } from "../../data/contracts/sessions.contracts";
 
+export function formatReplayElapsed(timeMs: number, startMs: number) {
+  const seconds = Math.max(0, Math.floor((timeMs - startMs) / 1000));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor(seconds / 60) % 60;
+  const remainder = String(seconds % 60).padStart(2, "0");
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${remainder}`
+    : `${minutes}:${remainder}`;
+}
+
 // Playback needs a clock, not tens of thousands of raw telemetry tick records.
 export function buildReplayClock(start: number, end: number): SessionTickDto[] {
   if (end < start || !Number.isFinite(start) || !Number.isFinite(end))
@@ -19,6 +29,16 @@ export function buildReplayClock(start: number, end: number): SessionTickDto[] {
   }));
 }
 
-export function replaySampleInterval(start: number, end: number): number {
+function replaySampleInterval(start: number, end: number): number {
   return Math.max(500, Math.ceil(Math.max(0, end - start) / 18000 / 100) * 100);
+}
+
+export function sampledSessionTelemetry(start: number, end: number) {
+  return {
+    scope: "session" as const,
+    limit: 20_000,
+    sampleIntervalMs: replaySampleInterval(start, end),
+    sessionTimeFromMs: start,
+    sessionTimeToMs: end > start ? end : undefined,
+  };
 }

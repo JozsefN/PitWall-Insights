@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { getImportFeedback } from "../features/sessions/import-feedback";
 import { PageContainer } from "../app/layout/PageContanier";
 import type { SessionCatalogItemDto, SessionImportRequestDto } from "../data/contracts/sessions.contracts";
 import {
@@ -14,8 +15,9 @@ import {
   writeStoredSessionWorkspace,
 } from "../features/sessions/session-resume";
 import { buildSessionWorkspaceHref } from "../features/sessions/session-workspace.search";
-import { formatDateTime, formatEventSessionLabel } from "../features/sessions/session-utils";
+import { formatDateTime } from "../features/sessions/session-utils";
 import type { SessionWorkspaceMode } from "../widgets/registry/widget.types";
+import { SessionModeToggle } from "../features/sessions/SessionModeToggle";
 import "./sessions-page.css";
 
 type CatalogGroup = {
@@ -27,16 +29,16 @@ type CatalogGroup = {
 };
 
 const CURRENT_YEAR = new Date().getFullYear();
-const SEASONS = Array.from({ length: CURRENT_YEAR - 2017 }, (_, index) => CURRENT_YEAR - index);
+const SEASONS = Array.from({ length: CURRENT_YEAR - 2022 }, (_, index) => CURRENT_YEAR - index);
 
 export function SessionsExplorerPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const [season, setSeason] = useState(CURRENT_YEAR);
-  const [mode, setMode] = useState<SessionWorkspaceMode>("lookback");
-  const [selectedWeekendKey, setSelectedWeekendKey] = useState<string | null>(null);
-  const [selectedSessionKey, setSelectedSessionKey] = useState<string | null>(null);
+  const [season, setSeason] = useState(() => SEASONS.includes(Number(searchParams.get("season"))) ? Number(searchParams.get("season")) : CURRENT_YEAR);
+  const [mode, setMode] = useState<SessionWorkspaceMode>(() => searchParams.get("mode") === "simulation" ? "simulation" : "lookback");
+  const [selectedWeekendKey, setSelectedWeekendKey] = useState<string | null>(() => searchParams.get("weekend"));
+  const [selectedSessionKey, setSelectedSessionKey] = useState<string | null>(() => searchParams.get("session"));
 
   const catalogQuery = useSessionCatalogQuery(season);
   const coreImportMutation = useImportSessionMutation();
@@ -64,6 +66,7 @@ export function SessionsExplorerPage() {
   const showExplorer = searchParams.get("view") === "explorer";
   const importProgress = getCoreImportProgress();
   const isImportActive = coreImportMutation.isPending;
+  const importFeedback = getImportFeedback(coreImportMutation.error);
 
   useEffect(() => {
     if (!resumeHref || showExplorer || !resumeSessionQuery.data) {
@@ -74,7 +77,7 @@ export function SessionsExplorerPage() {
   }, [navigate, resumeHref, resumeSessionQuery.data, showExplorer]);
 
   function handlePrepare() {
-    if (!selectedSession) {
+    if (!selectedSession || selectedSession.available_for_import === false) {
       return;
     }
 
@@ -84,6 +87,7 @@ export function SessionsExplorerPage() {
       session_name: selectedSession.session_name,
       source_session_key: selectedSession.source_session_key,
       import_profile: "core",
+      data_provider: "openf1",
     };
     const nextMode = mode;
 
@@ -127,60 +131,64 @@ export function SessionsExplorerPage() {
   return (
     <PageContainer>
       <div className="sessions-shell">
+        <header className="feature-banner sessions-section-heading">
+          <h1 className="feature-banner__title">Session Explorer</h1>
+          <p className="feature-banner__detail">Pick a session and open it in Lookback or Replay.</p>
+        </header>
         <section className="surface-card sessions-explorer">
           <div className="sessions-explorer__left">
-            <div className="sessions-section-heading">
-              <span className="ui-pill ui-pill--focus">Sessions</span>
-              <h1>Session Explorer</h1>
-              <p>Pick any session, choose lookback or simulation, then load straight into the telemetry workspace.</p>
+            <div className="sessions-explorer__filters">
+              <label className="sessions-select-field">
+                <span>Season</span>
+                <select
+                  aria-label="Season"
+                  value={season}
+                  onChange={(event) => {
+                    setSeason(Number(event.target.value));
+                    setSelectedWeekendKey(null);
+                    setSelectedSessionKey(null);
+                  }}
+                >
+                  {SEASONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="sessions-select-field">
+                <span>Race weekend</span>
+                <select
+                  aria-label="Race weekend"
+                  value={activeWeekendKey ?? ""}
+                  onChange={(event) => {
+                    setSelectedWeekendKey(event.target.value || null);
+                    setSelectedSessionKey(null);
+                  }}
+                  disabled={catalogQuery.isLoading || groupedCatalog.length === 0}
+                >
+                  {groupedCatalog.length === 0 ? (
+                    <option value="">No weekend available</option>
+                  ) : (
+                    groupedCatalog.map((group) => (
+                      <option key={group.key} value={group.key}>
+                        {group.roundLabel} - {group.title}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </label>
             </div>
 
-            <label className="sessions-select-field">
-              <span>Season</span>
-              <select
-                value={season}
-                onChange={(event) => {
-                  setSeason(Number(event.target.value));
-                  setSelectedWeekendKey(null);
-                  setSelectedSessionKey(null);
-                }}
-              >
-                {SEASONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="sessions-select-field">
-              <span>Race weekend</span>
-              <select
-                value={activeWeekendKey ?? ""}
-                onChange={(event) => {
-                  setSelectedWeekendKey(event.target.value || null);
-                  setSelectedSessionKey(null);
-                }}
-                disabled={catalogQuery.isLoading || groupedCatalog.length === 0}
-              >
-                {groupedCatalog.length === 0 ? (
-                  <option value="">No weekend available</option>
-                ) : (
-                  groupedCatalog.map((group) => (
-                    <option key={group.key} value={group.key}>
-                      {group.roundLabel} - {group.title}
-                    </option>
-                  ))
-                )}
-              </select>
-            </label>
+            <p className="sessions-source-note">OpenF1 historical data · 2023 onwards · No external account needed</p>
 
             <div className="sessions-catalog">
               {catalogQuery.isLoading ? (
                 <div className="sessions-empty-state">Loading session catalog...</div>
               ) : catalogQuery.isError ? (
                 <div className="sessions-empty-state sessions-empty-state--error">
-                  The FastF1 session catalog could not be loaded.
+                  The OpenF1 session catalog could not be loaded.
                 </div>
               ) : !selectedGroup ? (
                 <div className="sessions-empty-state">No sessions were returned for this season.</div>
@@ -211,11 +219,8 @@ export function SessionsExplorerPage() {
                             setSelectedSessionKey(item.source_session_key);
                           }}
                         >
-                          <div>
-                            <strong>{item.session_name}</strong>
-                            <span>{formatDateTime(item.scheduled_start_utc)}</span>
-                          </div>
-                          <small>{item.session_type ?? "Session"}</small>
+                          <strong>{item.session_name}</strong>
+                          <span>{formatDateTime(item.scheduled_start_utc)}</span>
                         </button>
                       );
                     })}
@@ -227,12 +232,11 @@ export function SessionsExplorerPage() {
 
           <aside className="sessions-explorer__right">
             <div className="sessions-section-heading">
-              <span className="ui-pill ui-pill--ready">Workspace</span>
-              <h2>{selectedSession ? selectedSession.session_name : "Pick a session"}</h2>
+              <h2>{selectedSession?.session_name ?? "Pick a session"}</h2>
               <p>
                 {selectedSession
-                  ? formatEventSessionLabel(selectedSession.event_name, selectedSession.session_name)
-                  : "Choose a session from the catalog to prepare the workspace."}
+                  ? `${selectedSession.event_name} · ${formatDateTime(selectedSession.scheduled_start_utc)}`
+                  : "Choose a session to continue."}
               </p>
             </div>
 
@@ -241,7 +245,7 @@ export function SessionsExplorerPage() {
                 <div className="sessions-subheading">
                   <h3>Current workspace</h3>
                   <p>
-                    This session is already imported. Jump back into the exact lookback or simulation workspace you last opened.
+                    Resume the Lookback or Replay workspace you last opened.
                   </p>
                 </div>
 
@@ -274,55 +278,15 @@ export function SessionsExplorerPage() {
 
             {selectedSession ? (
               <>
-                <div className="sessions-summary-card">
-                  <div>
-                    <span className="sessions-summary-card__label">Event</span>
-                    <strong>{selectedSession.event_name}</strong>
-                  </div>
-                  <div>
-                    <span className="sessions-summary-card__label">Scheduled</span>
-                    <strong>{formatDateTime(selectedSession.scheduled_start_utc)}</strong>
-                  </div>
-                  <div>
-                    <span className="sessions-summary-card__label">Location</span>
-                    <strong>{selectedSession.location ?? selectedSession.country ?? "TBD"}</strong>
-                  </div>
-                </div>
-
-                <div className="sessions-mode-grid">
-                  <button
-                    type="button"
-                    className={`sessions-mode-card${mode === "lookback" ? " is-active" : ""}`}
-                    aria-pressed={mode === "lookback"}
-                    onClick={() => {
-                      setMode("lookback");
-                    }}
-                  >
-                    <span className="ui-pill ui-pill--focus">Lookback</span>
-                    <h3>Driver telemetry</h3>
-                    <p>Load into the workspace, then choose any number of drivers and layouts with full-session or lap-specific widgets.</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`sessions-mode-card${mode === "simulation" ? " is-active" : ""}`}
-                    aria-pressed={mode === "simulation"}
-                    onClick={() => {
-                      setMode("simulation");
-                    }}
-                  >
-                    <span className="ui-pill ui-pill--live">Simulation</span>
-                    <h3>Replay command</h3>
-                    <p>Prepare live-race layouts only, with replay time, speed controls, and no future-looking widgets.</p>
-                  </button>
-                </div>
+                <SessionModeToggle value={mode} onChange={setMode} />
 
                 <div className="sessions-actions">
+                  {selectedSession.available_for_import === false && <p role="status" className="sessions-source-note">{selectedSession.unavailable_reason ?? "This session is not available as history yet."}</p>}
                   <button
                     type="button"
                     className="button-primary"
                     onClick={handlePrepare}
-                    disabled={isImportActive}
+                    disabled={isImportActive || selectedSession.available_for_import === false}
                   >
                     {isImportActive ? importProgress.buttonLabel : "Load session"}
                   </button>
@@ -342,8 +306,8 @@ export function SessionsExplorerPage() {
                 ) : null}
 
                 {coreImportMutation.isError ? (
-                  <div className="sessions-empty-state sessions-empty-state--error">
-                    Core import failed. Check backend connectivity and FastF1 availability, then try again.
+                  <div className="sessions-empty-state sessions-empty-state--error" role="alert">
+                    <p>{importFeedback.message}</p>
                   </div>
                 ) : null}
               </>
@@ -372,7 +336,7 @@ function groupCatalog(items: SessionCatalogItemDto[]): CatalogGroup[] {
 
     groups.set(item.source_event_key, {
       key: item.source_event_key,
-      roundLabel: item.round_number != null ? `R${String(item.round_number).padStart(2, "0")}` : "Test",
+      roundLabel: item.round_number != null ? `R${String(item.round_number).padStart(2, "0")}` : item.is_testing ? "Test" : "Event",
       title: item.event_name,
       subtitle: item.location ?? item.country ?? item.official_event_name ?? "Weekend",
       sessions: [item],

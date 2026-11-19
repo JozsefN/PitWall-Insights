@@ -14,6 +14,9 @@ class TelemetrySelection:
     """Internal extraction contract; raw source data stays reusable across jobs."""
     driver_numbers: frozenset[str]
     kinds: frozenset[str]
+    clock_origin_utc: datetime | None = None
+    # Legacy imports did not persist t0. Match source lap clocks before mixing feeds.
+    lap_clock_anchors: tuple[tuple[str, int, int], ...] = ()
 
 
 class IngestionSourceStatus(BaseModel):
@@ -26,6 +29,8 @@ class IngestionSourceStatus(BaseModel):
 
 
 class SourceSessionMetadata(BaseModel):
+    data_provider: str | None = None
+    owner_user_id: str | None = None
     meeting_key: str | None = None
     session_key: str | None = None
     api_path: str | None = None

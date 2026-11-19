@@ -32,7 +32,7 @@ def plan_strategies(data, request, context, result, pit):
         request.mode == "race"
         and session_phase is not None
         and session_phase.lower()
-        in ("finished", "finalised", "inactive", "aborted", "ends")
+        in ("finished", "finalised", "inactive", "aborted", "ends", "suspended")
     ):
         return (
             [],

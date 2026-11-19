@@ -71,6 +71,7 @@ export function TelemetryLineChartWidget({
 
   const metric = widgetOptions.metric ?? "speed_kph";
   const series: LineSeries[] = workspace.selectedEntries.map((entry, index) => ({
+    entry,
     key: entry.id,
     label: getEntryDisplayName(entry),
     color: getEntryAccent(entry, index),
@@ -89,7 +90,7 @@ export function TelemetryLineChartWidget({
       title={widgetOptions.title ?? "Telemetry"}
       description={`${widgetOptions.metricLabel ?? "Telemetry"} trace${widgetOptions.unit ? ` - ${widgetOptions.unit}` : ""}`}
     >
-      <SimpleLineChart series={series} emptyMessage="Telemetry samples were not available for the selected drivers." />
+      <SimpleLineChart series={series} alignByLap={telemetry.scope === "lap"} emptyMessage="Telemetry samples were not available for the selected drivers." />
     </WidgetCard>
   );
 }

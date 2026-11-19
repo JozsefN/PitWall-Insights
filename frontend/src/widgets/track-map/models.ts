@@ -1,4 +1,9 @@
 import type { SessionEntryDto } from "../../data/contracts/sessions.contracts";
+import type { IllustratedTrackEdges } from "./utils/track-envelope";
+import type {
+  ReviewData,
+  WeatherPoint,
+} from "../../features/session-review/contracts";
 
 export type TrackMapPoint = {
   x: number;
@@ -17,31 +22,21 @@ export type TrackMapTrace = {
   shortLabel: string;
   color: string;
   points: TrackMapPoint[];
-  referencePoints: TrackMapPoint[];
   previousLapPoints: TrackMapPoint[];
   currentPoint: TrackMapPoint | null;
   headingDeg: number;
   lapNumber: number | null;
-  previousLapNumber: number | null;
   progressPct: number | null;
   detail: string;
-  sampleCount: number;
-};
-
-export type TrackMapTurnMarker = {
-  key: string;
-  label: string;
-  x: number;
-  y: number;
-  angleDeg: number | null;
-  distanceM: number | null;
 };
 
 export type TrackMapData = {
   traces: TrackMapTrace[];
   outlinePoints: TrackMapPoint[];
-  turnMarkers: TrackMapTurnMarker[];
   detail: string;
+  fallbackBounds?: TrackMapBounds;
+  illustratedEdges?: IllustratedTrackEdges;
+  drivers?: { key: string; label: string; entry: SessionEntryDto }[];
 };
 
 export type TrackMapBounds = {
@@ -55,7 +50,30 @@ export type TrackMapBounds = {
 
 export type TrackMapMode = "lookback" | "replay";
 
+export const trackMapLayers = {
+  track: "Track",
+  weather: "Wind & rain",
+  flags: "Flags",
+  surface: "Surface & recovery",
+} as const;
+export type TrackMapLayer = keyof typeof trackMapLayers;
+
+export function resolveTrackMapLayer(value: unknown): TrackMapLayer {
+  return typeof value === "string" && Object.hasOwn(trackMapLayers, value)
+    ? (value as TrackMapLayer)
+    : "track";
+}
+
+export type TrackMapOverlay = {
+  layer: TrackMapLayer;
+  weather?: WeatherPoint | null;
+  flags?: ReviewData["groups"]["flags"];
+  surface?: ReviewData["groups"]["surface"];
+};
+
 export type TrackMapWidgetOptions = {
   title?: string;
   scope?: "session" | "lap";
+  mapLayer?: TrackMapLayer;
+  contextId?: string;
 };

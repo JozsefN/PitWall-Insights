@@ -118,6 +118,36 @@ class LayoutApiTests(unittest.TestCase):
             child.update(widgetId=widget_id, placement=box)
             self.assertEqual(request("POST", "/api/layouts", bad, token)[0], 400)
 
+    def test_layout_mode_conversion_and_session_restrictions(self):
+        _, token = self.accounts[0]
+        body = payload()
+        config = body["config"]
+        child = config["sections"][0]["layout"]["children"][0]
+        child["widgetId"] = "weather-history"
+        status, layout = request("POST", "/api/layouts", body, token)
+        self.assertEqual(status, 201, layout)
+        route = f"/api/layouts/{layout['id']}"
+        try:
+            config.update(enabledAudiences=["session-lookback", "live-race"], sessionKind="practice")
+            status, updated = request("PUT", route, {"config": config}, token)
+            self.assertEqual(status, 200, updated)
+            self.assertEqual(request("GET", route, token=token)[1]["config"], config)
+
+            config["enabledAudiences"] = ["live-race"]
+            child["widgetId"] = "wake-exposure"
+            status, error = request("PUT", route, {"audience": "live-race", "config": config}, token)
+            self.assertEqual(status, 400, error)
+            self.assertIn("Grand Prix", error["detail"])
+
+            config["sessionKind"] = "qualifying"
+            child["widgetId"] = "lookback-driver-cards"
+            status, error = request("PUT", route, {"audience": "live-race", "config": config}, token)
+            self.assertEqual(status, 400, error)
+            self.assertIn("cannot be used in Replay", error["detail"])
+            self.assertEqual(request("GET", route, token=token)[1]["config"], updated["config"])
+        finally:
+            self.assertEqual(request("DELETE", route, token=token)[0], 204)
+
 
 class ValidationTests(unittest.TestCase):
     def test_shared_widget_contract_defaults_and_constraints(self):

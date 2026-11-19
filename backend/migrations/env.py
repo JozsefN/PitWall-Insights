@@ -14,6 +14,8 @@ from modules.telemetry_materialization.infrastructure.db_models import (  # noqa
     TelemetryMaterializationJobRecord,
 )
 from modules.identity_auth.infrastructure.db_models import UserRecord
+from modules.account_profile.infrastructure.db_models import AccountProfileRecord  # noqa: F401
+from modules.provider_connections.infrastructure.db_models import F1ConnectionRecord  # noqa: F401
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord  # noqa: F401
 from modules.feature_metrics.infrastructure.db_models import SessionAnalysisCacheRecord  # noqa: F401
 

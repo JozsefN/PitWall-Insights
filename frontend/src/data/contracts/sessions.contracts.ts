@@ -1,6 +1,25 @@
 export type SessionImportProfile = "core" | "full";
 export type SessionTelemetryStatus = "not_loaded" | "loaded" | "partial" | "unavailable";
 
+export type SessionPitVisitDto = {
+  entry_id: string;
+  lap_number: number;
+  start_ms: number;
+  end_ms: number;
+  stopped_from_ms: number | null;
+  stopped_until_ms: number | null;
+  reported_stationary_s: number | null;
+};
+
+export type SessionPitMapDto = {
+  reported_visits: number;
+  lane_source?: "pit_reports" | "position_traces" | null;
+  reference_entry_ids?: string[];
+  lane: [number, number][];
+  boxes: { team_id: string; point: [number, number]; known_at_ms: number }[];
+  visits: SessionPitVisitDto[];
+};
+
 export interface SessionCatalogItemDto {
   source: string;
   source_event_key: string;
@@ -11,11 +30,14 @@ export interface SessionCatalogItemDto {
   official_event_name: string | null;
   country: string | null;
   location: string | null;
+  circuit_key?: string | null;
   event_format: string | null;
   is_testing: boolean;
   session_name: string;
   session_type: string | null;
   scheduled_start_utc: string | null;
+  available_for_import?: boolean;
+  unavailable_reason?: string | null;
 }
 
 export interface SessionImportRequestDto {
@@ -25,18 +47,22 @@ export interface SessionImportRequestDto {
   source_session_key?: string;
   import_profile?: SessionImportProfile;
   force_refresh?: boolean;
+  data_provider?: "openf1";
 }
 
 export interface SessionDto {
   id: string;
   source: string;
   source_session_key: string;
+  data_provider?: string | null;
+  owner_user_id?: string | null;
   season_year: number;
   round_number: number | null;
   event_name: string;
   official_event_name: string | null;
   country: string | null;
   location: string | null;
+  circuit_key?: string | null;
   session_name: string;
   session_type: string | null;
   import_profile: SessionImportProfile;
@@ -72,6 +98,7 @@ export interface SessionEntryDto {
   driver_number: string | null;
   driver_abbreviation: string | null;
   driver_name: string | null;
+  headshot_url?: string | null;
   team_id: string | null;
   team_name: string | null;
   team_color: string | null;
@@ -124,15 +151,6 @@ export interface SessionTrackStatusEventDto {
   source_time_utc: string | null;
   status: string;
   message: string | null;
-}
-
-export interface SessionCircuitCornerDto {
-  number: number;
-  letter: string | null;
-  x: number;
-  y: number;
-  angle_deg: number | null;
-  distance_m: number | null;
 }
 
 export interface CarTelemetrySampleDto {

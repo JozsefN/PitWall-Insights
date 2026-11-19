@@ -24,7 +24,7 @@ class SessionStateService:
         records = self.provider.entries(session_id, entry_ids)
         ids = [row.id for row in records]
         modern = (
-            session.source == "fastf1"
+            session.source in {"fastf1", "openf1"}
             and self.db.scalar(
                 select(WeekendRecord.season_year).where(
                     WeekendRecord.id == session.weekend_id

@@ -30,7 +30,7 @@
   gap: 10px;
   border: 1px solid var(--color-border-subtle);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.025);
+  background: color-mix(in srgb, var(--color-text-primary) 2.5%, transparent);
   padding: 14px;
 }
 
@@ -39,9 +39,9 @@
   min-width: 140px;
   flex-direction: column;
   gap: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 5%, transparent);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--color-text-primary) 2%, transparent);
   padding: 12px 14px;
 }
 
@@ -196,7 +196,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid color-mix(in srgb, var(--color-text-primary) 6%, transparent);
   padding-top: 10px;
 }
 
@@ -225,7 +225,7 @@
   align-items: center;
   border: 1px solid var(--color-border-subtle);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--color-text-primary) 3%, transparent);
   color: var(--color-text-secondary);
   font-size: 12px;
   padding: 6px 10px;
@@ -268,12 +268,12 @@
 .system-health-badge--down {
   border-color: rgba(220, 38, 38, 0.38);
   background: rgba(220, 38, 38, 0.12);
-  color: #fecaca;
+  color: var(--color-danger);
 }
 
 .system-health-badge--unknown {
   border-color: var(--color-border-subtle);
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--color-text-primary) 3%, transparent);
   color: var(--color-text-secondary);
 }
 

@@ -1,0 +1,136 @@
+/* All native filters, including browser-owned option menus, use the active theme. */
+:root {
+  --color-select-bg: var(--color-control);
+  --color-select-menu: var(--color-bg-secondary);
+  --color-select-text: var(--color-text-primary);
+  --color-select-border: var(--color-border-strong);
+  --color-select-hover: var(--color-selection-hover);
+  --color-select-selected: var(--color-selection);
+}
+
+select {
+  min-height: 32px;
+  max-width: 100%;
+  border: 1px solid var(--color-select-border);
+  border-radius: 7px;
+  padding: 5px 8px;
+  background-color: var(--color-select-bg);
+  color: var(--color-select-text);
+  cursor: pointer;
+}
+
+select option,
+select optgroup {
+  background-color: var(--color-select-menu);
+  color: var(--color-select-text);
+}
+
+select option:checked {
+  background-color: var(--color-select-selected);
+  color: var(--color-select-text);
+}
+
+select:disabled,
+select option:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+select:hover:not(:disabled),
+.driver-select:hover:not(:disabled) {
+  border-color: var(--color-focus);
+}
+
+.driver-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--color-select-border);
+  border-radius: 7px;
+  background: var(--color-select-bg);
+  color: var(--color-select-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.driver-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.driver-select__chevron {
+  flex: none;
+  color: var(--color-text-secondary);
+}
+.driver-select__content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.driver-select__number {
+  min-width: 3ch;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.driver-select__badge {
+  display: inline-flex;
+  justify-content: center;
+  flex: none;
+  min-width: 36px;
+  border-radius: 4px;
+  padding: 3px 5px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+}
+.driver-select__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.driver-select__list {
+  position: fixed;
+  z-index: 10000;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--color-border-strong) var(--color-select-menu);
+  border: 1px solid var(--color-select-border);
+  border-radius: 9px;
+  padding: 4px;
+  background: var(--color-select-menu);
+  color: var(--color-select-text);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.3);
+  font: 500 12px/1.4 var(--font-body);
+}
+.driver-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.driver-select__option[aria-selected="true"] {
+  background: var(--color-select-selected);
+}
+.driver-select__option[data-active="true"] {
+  background: var(--color-select-hover);
+  border-color: var(--color-focus);
+}
+.driver-select__check {
+  flex: none;
+  min-width: 1em;
+  color: var(--color-select-text);
+}

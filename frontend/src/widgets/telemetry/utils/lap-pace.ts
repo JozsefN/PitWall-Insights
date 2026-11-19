@@ -26,9 +26,10 @@ export function buildLapTimeAnalysis(
       .filter((lap) => lap.lap_time_ms != null)
       .sort((left, right) => left.lap_number - right.lap_number);
     const outlierLapNumbers = findOutlierLapNumbers(rawLaps);
-    const visiblePoints = rawLaps
+    const rawPoints = rawLaps
       .map((lap) => buildLapPoint(entry, index, lap, outlierLapNumbers, filters))
-      .filter((point): point is LapChartPoint => point != null && point.reasons.length === 0);
+      .filter((point): point is LapChartPoint => point != null);
+    const visiblePoints = rawPoints.filter((point) => point.reasons.length === 0);
     const smoothedPoints = filters.smooth ? smoothLapPoints(visiblePoints) : visiblePoints;
 
     return {
@@ -36,17 +37,19 @@ export function buildLapTimeAnalysis(
       entryId: entry.id,
       label: getEntryDisplayName(entry),
       color: getEntryAccent(entry, index),
+      excludedLapCount: rawPoints.length - visiblePoints.length,
       points: smoothedPoints,
     };
   });
-  const allRawPoints = entries.flatMap((entry, index) => {
-    const outlierLapNumbers = findOutlierLapNumbers(lapsByEntryId[entry.id] ?? []);
-    return (lapsByEntryId[entry.id] ?? [])
-      .map((lap) => buildLapPoint(entry, index, lap, outlierLapNumbers, filters))
-      .filter((point): point is LapChartPoint => point != null);
-  });
+  return {
+    series,
+    statusBands: buildTrackStatusBands({ entries, lapsByEntryId, events: trackStatusEvents }),
+  };
+}
+
+export function summarizeLapPace(series: LapChartSeries[]) {
   const visiblePoints = series.flatMap((item) => item.points);
-  const hiddenLapCount = allRawPoints.filter((point) => point.reasons.length > 0).length;
+  const hiddenLapCount = series.reduce((total, item) => total + item.excludedLapCount, 0);
   const fastestPoint = visiblePoints.reduce<LapChartPoint | null>(
     (current, point) => (current == null || point.lapTimeMs < current.lapTimeMs ? point : current),
     null,
@@ -61,12 +64,6 @@ export function buildLapTimeAnalysis(
       .sort((left, right) => left.medianMs - right.medianMs)[0] ?? null;
 
   return {
-    series,
-    statusBands: buildTrackStatusBands({
-      entries,
-      lapsByEntryId,
-      events: trackStatusEvents,
-    }),
     visibleLapCount: visiblePoints.length,
     hiddenLapCount,
     fastestPoint,

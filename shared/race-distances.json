@@ -1,0 +1,21 @@
+{
+  "verifiedSeasons": [2023, 2024, 2025, 2026],
+  "sources": {
+    "officialCircuitPages": "https://www.formula1.com/en/racing/2025",
+    "2026CircuitPages": "https://www.formula1.com/en/racing/2026",
+    "monaco2025": "https://api.fia.com/news/first-world-motor-sport-council-2025-heralds-start-vision-2030-and-announces-strategic-overhaul",
+    "qatar2023": "https://www.fia.com/news/fia-statement-treatment-tyres-2023-fia-formula-1-qatar-grand-prix-update",
+    "qatar2025": "https://www.fia.com/system/files/decision-document/2025_qatar_grand_prix_-_event_notes_-_pirelli_preview_v2.pdf"
+  },
+  "distances": {
+    "2": 52, "4": 70, "6": 63, "7": 44, "9": 56, "10": 58, "12": 56,
+    "14": 71, "15": 66, "19": 71, "22": 78, "23": 70, "39": 53, "46": 53,
+    "49": 56, "55": 72, "61": 62, "63": 57, "65": 71, "70": 58, "144": 51,
+    "149": 50, "150": 57, "151": 57, "152": 50, "153": 57
+  },
+  "raceRules": {
+    "2023:150": {"maxTyreAge": 18},
+    "2025:150": {"maxTyreAge": 25},
+    "2025:22": {"minSets": 3}
+  }
+}

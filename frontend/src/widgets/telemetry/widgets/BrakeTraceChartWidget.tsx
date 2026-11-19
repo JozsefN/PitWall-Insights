@@ -69,6 +69,7 @@ export function BrakeTraceChartWidget({
   }
 
   const series: LineSeries[] = workspace.selectedEntries.map((entry, index) => ({
+    entry,
     key: entry.id,
     label: getEntryDisplayName(entry),
     color: getEntryAccent(entry, index),
@@ -80,7 +81,7 @@ export function BrakeTraceChartWidget({
       title={widgetOptions.title ?? "Brake Trace"}
       description="Binary brake-on trace across the selected lap."
     >
-      <SimpleLineChart series={series} emptyMessage="Brake telemetry was not available for the selected drivers." />
+      <SimpleLineChart series={series} alignByLap={telemetry.scope === "lap"} valueRange={[0, 100]} emptyMessage="Brake telemetry was not available for the selected drivers." />
     </WidgetCard>
   );
 }

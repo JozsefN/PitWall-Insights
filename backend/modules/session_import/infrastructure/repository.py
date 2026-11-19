@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from modules.session_domain.domain.models import SessionImportRequest
 from modules.session_import.domain.models import ImportJobRead
@@ -44,6 +45,7 @@ class ImportJobRepository:
     def list_jobs(self, *, limit: int = 50) -> list[ImportJobRead]:
         records = (
             self.db.query(ImportJobRecord)
+            .filter(or_(ImportJobRecord.created_by_user_id.is_(None), ImportJobRecord.created_by_user_id == self.db.info.get("actor_user_id")))
             .order_by(ImportJobRecord.created_at.desc())
             .limit(limit)
             .all()

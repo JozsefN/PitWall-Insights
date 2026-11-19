@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import json
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -57,8 +58,8 @@ class _Participant:
     q3_time_ms: int | None = None
 
 
-class FastF1SessionSnapshotBuilder:
-    source_name = "fastf1"
+class SessionSnapshotBuilder:
+    source_name = "openf1"
 
     def build(self, bundle: SourceSessionBundle, ttl_hours: int) -> SessionSnapshot:
         now = datetime.now(timezone.utc)
@@ -107,6 +108,10 @@ class FastF1SessionSnapshotBuilder:
             session=SessionPayload(
                 source=bundle.source,
                 source_session_key=catalog.source_session_key,
+                data_provider=metadata.data_provider,
+                owner_user_id=metadata.owner_user_id,
+                session_time_origin_utc=metadata.session_time_origin_utc,
+                source_details=json.loads(json.dumps(metadata.session_info, default=str)),
                 source_event_key=catalog.source_event_key,
                 session_name=catalog.session_name,
                 session_type=catalog.session_type,
@@ -186,6 +191,13 @@ class FastF1SessionSnapshotBuilder:
                 self._ensure_participant(bundle, participants_by_number, {"DriverNumber": driver_number})
 
         participants = sorted(participants_by_number.values(), key=lambda item: item.car_number)
+        if bundle.source == "openf1":
+            for participant in participants:
+                abbreviation = participant.abbreviation or "unknown"
+                participant.source_driver_key = (
+                    f"openf1:driver:{bundle.catalog_item.season_year}:"
+                    f"{participant.car_number}:{abbreviation}"
+                )
         return participants, participants_by_number, participants_by_abbreviation
 
     @staticmethod
@@ -378,7 +390,7 @@ class FastF1SessionSnapshotBuilder:
                     is_deleted=bool(row.get("Deleted", False)),
                     deleted_reason=self._as_text(row.get("DeletedReason")),
                     is_generated=bool(row.get("FastF1Generated", False)),
-                    is_accurate=False if row.get("IsAccurate") is False else True,
+                    is_accurate=self._as_bool(row.get("IsAccurate")) is True,
                 )
             )
 
@@ -705,21 +717,21 @@ class FastF1SessionSnapshotBuilder:
     @staticmethod
     def _telemetry_sort_key(row: dict[str, Any]) -> tuple[int, datetime | None]:
         return (
-            FastF1SessionSnapshotBuilder._extract_session_time_ms(row) or -1,
-            FastF1SessionSnapshotBuilder._as_datetime(row.get("Date")),
+            SessionSnapshotBuilder._extract_session_time_ms(row) or -1,
+            SessionSnapshotBuilder._as_datetime(row.get("Date")),
         )
 
     @staticmethod
     def _extract_session_time_ms(row: dict[str, Any]) -> int | None:
         for key in ("SessionTime", "Time"):
-            value = FastF1SessionSnapshotBuilder._as_duration_ms(row.get(key))
+            value = SessionSnapshotBuilder._as_duration_ms(row.get(key))
             if value is not None:
                 return value
         return None
 
     @staticmethod
     def _coerce_driver_number(row: dict[str, Any]) -> str | None:
-        return FastF1SessionSnapshotBuilder._as_text(row.get("DriverNumber") or row.get("driver_number"))
+        return SessionSnapshotBuilder._as_text(row.get("DriverNumber") or row.get("driver_number"))
 
     @staticmethod
     def _build_driver_key(driver_number: str) -> str:

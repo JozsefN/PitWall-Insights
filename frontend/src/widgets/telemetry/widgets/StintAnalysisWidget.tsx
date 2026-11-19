@@ -1,16 +1,22 @@
 import { useMemo, useState } from "react";
 import { useSessionTrackStatusEventsQuery } from "../../../data/queries/sessions.queries";
 import { useWorkspaceEntryLapsResource } from "../../../features/sessions/session-data.hooks";
-import { useSessionWorkspace } from "../../../features/sessions/SessionWorkspaceContext";
-import { formatLapTime } from "../../../features/sessions/session-utils";
+import {
+  useReplayTime,
+  useSessionWorkspace,
+} from "../../../features/sessions/SessionWorkspaceContext";
+import {
+  formatLapTime,
+  getEntryDisplayName,
+} from "../../../features/sessions/session-utils";
 import { WidgetCard } from "../../shared/WidgetCard";
-import { useWidgetSize } from "../../shared/widget-size";
 import {
   WidgetEmpty,
   WidgetError,
   WidgetLoading,
 } from "../../shared/WidgetState";
 import { StintAnalysisChart } from "../components/StintAnalysisChart";
+import { ChartDriverPicker } from "../components/ChartDriverPicker";
 import type {
   StintFilterState,
   StintSeries,
@@ -21,7 +27,7 @@ import {
   formatDegradation,
   getCompoundColor,
   getCompoundLabel,
-  getCompoundShortLabel,
+  summarizeStints,
 } from "../utils/stint-analysis";
 
 export function StintAnalysisWidget({
@@ -30,14 +36,15 @@ export function StintAnalysisWidget({
   options?: Record<string, unknown>;
 }) {
   const widgetOptions = (options ?? {}) as TelemetryWidgetOptions;
-  const { short } = useWidgetSize();
   const workspace = useSessionWorkspace();
+  const replayTimeMs = useReplayTime("review");
+  const [driverFocus, setDriverFocus] = useState("");
+  const [trendPreference, setTrendPreference] = useState<boolean>();
   const [filters, setFilters] = useState<StintFilterState>({
     cleanOnly: true,
     hidePitLaps: true,
     hideNeutralizedLaps: true,
     hideOutliers: true,
-    showTrend: true,
     showTrackStatus: true,
   });
   const [hiddenStintKeys, setHiddenStintKeys] = useState<Set<string>>(
@@ -53,9 +60,7 @@ export function StintAnalysisWidget({
     (workspace.session.track_status_event_count ?? 0) > 0,
   );
   const currentTimeLimitMs =
-    workspace.mode === "simulation"
-      ? workspace.replay.currentTimeMs
-      : undefined;
+    workspace.mode === "simulation" ? replayTimeMs : undefined;
   const analysis = useMemo(
     () =>
       buildStintAnalysis(
@@ -73,9 +78,21 @@ export function StintAnalysisWidget({
       workspace.selectedEntries,
     ],
   );
-  const visibleSeries = analysis.series.filter(
+  const focusedId = workspace.selectedEntries.some(
+    (entry) => entry.id === driverFocus,
+  )
+    ? driverFocus
+    : "";
+  const chartSeries = focusedId
+    ? analysis.series.filter((stint) => stint.entryId === focusedId)
+    : analysis.series;
+  const showTrend =
+    trendPreference ??
+    (Boolean(focusedId) || workspace.selectedEntries.length <= 6);
+  const visibleSeries = chartSeries.filter(
     (stint) => !hiddenStintKeys.has(stint.key),
   );
+  const summary = summarizeStints(visibleSeries);
 
   if (workspace.selectedEntries.length === 0) {
     return (
@@ -111,6 +128,15 @@ export function StintAnalysisWidget({
       }
       actions={
         <div className="stint-toolbar">
+          <ChartDriverPicker
+            drivers={workspace.selectedEntries.map((entry) => ({
+              entry,
+              id: entry.id,
+              label: getEntryDisplayName(entry),
+            }))}
+            value={focusedId}
+            onChange={setDriverFocus}
+          />
           <StintFilterButton
             active={filters.cleanOnly}
             label="Clean"
@@ -152,14 +178,9 @@ export function StintAnalysisWidget({
             }
           />
           <StintFilterButton
-            active={filters.showTrend}
+            active={showTrend}
             label="Trend"
-            onClick={() =>
-              setFilters((current) => ({
-                ...current,
-                showTrend: !current.showTrend,
-              }))
-            }
+            onClick={() => setTrendPreference(!showTrend)}
           />
           <StintFilterButton
             active={filters.showTrackStatus}
@@ -175,11 +196,14 @@ export function StintAnalysisWidget({
       }
     >
       <StintAnalysisChart
-        series={analysis.series}
+        series={visibleSeries}
         statusBands={filters.showTrackStatus ? analysis.statusBands : []}
-        hiddenStintKeys={hiddenStintKeys}
-        showTrend={filters.showTrend}
-        emptyMessage="No stint laps matched the current drivers and filters."
+        showTrend={showTrend}
+        emptyMessage={
+          chartSeries.length && !visibleSeries.length
+            ? "All stints are hidden. Turn on a stint below to see its laps."
+            : "No completed stint laps matched the displayed drivers and filters."
+        }
       />
 
       <div className="stint-dashboard">
@@ -187,115 +211,115 @@ export function StintAnalysisWidget({
           <StintSummaryItem
             label="Best Median"
             value={
-              analysis.bestMedian
-                ? formatLapTime(analysis.bestMedian.medianLapMs)
+              summary.bestMedian
+                ? formatLapTime(summary.bestMedian.medianLapMs)
                 : "--:--.---"
             }
             detail={
-              analysis.bestMedian
-                ? formatStintName(analysis.bestMedian)
+              summary.bestMedian
+                ? formatStintName(summary.bestMedian)
                 : "No visible stint"
             }
           />
           <StintSummaryItem
             label="Longest"
             value={
-              analysis.longestStint
-                ? `${analysis.longestStint.lapFrom}-${analysis.longestStint.lapTo}`
+              summary.longestStint
+                ? `${summary.longestStint.lapFrom}-${summary.longestStint.lapTo}`
                 : "N/A"
             }
             detail={
-              analysis.longestStint
-                ? formatStintName(analysis.longestStint)
+              summary.longestStint
+                ? formatStintName(summary.longestStint)
                 : "No visible stint"
             }
           />
           <StintSummaryItem
             label="Degradation"
             value={
-              analysis.highestDegradation
+              summary.highestDegradation
                 ? formatDegradation(
-                    analysis.highestDegradation.degradationMsPerLap,
+                    summary.highestDegradation.degradationMsPerLap,
                   )
                 : "N/A"
             }
             detail={
-              analysis.highestDegradation
-                ? formatStintName(analysis.highestDegradation)
+              summary.highestDegradation
+                ? formatStintName(summary.highestDegradation)
                 : "No positive slope"
             }
           />
           <StintSummaryItem
             label="Visible Laps"
-            value={analysis.visibleLapCount}
-            detail={`${analysis.hiddenLapCount} hidden by filters`}
+            value={summary.visibleLapCount}
+            detail={`${summary.hiddenLapCount} excluded by lap filters`}
           />
         </div>
 
-        <details className="stint-details" open={!short}>
-          <summary>Driver and stint visibility</summary>
-          <div
-            className="stint-control-grid"
-            aria-label="Stint visibility controls"
-          >
-            {groupSeriesByEntry(analysis.series).map(([entryId, stints]) => (
-              <div key={entryId} className="stint-driver-panel">
-                <div className="stint-driver-panel__header">
-                  <span>
-                    <i style={{ backgroundColor: stints[0]?.driverColor }} />
-                    {stints[0]?.driverLabel ?? "Driver"}
-                  </span>
-                  <small>
-                    {
-                      stints.filter((stint) => !hiddenStintKeys.has(stint.key))
-                        .length
-                    }
-                    /{stints.length} on
-                  </small>
+        {chartSeries.length ? (
+          <details className="stint-details">
+            <summary>Driver and stint visibility</summary>
+            <div
+              className="stint-control-grid"
+              aria-label="Stint visibility controls"
+            >
+              {groupSeriesByEntry(chartSeries).map(([entryId, stints]) => (
+                <div key={entryId} className="stint-driver-panel">
+                  <div className="stint-driver-panel__header">
+                    <span>
+                      <i style={{ backgroundColor: stints[0]?.driverColor }} />
+                      {stints[0]?.driverLabel ?? "Driver"}
+                    </span>
+                    <small>
+                      {
+                        stints.filter(
+                          (stint) => !hiddenStintKeys.has(stint.key),
+                        ).length
+                      }
+                      /{stints.length} on
+                    </small>
+                  </div>
+                  <div className="stint-driver-panel__rows">
+                    {stints.map((stint) => {
+                      const active = !hiddenStintKeys.has(stint.key);
+                      return (
+                        <button
+                          key={stint.key}
+                          type="button"
+                          aria-pressed={active}
+                          className={`stint-toggle-row${active ? " is-active" : ""}`}
+                          onClick={() =>
+                            toggleStint(
+                              hiddenStintKeys,
+                              setHiddenStintKeys,
+                              stint.key,
+                            )
+                          }
+                        >
+                          <span className="stint-toggle-row__compound">
+                            <i
+                              style={{
+                                backgroundColor: getCompoundColor(
+                                  stint.compound,
+                                ),
+                              }}
+                            />
+                            {`S${stint.stintNumber} · ${getCompoundLabel(stint.compound)}`}
+                          </span>
+                          <span className="stint-toggle-row__meta">
+                            {`L${stint.lapFrom}-${stint.lapTo}`}
+                          </span>
+                          <span className="stint-toggle-row__switch">
+                            {active ? "ON" : "OFF"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="stint-driver-panel__rows">
-                  {stints.map((stint) => {
-                    const active = !hiddenStintKeys.has(stint.key);
-                    return (
-                      <button
-                        key={stint.key}
-                        type="button"
-                        className={`stint-toggle-row${active ? " is-active" : ""}`}
-                        onClick={() =>
-                          toggleStint(
-                            hiddenStintKeys,
-                            setHiddenStintKeys,
-                            stint.key,
-                          )
-                        }
-                      >
-                        <span className="stint-toggle-row__compound">
-                          <i
-                            style={{
-                              backgroundColor: getCompoundColor(stint.compound),
-                            }}
-                          />
-                          {`S${stint.stintNumber} - ${getCompoundLabel(stint.compound)} (${getCompoundShortLabel(stint.compound)})`}
-                        </span>
-                        <span className="stint-toggle-row__meta">
-                          {`L${stint.lapFrom}-${stint.lapTo}`}
-                        </span>
-                        <span className="stint-toggle-row__switch">
-                          {active ? "ON" : "OFF"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </details>
-        {visibleSeries.length === 0 ? (
-          <p className="stint-empty-note">
-            All stints are hidden. Turn at least one stint back on to see the
-            chart.
-          </p>
+              ))}
+            </div>
+          </details>
         ) : null}
       </div>
     </WidgetCard>

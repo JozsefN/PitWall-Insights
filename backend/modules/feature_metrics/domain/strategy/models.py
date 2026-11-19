@@ -53,13 +53,18 @@ class StrategyValue(StrictModel):
 
 class Zone(StrictModel):
     zone_id: str = Field(min_length=1, max_length=80)
-    kind: Literal["racing_surface", "pit_lane", "recovery"]
+    kind: Literal[
+        "racing_surface", "pit_lane", "recovery", "gravel", "runoff", "marshal_sector"
+    ]
+    sector_number: int | None = Field(default=None, ge=1, le=200)
     polygon_m: list[tuple[float, float]] = Field(min_length=3, max_length=2000)
 
     @model_validator(mode="after")
     def polygon(self):
         from .spatial import polygon_area
 
+        if (self.kind == "marshal_sector") != (self.sector_number is not None):
+            raise ValueError("Only marshal sectors require a sector number")
         if abs(polygon_area(self.polygon_m)) < 1:
             raise ValueError(
                 "Zone polygon must have nonzero area of at least one square metre"
@@ -71,11 +76,13 @@ class TrackProfile(StrictModel):
     circuit_key: str = Field(min_length=1, max_length=120)
     coordinate_frame: str = Field(min_length=1, max_length=120)
     source_uri: str = Field(min_length=1, max_length=500)
+    source_license: str | None = Field(default=None, min_length=1, max_length=180)
     valid_season_from: int = Field(ge=2020, le=2100)
     valid_season_to: int = Field(ge=2020, le=2100)
     north_angle_xy_deg: float | None = Field(default=None, ge=-360, le=360)
     alignment_error_deg: float | None = Field(default=None, ge=0, le=180)
     position_error_m: float = Field(default=15, ge=5, le=200)
+    circuit_length_m: float | None = Field(default=None, gt=0, le=30000)
     zones: list[Zone] = Field(default_factory=list, max_length=100)
     recovery_points_m: list[tuple[float, float]] = Field(
         default_factory=list, max_length=300
@@ -162,6 +169,7 @@ class IncidentHistory(StrictModel):
     stopped: bool
     surface: Literal["on_track", "off_track", "unknown"]
     recovery_access: Literal["near", "far", "unknown"]
+    terrain: Literal["gravel", "runoff", "recovery"] | None = None
     elapsed_stop_bin: Literal["4_10", "10_30", "30_plus"] = "4_10"
     horizon_s: int = Field(default=120, ge=30, le=600)
     outcome: Literal["sc", "vsc", "red", "none"]

@@ -298,7 +298,7 @@ export function SystemHealthPage() {
             <h1 className="display-font system-health-hero__title">System Health</h1>
             <p className="system-health-hero__lead">
               This page follows the current import architecture: clients create import jobs,
-              the worker loads FastF1 through profile-aware ingestion, normalization builds
+              the worker loads OpenF1 history through ingestion, normalization builds
               the canonical snapshot, and PostgreSQL remains the selected-session cache.
             </p>
           </div>
@@ -306,7 +306,7 @@ export function SystemHealthPage() {
           <div className="system-health-flow">
             <div className="system-health-flow__step">
               <span className="system-health-flow__label">Source</span>
-              <strong>FastF1</strong>
+              <strong>OpenF1</strong>
             </div>
             <div className="system-health-flow__arrow">-&gt;</div>
             <div className="system-health-flow__step">
@@ -512,8 +512,8 @@ export function SystemHealthPage() {
 
             <DomainCard
               eyebrow="Ingestion domain"
-              title="FastF1 source loader"
-              description="Handles source access, season catalog discovery, selected-session loading, and extraction of source-shaped records from FastF1."
+              title="OpenF1 source loader"
+              description="Handles source access, season catalog discovery, selected-session loading, and extraction of source-shaped records from OpenF1."
               status={ingestionStatus}
               facts={[
                 {
@@ -539,7 +539,7 @@ export function SystemHealthPage() {
                       : "Unknown",
                 },
                 {
-                  label: "FastF1 cache size",
+                  label: "OpenF1 cache size",
                   value: formatBytes(ingestionHealth.data?.details?.cache_size_bytes),
                 },
                 {
@@ -550,8 +550,8 @@ export function SystemHealthPage() {
               endpoints={["/api/ingestion/health", "/api/sessions/catalog", "/api/session-import/jobs"]}
               note={
                 ingestionHealth.data?.details?.cache_dir
-                  ? `FastF1 cache directory is configured at ${ingestionHealth.data.details.cache_dir}.`
-                  : "FastF1 cache directory is not available in the current response."
+                  ? `OpenF1 cache directory is configured at ${ingestionHealth.data.details.cache_dir}.`
+                  : "OpenF1 cache directory is not available in the current response."
               }
             />
 
@@ -586,7 +586,7 @@ export function SystemHealthPage() {
                 },
               ]}
               endpoints={["/api/normalization/health", "/api/session-import/jobs"]}
-              note="Normalization now records whether the snapshot came from a core or full import while keeping FastF1-specific source shapes out of storage."
+              note="Normalization now records whether the snapshot came from a core or full import while keeping OpenF1-specific source shapes out of storage."
             />
           </div>
         </section>

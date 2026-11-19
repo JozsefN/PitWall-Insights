@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from modules.identity_auth.infrastructure.signing_key import load_signing_key
 
-SECRET_KEY = "replace-this-in-env"
+SECRET_KEY = load_signing_key()
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

@@ -6,6 +6,7 @@ from modules.session_domain.domain.models import SessionImportRequest
 from modules.session_import.application.service import ImportJobService
 from modules.session_import.domain.models import ImportJobListResponse, ImportJobRead
 from modules.storage.infrastructure.db import get_db
+from modules.identity_auth.domain.models import User
 
 router = APIRouter(
     prefix="/api/session-import/jobs",
@@ -22,9 +23,10 @@ def build_import_job_service(db: Session) -> ImportJobService:
 def create_import_job(
     request: SessionImportRequest,
     db: Session = Depends(get_db),
+    user: User = Depends(require_current_user),
 ) -> ImportJobRead:
     service = build_import_job_service(db)
-    return service.create_job(request)
+    return service.create_job(request, created_by_user_id=user.id)
 
 
 @router.get("", response_model=ImportJobListResponse)

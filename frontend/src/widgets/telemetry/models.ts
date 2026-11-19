@@ -1,4 +1,4 @@
-import type { EntryLapDto, SessionTrackStatusEventDto } from "../../data/contracts/sessions.contracts";
+import type { EntryLapDto, SessionEntryDto, SessionTrackStatusEventDto } from "../../data/contracts/sessions.contracts";
 
 export type TelemetryMetric = "speed_kph" | "throttle_pct";
 
@@ -12,6 +12,7 @@ export type TelemetryWidgetOptions = {
 };
 
 export type LineSeries = {
+  entry: SessionEntryDto;
   key: string;
   label: string;
   color: string;
@@ -55,6 +56,7 @@ export type LapChartSeries = {
   entryId: string;
   label: string;
   color: string;
+  excludedLapCount: number;
   points: LapChartPoint[];
 };
 
@@ -94,10 +96,6 @@ export type PlottedLapPoint = LapChartPoint & {
 export type LapTimeAnalysis = {
   series: LapChartSeries[];
   statusBands: TrackStatusBand[];
-  visibleLapCount: number;
-  hiddenLapCount: number;
-  fastestPoint: LapChartPoint | null;
-  bestMedian: { label: string; medianMs: number } | null;
 };
 
 export type StintFilterState = {
@@ -105,7 +103,6 @@ export type StintFilterState = {
   hidePitLaps: boolean;
   hideNeutralizedLaps: boolean;
   hideOutliers: boolean;
-  showTrend: boolean;
   showTrackStatus: boolean;
 };
 
@@ -149,11 +146,6 @@ export type StintSeries = {
 export type StintAnalysis = {
   series: StintSeries[];
   statusBands: TrackStatusBand[];
-  visibleLapCount: number;
-  hiddenLapCount: number;
-  bestMedian: StintSeries | null;
-  longestStint: StintSeries | null;
-  highestDegradation: StintSeries | null;
 };
 
 export type PlottedStintPoint = StintLapPoint & {

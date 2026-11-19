@@ -9,6 +9,7 @@ import type {
   DashboardAudience,
   GridPlacement,
   LayoutRecord,
+  SessionKind,
   WidgetId,
 } from "../../widgets/registry/widget.types";
 import {
@@ -17,6 +18,7 @@ import {
 } from "../../widgets/registry/widget.catalog";
 import { EditorCanvas } from "./EditorCanvas";
 import {
+  draftCompatibilityError,
   draftError,
   draftFromLayout,
   draftToConfig,
@@ -30,25 +32,35 @@ import type { EditorDraft, EditorWidget } from "./editor-model";
 import { WidgetLibrary } from "./WidgetLibrary";
 import { PanelSettings } from "./PanelSettings";
 import { LayoutPreview } from "./LayoutPreview";
+import { Availability } from "./Availability";
+import {
+  modesText,
+  sessionKindLabel,
+  sessionKinds,
+  supportedSessionKinds,
+  widgetBlockReason,
+} from "./compatibility";
 import "./layout-editor.css";
 
 type Props = {
   layout: LayoutRecord | null;
   audience: DashboardAudience;
+  sessionKind?: SessionKind;
   copy?: boolean;
   onClose: () => void;
-  onSaved: (id: string) => void;
+  onSaved: (id: string, audience: DashboardAudience, kind?: SessionKind) => void;
 };
 
 export function LayoutEditor({
   layout,
   audience,
+  sessionKind,
   copy = false,
   onClose,
   onSaved,
 }: Props) {
   const [initial] = useState(() =>
-    layout ? draftFromLayout(layout, copy) : emptyDraft(audience),
+    layout ? draftFromLayout(layout, copy) : emptyDraft(audience, sessionKind),
   );
   const [history, setHistory] = useState<{
     past: EditorDraft[];
@@ -56,6 +68,15 @@ export function LayoutEditor({
     future: EditorDraft[];
   }>({ past: [], present: initial, future: [] });
   const draft = history.present;
+  const panelCount = draft.sections.reduce((count, group) => count + group.widgets.length, 0);
+  const modes = draft.enabledAudiences ?? [draft.audience];
+  const compatibleKinds = supportedSessionKinds(
+    draft.sections.flatMap((group) =>
+      group.widgets.map((widget) => widget.widgetId),
+    ),
+    draft.sessionKind,
+  );
+  const compatibilityError = draftCompatibilityError(draft);
   const [sectionId, setSectionId] = useState(initial.sections[0].id);
   const section =
     draft.sections.find((item) => item.id === sectionId) ?? draft.sections[0];
@@ -100,11 +121,11 @@ export function LayoutEditor({
   ) {
     const policy = widgetCatalog[id];
     const group = draft.sections.find((item) => item.id === groupId)!;
-    if (
-      !policy?.builderEnabled ||
-      !policy.supportedAudiences.includes(draft.audience)
-    )
+    const restriction = widgetBlockReason(id, modes, compatibleKinds);
+    if (restriction) {
+      setMessage(restriction);
       return;
+    }
     if (policy.accessTier > 0) {
       setMessage("This widget requires a subscription.");
       return;
@@ -169,14 +190,17 @@ export function LayoutEditor({
       description: draft.description.trim() || null,
       audience: draft.audience,
       schemaVersion: 2,
-      config: draftToConfig(draft, layout?.config.id ?? crypto.randomUUID()),
+      config: draftToConfig(
+        draft,
+        copy ? crypto.randomUUID() : (layout?.config.id ?? crypto.randomUUID()),
+      ),
     };
     try {
       const result = editableId
         ? await updateMutation.mutateAsync({ layoutId: editableId, payload })
         : await createMutation.mutateAsync(payload);
       savedRef.current = true;
-      onSaved(`user:${result.id}`);
+      onSaved(`user:${result.id}`, result.audience, result.config.sessionKind);
     } catch (error) {
       const detail = isAxiosError(error) ? error.response?.data?.detail : null;
       setMessage(
@@ -190,17 +214,14 @@ export function LayoutEditor({
     <section className="layout-editor" aria-label="Layout editor">
       <header className="editor-toolbar">
         <div>
-          <p className="builder-eyebrow">
+          <p className="editor-action-label">
             {editableId ? "Edit your layout" : "Create a layout"}
           </p>
           <h2>{draft.name || "Untitled dashboard"}</h2>
           <small>
-            {draft.audience === "session-lookback"
-              ? "Lookback"
-              : "Live & replay"}{" "}
-            · {draft.sections.length}{" "}
+            {modesText(modes)} · {draft.sections.length}{" "}
             {draft.sections.length === 1 ? "group" : "groups"} ·{" "}
-            {draft.sections.flatMap((item) => item.widgets).length} panels ·{" "}
+            {panelCount} {panelCount === 1 ? "panel" : "panels"} ·{" "}
             {dirty ? "Unsaved changes" : "No unsaved changes"}
           </small>
         </div>
@@ -250,7 +271,7 @@ export function LayoutEditor({
           <button
             type="button"
             className="button-primary"
-            disabled={saving}
+            disabled={saving || Boolean(compatibilityError)}
             onClick={() => void save()}
           >
             {saving ? "Saving..." : "Save layout"}
@@ -301,9 +322,77 @@ export function LayoutEditor({
             />
           </label>
         </div>
+        <div className="editor-metadata editor-availability-controls">
+          <label>
+            Layout mode
+            <select
+              aria-label="Layout mode"
+              value={modes.length === 2 ? "both" : draft.audience}
+              onChange={(event) => {
+                const value = event.target.value;
+                change(
+                  value === "both"
+                    ? {
+                        ...draft,
+                        enabledAudiences: ["session-lookback", "live-race"],
+                      }
+                    : {
+                        ...draft,
+                        audience: value as DashboardAudience,
+                        enabledAudiences: undefined,
+                      },
+                );
+              }}
+            >
+              <option value="session-lookback">Lookback only</option>
+              <option value="live-race">Replay only</option>
+              <option value="both">Lookback + Replay</option>
+            </select>
+          </label>
+          <label>
+            Session type
+            <select
+              aria-label="Session type"
+              value={draft.sessionKind ?? ""}
+              onChange={(event) =>
+                change({
+                  ...draft,
+                  sessionKind: (event.target.value || undefined) as
+                    | SessionKind
+                    | undefined,
+                })
+              }
+            >
+              <option value="">Any compatible session</option>
+              {sessionKinds.map((kind) => (
+                <option key={kind} value={kind}>
+                  {sessionKindLabel[kind]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="editor-availability-summary">
+            <strong>
+              {compatibilityError ? "Requested scope" : "Available in"}
+            </strong>
+            <Availability modes={modes} kinds={compatibleKinds} />
+            <small>
+              Every panel must support the chosen modes and share a session
+              type. Switching modes keeps your panels so you can replace any
+              that are restricted.
+            </small>
+          </div>
+        </div>
+        {compatibilityError ? (
+          <p className="layout-availability-message" role="status">
+            {compatibilityError} Change the layout settings or remove the
+            restricted panel to save.
+          </p>
+        ) : null}
         <div className="editor-body">
           <WidgetLibrary
-            audience={draft.audience}
+            modes={modes}
+            compatibleKinds={compatibleKinds}
             target={
               section.title || `Group ${draft.sections.indexOf(section) + 1}`
             }
@@ -461,6 +550,8 @@ export function LayoutEditor({
                     </p>
                     <EditorCanvas
                       section={group}
+                      modes={modes}
+                      sessionKind={draft.sessionKind}
                       selectedId={selectedId}
                       onSelect={(id) => {
                         setSelectedId(id);

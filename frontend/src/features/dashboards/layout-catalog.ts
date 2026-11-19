@@ -2,12 +2,15 @@ import { widgetSizeError } from "../../widgets/registry/widget.catalog";
 import type { LayoutDto } from "../../data/contracts/layouts.contracts";
 import { builtinSessionLayouts } from "../../widgets/registry/dashboard.config";
 import { widgetRegistry } from "../../widgets/registry/widget.registry";
+import { layoutCompatibilityReason, layoutModes } from "./compatibility";
+import { raceViewerLayoutId, recommendedLayoutId } from "./layout-guides";
 import type {
   DashboardAudience,
   LayoutGroupNode,
   LayoutRecord,
   LayoutWidgetNode,
   SectionLayoutNode,
+  SessionKind,
 } from "../../widgets/registry/widget.types";
 
 export type ResolvedLayoutRecord = LayoutRecord & {
@@ -33,17 +36,45 @@ export function resolveWorkspaceLayouts(
   userLayouts: LayoutDto[] | undefined,
   audience: DashboardAudience,
   favorites: string[] = [],
+  kind?: SessionKind,
+): ResolvedLayoutRecord[] {
+  return resolveAllLayouts(userLayouts, favorites)
+    .filter((layout) => layoutModes(layout).includes(audience))
+    .map((layout) => checkLayoutInSession(layout, audience, kind))
+    .sort(sortLayoutsForSession(audience, kind, favorites));
+}
+
+export function sortLayoutsForSession(audience: DashboardAudience, kind?: SessionKind, favorites: readonly string[] = []) {
+  const recommended = recommendedLayoutId(audience, kind);
+  return (a: LayoutRecord, b: LayoutRecord) =>
+    Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)) ||
+    Number(b.id === recommended) - Number(a.id === recommended);
+}
+
+export function resolveAllLayouts(
+  userLayouts: LayoutDto[] | undefined,
+  favorites: string[] = [],
 ): ResolvedLayoutRecord[] {
   return [
     ...builtinSessionLayouts,
     ...(userLayouts ?? []).map(toUserLayoutRecord),
   ]
-    .filter((layout) => layout.audience === audience)
     .map((layout) => validateResolvedLayout(layout))
     .sort(
       (a, b) =>
-        Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)),
+        Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)) ||
+        Number(b.id === raceViewerLayoutId) - Number(a.id === raceViewerLayoutId),
     );
+}
+
+export function checkLayoutInSession(
+  layout: ResolvedLayoutRecord,
+  audience: DashboardAudience,
+  kind?: SessionKind,
+): ResolvedLayoutRecord {
+  const reason =
+    layoutCompatibilityReason(layout, audience, kind) ?? layout.invalidReason;
+  return reason ? { ...layout, isValid: false, invalidReason: reason } : layout;
 }
 
 export function getResolvedLayoutById(
@@ -60,10 +91,10 @@ export function getResolvedLayoutById(
 function validateResolvedLayout(layout: LayoutRecord): ResolvedLayoutRecord {
   const invalidReason = ![1, 2].includes(layout.schemaVersion)
     ? `Layout schema version ${layout.schemaVersion} is not supported.`
-    : findInvalidNodeReason(
-        layout.audience,
+    : (layoutCompatibilityReason(layout, layout.audience) ??
+      findInvalidNodeReason(
         layout.config.sections.flatMap((section) => [section.layout]),
-      );
+      ));
 
   if (invalidReason) {
     return {
@@ -79,15 +110,12 @@ function validateResolvedLayout(layout: LayoutRecord): ResolvedLayoutRecord {
   };
 }
 
-function findInvalidNodeReason(
-  audience: DashboardAudience,
-  nodes: SectionLayoutNode[],
-): string | undefined {
+function findInvalidNodeReason(nodes: SectionLayoutNode[]): string | undefined {
   for (const node of nodes) {
     const reason =
       node.type === "group"
-        ? findInvalidGroupReason(audience, node)
-        : findInvalidWidgetReason(audience, node);
+        ? findInvalidGroupReason(node)
+        : findInvalidWidgetReason(node);
 
     if (reason) {
       return reason;
@@ -97,28 +125,15 @@ function findInvalidNodeReason(
   return undefined;
 }
 
-function findInvalidGroupReason(
-  audience: DashboardAudience,
-  node: LayoutGroupNode,
-): string | undefined {
-  return findInvalidNodeReason(audience, node.children);
+function findInvalidGroupReason(node: LayoutGroupNode): string | undefined {
+  return findInvalidNodeReason(node.children);
 }
 
-function findInvalidWidgetReason(
-  audience: DashboardAudience,
-  node: LayoutWidgetNode,
-): string | undefined {
+function findInvalidWidgetReason(node: LayoutWidgetNode): string | undefined {
   const widget = widgetRegistry[node.widgetId];
 
   if (!widget || !widget.builderEnabled) {
     return `Missing widget "${node.widgetId}".`;
-  }
-
-  if (
-    widget.supportedAudiences &&
-    !widget.supportedAudiences.includes(audience)
-  ) {
-    return `Widget "${node.widgetId}" is not available for ${audience}.`;
   }
 
   if (node.placement)

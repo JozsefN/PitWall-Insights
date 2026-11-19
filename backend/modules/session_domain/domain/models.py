@@ -19,11 +19,14 @@ class SessionCatalogItem(BaseModel):
     official_event_name: str | None = None
     country: str | None = None
     location: str | None = None
+    circuit_key: str | None = None
     event_format: str | None = None
     is_testing: bool = False
     session_name: str
     session_type: str | None = None
     scheduled_start_utc: datetime | None = None
+    available_for_import: bool = True
+    unavailable_reason: str | None = None
 
 
 class SessionImportRequest(BaseModel):
@@ -33,12 +36,15 @@ class SessionImportRequest(BaseModel):
     source_session_key: str | None = Field(default=None, min_length=1, max_length=255)
     import_profile: ImportProfile = "core"
     force_refresh: bool = False
+    data_provider: Literal["openf1"] = "openf1"
 
 
 class SessionSummary(BaseModel):
     id: str
     source: str
     source_session_key: str
+    data_provider: str | None = None
+    owner_user_id: str | None = None
     season_year: int
     round_number: int | None = None
     event_name: str
@@ -64,6 +70,7 @@ class SessionSummary(BaseModel):
 class SessionDetail(SessionSummary):
     meeting_key: str | None = None
     session_key: str | None = None
+    circuit_key: str | None = None
     api_path: str | None = None
     f1_api_support: bool | None = None
     weather_sample_count: int = 0
@@ -83,6 +90,7 @@ class SessionEntrySummary(BaseModel):
     driver_number: str | None = None
     driver_abbreviation: str | None = None
     driver_name: str | None = None
+    headshot_url: str | None = None
     team_id: str | None = None
     team_name: str | None = None
     team_color: str | None = None

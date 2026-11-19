@@ -3,8 +3,7 @@
   top: 0;
   z-index: 40;
   border-bottom: 1px solid var(--color-border-subtle);
-  background: rgba(11, 13, 18, 0.96);
-  backdrop-filter: blur(18px);
+  background: var(--color-chrome);
 }
 .app-header__inner {
   display: flex;
@@ -26,15 +25,15 @@
   place-items: center;
   width: 38px;
   height: 38px;
-  border: 1px solid #65231f;
+  border: 1px solid var(--color-brand);
   border-radius: 10px;
-  background: #281310;
+  background: var(--color-brand);
 }
 .app-header__mark::after {
   content: "";
   width: 15px;
   height: 15px;
-  border: 3px solid #ff574e;
+  border: 3px solid var(--color-on-brand);
   border-left: 0;
   transform: skew(-18deg);
 }
@@ -72,13 +71,12 @@
 }
 .app-header__link:hover {
   background: var(--color-bg-tertiary);
-  color: white;
+  color: var(--color-text-primary);
 }
 .app-header__link.is-active {
-  color: white;
-  border-color: #466084;
-  background: #18273c;
-  box-shadow: inset 0 -2px 0 var(--color-accent-blue);
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+  box-shadow: inset 0 -3px 0 var(--color-brand);
 }
 .app-header__account {
   display: flex;
@@ -86,6 +84,7 @@
   gap: 8px;
   font-size: 12px;
 }
+.app-header__account .app-theme-toggle { gap: 6px; }
 .app-header__account .button-secondary,
 .app-header__account .button-primary {
   min-height: 38px;
@@ -99,12 +98,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.app-header__profile { display:flex;align-items:center; }
+.app-header__profile-label { display:none; }
 .app-sidebar {
   display: none;
   flex-shrink: 0;
   width: 208px;
   border-right: 1px solid var(--color-border-subtle);
-  background: #0e1118;
+  background: var(--color-chrome);
 }
 .app-sidebar__inner {
   position: sticky;
@@ -146,27 +147,11 @@
   background: var(--color-bg-tertiary);
 }
 .app-sidebar__link.is-active {
-  background: #192538;
-  border-color: #3b5273;
-  box-shadow: inset 3px 0 0 var(--color-accent-blue);
+  background: var(--color-bg-tertiary);
+  box-shadow: inset 3px 0 0 var(--color-brand);
 }
 .app-sidebar__link.is-active > span {
-  color: white;
-}
-.app-sidebar__footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-top: 1px solid var(--color-border-subtle);
-  padding: 18px 10px;
-  color: var(--color-text-muted);
-  font-size: 10px;
-}
-.app-sidebar__footer > span {
-  width: 5px;
-  height: 5px;
-  background: var(--color-accent-red);
-  border-radius: 50%;
+  color: var(--color-text-primary);
 }
 .skip-link {
   position: fixed;
@@ -174,8 +159,8 @@
   left: 16px;
   z-index: 100;
   padding: 12px 18px;
-  background: white;
-  color: #0b0d12;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
   border-radius: 6px;
 }
 .skip-link:focus {
@@ -207,17 +192,15 @@
   .app-header__diagnostics {
     display: none;
   }
+  .app-header__profile-label { display:inline-block;padding:8px 10px;border:1px solid var(--color-border-subtle);border-radius:8px;color:var(--color-text-primary);font-size:12px; }
   .app-header__brand small {
     font-size: 8px;
   }
   .app-header__brand strong {
     font-size: 11px;
   }
-  .app-header__nav {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 5px;
-  }
+  .app-theme-toggle span { display: none; }
+  .app-header__account .app-theme-toggle { min-width: 38px; padding: 0 9px; }
   .app-header__link {
     min-height: 40px;
     padding: 0 10px;

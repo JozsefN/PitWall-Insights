@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from modules.delivery_api.api.dataset_access import enforce_dataset_access
 
 from modules.delivery_api.api.health_routes import router as health_router
 from modules.delivery_api.api.auth_routes import router as auth_router
@@ -13,8 +14,11 @@ from modules.delivery_api.api.strategy_routes import router as strategy_router
 from modules.delivery_api.api.decision_engine_routes import router as decision_engine_router
 from modules.delivery_api.api.layout_routes import router as layout_router
 from modules.delivery_api.api.story_feed_routes import router as story_feed_router
+from modules.delivery_api.api.profile_routes import router as profile_router
+from modules.delivery_api.api.race_estimation_routes import router as race_estimation_router
+from modules.delivery_api.api.session_review_routes import router as session_review_router
 
-api_router = APIRouter()
+api_router = APIRouter(dependencies=[Depends(enforce_dataset_access)])
 api_router.include_router(health_router)
 api_router.include_router(auth_router)
 api_router.include_router(session_router)
@@ -28,3 +32,6 @@ api_router.include_router(strategy_router)
 api_router.include_router(decision_engine_router)
 api_router.include_router(layout_router)
 api_router.include_router(story_feed_router)
+api_router.include_router(profile_router)
+api_router.include_router(race_estimation_router)
+api_router.include_router(session_review_router)

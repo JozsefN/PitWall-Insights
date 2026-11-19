@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { PageContainer } from "../app/layout/PageContanier";
 import {
@@ -12,9 +12,22 @@ import { LayoutPreview } from "../features/dashboards/LayoutPreview";
 import { draftFromLayout } from "../features/dashboards/editor-model";
 import { LayoutEditor } from "../features/dashboards/LayoutEditor";
 import { FavoriteButton } from "../features/dashboards/FavoriteButton";
+import { Availability } from "../features/dashboards/Availability";
+import {
+  getLayoutGuide,
+  recommendedLayoutId,
+} from "../features/dashboards/layout-guides";
+import {
+  layoutModes,
+  sessionKindLabel,
+  sessionKinds,
+  supportedSessionKinds,
+  widgetIds,
+} from "../features/dashboards/compatibility";
 import type {
   LayoutRecord,
   DashboardAudience,
+  SessionKind,
 } from "../widgets/registry/widget.types";
 import "./dashboard-builder-page.css";
 
@@ -26,14 +39,12 @@ const audiences: {
   {
     id: "session-lookback",
     label: "Lookback",
-    description:
-      "Compare laps, telemetry, and strategy across a completed session.",
+    description: "Review laps and telemetry after the session.",
   },
   {
     id: "live-race",
-    label: "Live & replay",
-    description:
-      "Follow track position and race context as the session clock moves.",
+    label: "Replay",
+    description: "Follow timing and telemetry as the replay clock moves.",
   },
 ];
 
@@ -45,6 +56,7 @@ export function DashboardBuilderPage() {
     copy: boolean;
   } | null>(null);
   const [notice, setNotice] = useState("");
+  const [preview, setPreview] = useState<LayoutRecord | null>(null);
   const layoutsQuery = useLayoutsQuery();
   const favoritesQuery = useLayoutFavoritesQuery();
   const favoriteMutation = useSetLayoutFavoriteMutation();
@@ -52,17 +64,45 @@ export function DashboardBuilderPage() {
   const audience =
     audiences.find((item) => item.id === searchParams.get("audience")) ??
     audiences[0];
+  const selectedId = searchParams.get("layout");
+  const kindParam = searchParams.get("sessionKind");
+  const sessionKind =
+    sessionKinds.find((kind) => kind === kindParam) ??
+    (kindParam === "all" || selectedId ? undefined : "race");
   const layouts = resolveWorkspaceLayouts(
     layoutsQuery.data,
     audience.id,
     favoritesQuery.data,
+    sessionKind,
   );
   const visibleLayouts = layouts.filter(
-    (layout) => source === "all" || layout.source === source,
+    (layout) =>
+      (source === "all" || layout.source === source) &&
+      (!sessionKind ||
+        layout.id === selectedId ||
+        supportedSessionKinds(
+          widgetIds(layout.config),
+          layout.config.sessionKind,
+        ).includes(sessionKind)),
   );
-  const selectedLayout =
-    visibleLayouts.find((layout) => layout.id === searchParams.get("layout")) ??
-    visibleLayouts[0];
+  const selectedLayout = visibleLayouts.find(
+    (layout) => layout.id === selectedId,
+  );
+
+  function setLibraryScope(
+    mode: DashboardAudience,
+    kind?: SessionKind,
+    layout?: string,
+  ) {
+    setSearchParams(
+      {
+        audience: mode,
+        sessionKind: kind ?? "all",
+        ...(layout ? { layout } : {}),
+      },
+      { replace: true },
+    );
+  }
 
   function openEditor(layout: LayoutRecord | null = null, copy = false) {
     try {
@@ -98,14 +138,12 @@ export function DashboardBuilderPage() {
         <LayoutEditor
           layout={editor.layout}
           audience={audience.id}
+          sessionKind={sessionKind}
           copy={editor.copy}
           onClose={() => setEditor(null)}
-          onSaved={(id) => {
+          onSaved={(id, savedAudience, savedKind) => {
             setEditor(null);
-            setSearchParams(
-              { audience: audience.id, layout: id },
-              { replace: true },
-            );
+            setLibraryScope(savedAudience, savedKind ?? sessionKind, id);
             setSource("all");
             setNotice("Layout saved to your profile.");
           }}
@@ -116,17 +154,12 @@ export function DashboardBuilderPage() {
   return (
     <PageContainer size="wide">
       <div className="builder-page">
-        <header className="builder-hero">
+        <header className="builder-hero feature-banner">
           <div>
-            <p className="builder-eyebrow">
-              <span aria-hidden="true" />
-              Your workspace, your perspective
-            </p>
-            <h1>Dashboard Builder</h1>
-            <p>
-              Your layouts, built around the way you read a race. Arrange
-              widgets for telemetry, strategy, and replay, then open your view
-              in any compatible session.
+            <h1 className="feature-banner__title">Dashboard Builder</h1>
+            <p className="feature-banner__detail">
+              Arrange panels for telemetry, strategy or replay. Saved layouts
+              appear when you open a compatible session.
             </p>
           </div>
           <Link to="/sessions?view=explorer" className="button-secondary">
@@ -134,43 +167,68 @@ export function DashboardBuilderPage() {
           </Link>
         </header>
         <div className="builder-toolbar builder-toolbar--sticky">
-          <button
-            type="button"
-            className="button-primary"
-            onClick={() => openEditor()}
-          >
-            + New layout
-          </button>
-          <div
-            className="builder-mode-switch"
-            role="group"
-            aria-label="Dashboard audience"
-          >
-            {audiences.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={audience.id === item.id}
-                className={audience.id === item.id ? "is-active" : ""}
-                onClick={() =>
-                  setSearchParams({ audience: item.id }, { replace: true })
-                }
+          <div className="builder-toolbar__main">
+            <button
+              type="button"
+              className="button-primary"
+              onClick={() => openEditor()}
+            >
+              + New layout
+            </button>
+            <div
+              className="builder-mode-switch"
+              role="group"
+              aria-label="Dashboard audience"
+            >
+              {audiences.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={audience.id === item.id}
+                  className={audience.id === item.id ? "is-active" : ""}
+                  onClick={() => setLibraryScope(item.id, sessionKind)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <div className="builder-filter">
+              <label htmlFor="builder-source">Show</label>
+              <select
+                id="builder-source"
+                value={source}
+                onChange={(event) => setSource(event.target.value)}
               >
-                {item.label}
+                <option value="all">All layouts</option>
+                <option value="builtin">Built-in layouts</option>
+                <option value="user">Your layouts</option>
+              </select>
+            </div>
+          </div>
+          <div
+            className="builder-session-switch"
+            role="group"
+            aria-label="Session type"
+          >
+            {(
+              [
+                "race",
+                "sprint",
+                "qualifying",
+                "practice",
+                ...(sessionKind === "other" ? ["other" as const] : []),
+                undefined,
+              ] as const
+            ).map((kind) => (
+              <button
+                type="button"
+                key={kind ?? "all"}
+                aria-pressed={sessionKind === kind}
+                onClick={() => setLibraryScope(audience.id, kind)}
+              >
+                {kind ? sessionKindLabel[kind] : "All sessions"}
               </button>
             ))}
-          </div>
-          <div className="builder-filter">
-            <label htmlFor="builder-source">Show</label>
-            <select
-              id="builder-source"
-              value={source}
-              onChange={(event) => setSource(event.target.value)}
-            >
-              <option value="all">All layouts</option>
-              <option value="builtin">Built-in layouts</option>
-              <option value="user">Your layouts</option>
-            </select>
           </div>
         </div>
         {notice ? (
@@ -215,9 +273,15 @@ export function DashboardBuilderPage() {
           <div className="builder-section-heading">
             <div>
               <h2 id="builder-library-title">
-                Layout library <span>{visibleLayouts.length}</span>
+                {sessionKind
+                  ? `${sessionKindLabel[sessionKind]} ${audience.label.toLowerCase()}`
+                  : "Layout library"}{" "}
+                <span>{visibleLayouts.length}</span>
               </h2>
               <p>
+                {sessionKind === "qualifying"
+                  ? "Includes Sprint Qualifying. "
+                  : ""}
                 {audience.description} Star favorites to show them first in
                 Sessions.
               </p>
@@ -252,10 +316,14 @@ export function DashboardBuilderPage() {
                   className={`builder-layout-card${selectedLayout?.id === layout.id ? " is-selected" : ""}`}
                 >
                   <div className="builder-card-actions">
-                    <span>
-                      {layout.source === "builtin"
-                        ? "Factory layout"
-                        : "Your layout"}
+                    <span
+                      className="layout-guide-label"
+                      data-recommended={
+                        layout.id ===
+                        recommendedLayoutId(audience.id, sessionKind)
+                      }
+                    >
+                      {getLayoutGuide(layout.id)?.label ?? "Your layout"}
                     </span>
                     <FavoriteButton
                       name={layout.name}
@@ -286,23 +354,21 @@ export function DashboardBuilderPage() {
                   <button
                     type="button"
                     className="builder-card-select"
-                    aria-label={`Select ${layout.name}`}
-                    aria-pressed={selectedLayout?.id === layout.id}
-                    onClick={() =>
-                      setSearchParams(
-                        { audience: audience.id, layout: layout.id },
-                        { replace: true },
-                      )
-                    }
+                    aria-label={`Preview ${layout.name}`}
+                    onClick={() => {
+                      setLibraryScope(audience.id, sessionKind, layout.id);
+                      setPreview(layout);
+                    }}
                   >
-                    <LayoutPreview config={layout.config} compact />
-                    <span className="builder-layout-card__meta">
-                      <span>{layout.config.sections.length} groups</span>
-                      <span>
-                        {selectedLayout?.id === layout.id ? "Selected" : ""}
-                      </span>
-                    </span>
                     <strong>{layout.name}</strong>
+                    <LayoutPreview config={layout.config} compact lead />
+                    <Availability
+                      modes={layoutModes(layout)}
+                      kinds={supportedSessionKinds(
+                        widgetIds(layout.config),
+                        layout.config.sessionKind,
+                      )}
+                    />
                     <span className="builder-layout-card__description">
                       {layout.description ?? "A custom session layout."}
                     </span>
@@ -322,6 +388,14 @@ export function DashboardBuilderPage() {
                           onClick={() => openEditor(layout)}
                         >
                           Edit layout
+                        </button>
+                        <button
+                          className="button-secondary"
+                          type="button"
+                          disabled={![1, 2].includes(layout.schemaVersion)}
+                          onClick={() => openEditor(layout, true)}
+                        >
+                          Copy layout
                         </button>
                         <button
                           className="button-secondary"
@@ -348,7 +422,46 @@ export function DashboardBuilderPage() {
             </div>
           )}
         </section>
+        {preview ? (
+          <LayoutPreviewDialog
+            layout={preview}
+            onClose={() => setPreview(null)}
+          />
+        ) : null}
       </div>
     </PageContainer>
+  );
+}
+
+function LayoutPreviewDialog({
+  layout,
+  onClose,
+}: {
+  layout: LayoutRecord;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (dialog && !dialog.open) dialog.showModal();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      className="builder-preview-dialog"
+      onClose={onClose}
+      aria-labelledby="preview-layout-name"
+    >
+      <header>
+        <h2 id="preview-layout-name">{layout.name}</h2>
+        <button
+          className="button-secondary"
+          onClick={() => ref.current?.close()}
+        >
+          Close preview
+        </button>
+      </header>
+      <LayoutPreview config={layout.config} full />
+    </dialog>
   );
 }

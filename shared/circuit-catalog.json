@@ -1,0 +1,71 @@
+{
+  "roadSources": {
+    "f1-circuits": {
+      "downloadBase": "https://raw.githubusercontent.com/bacinger/f1-circuits/8094e957b8d6aa8b9f4510c93968556cccd30e02/circuits/",
+      "credits": [
+        {"label": "f1-circuits", "url": "https://github.com/bacinger/f1-circuits"},
+        {"label": "© OpenStreetMap contributors", "url": "https://www.openstreetmap.org/copyright"}
+      ]
+    },
+    "tumftm": {
+      "downloadBase": "https://raw.githubusercontent.com/TUMFTM/racetrack-database/e59595d1f3573b30d1ded6a08984935b957688e0/tracks/",
+      "credits": [
+        {"label": "TUMFTM", "url": "https://github.com/TUMFTM/racetrack-database"},
+        {"label": "© OpenStreetMap contributors", "url": "https://www.openstreetmap.org/copyright"}
+      ]
+    }
+  },
+  "defaultEstimatedWidthM": 12,
+  "hosts": {
+    "ae": {"name": "United Arab Emirates", "aliases": ["UAE", "ARE"]},
+    "at": {"name": "Austria", "aliases": ["AUT"]},
+    "au": {"name": "Australia", "aliases": ["AUS"]},
+    "az": {"name": "Azerbaijan", "aliases": ["AZE"]},
+    "be": {"name": "Belgium", "aliases": ["BEL"]},
+    "bh": {"name": "Bahrain", "aliases": ["BRN"]},
+    "br": {"name": "Brazil", "aliases": ["BRA"]},
+    "ca": {"name": "Canada", "aliases": ["CAN"]},
+    "cn": {"name": "China", "aliases": ["CHN"]},
+    "es": {"name": "Spain", "aliases": ["ESP"]},
+    "gb": {"name": "United Kingdom", "aliases": ["Great Britain", "United Kingdom of Great Britain and Northern Ireland", "UK", "GBR"]},
+    "hu": {"name": "Hungary", "aliases": ["HUN"]},
+    "it": {"name": "Italy", "aliases": ["ITA"]},
+    "jp": {"name": "Japan", "aliases": ["JPN"]},
+    "mc": {"name": "Monaco", "aliases": ["MCO"]},
+    "mx": {"name": "Mexico", "aliases": ["MEX"]},
+    "my": {"name": "Malaysia", "aliases": ["MYS"]},
+    "nl": {"name": "Netherlands", "aliases": ["The Netherlands", "NLD"]},
+    "qa": {"name": "Qatar", "aliases": ["QAT"]},
+    "sa": {"name": "Saudi Arabia", "aliases": ["SAU"]},
+    "sg": {"name": "Singapore", "aliases": ["SGP"]},
+    "us": {"name": "United States", "aliases": ["United States of America", "USA"]}
+  },
+  "circuits": [
+    {"id": "ae-2009", "host": "ae", "openf1Key": 70, "aliases": ["Yas Marina", "Yas Island", "Abu Dhabi"]},
+    {"id": "at-1969", "host": "at", "openf1Key": 19, "aliases": ["Spielberg", "Red Bull Ring", "Austrian Grand Prix"]},
+    {"id": "au-1953", "host": "au", "openf1Key": 10, "aliases": ["Melbourne", "Albert Park", "Australian Grand Prix"]},
+    {"id": "az-2016", "host": "az", "openf1Key": 144, "aliases": ["Baku", "Azerbaijan"]},
+    {"id": "be-1925", "host": "be", "openf1Key": 7, "aliases": ["Spa", "Francorchamps", "Belgian Grand Prix"]},
+    {"id": "bh-2002", "host": "bh", "openf1Key": 63, "aliases": ["Sakhir", "Bahrain"], "widthProfile": {"file": "Sakhir.csv", "source": "tumftm"}},
+    {"id": "br-1940", "host": "br", "openf1Key": 14, "aliases": ["Interlagos", "São Paulo", "Brazilian Grand Prix"]},
+    {"id": "ca-1978", "host": "ca", "openf1Key": 23, "aliases": ["Montréal", "Canadian Grand Prix"]},
+    {"id": "cn-2004", "host": "cn", "openf1Key": 49, "aliases": ["Shanghai", "Chinese Grand Prix"]},
+    {"id": "es-1991", "host": "es", "openf1Key": 15, "aliases": ["Barcelona", "Montmeló", "Catalunya", "Spanish Grand Prix"]},
+    {"id": "es-2026", "host": "es", "openf1Key": 153, "aliases": ["Madrid", "Madring"]},
+    {"id": "gb-1948", "host": "gb", "openf1Key": 2, "aliases": ["Silverstone", "British Grand Prix"], "widthProfile": {"file": "Silverstone.csv", "source": "tumftm"}},
+    {"id": "hu-1986", "host": "hu", "openf1Key": 4, "aliases": ["Hungaroring", "Budapest", "Mogyoród", "Hungarian Grand Prix"]},
+    {"id": "it-1922", "host": "it", "openf1Key": 39, "aliases": ["Monza", "Italian Grand Prix"]},
+    {"id": "it-1953", "host": "it", "openf1Key": 6, "aliases": ["Imola", "Emilia Romagna"], "estimatedWidthM": 12.5, "illustratedWidthLimitM": 15},
+    {"id": "jp-1962", "host": "jp", "openf1Key": 46, "aliases": ["Suzuka", "Japanese Grand Prix"], "widthProfile": {"file": "Suzuka.csv", "source": "tumftm"}},
+    {"id": "mc-1929", "host": "mc", "openf1Key": 22, "aliases": ["Monaco", "Monte Carlo"]},
+    {"id": "mx-1962", "host": "mx", "openf1Key": 65, "aliases": ["Mexico"]},
+    {"id": "my-1999", "host": "my", "openf1Key": 12, "aliases": ["Sepang", "Kuala Lumpur", "Malaysian Grand Prix", "Malaysia"]},
+    {"id": "nl-1948", "host": "nl", "openf1Key": 55, "aliases": ["Zandvoort", "Dutch Grand Prix"]},
+    {"id": "qa-2004", "host": "qa", "openf1Key": 150, "aliases": ["Lusail", "Losail", "Qatar"]},
+    {"id": "sa-2021", "host": "sa", "openf1Key": 149, "aliases": ["Jeddah", "Saudi Arabian"]},
+    {"id": "sg-2008", "host": "sg", "openf1Key": 61, "aliases": ["Singapore", "Marina Bay"]},
+    {"id": "us-2012", "host": "us", "openf1Key": 9, "aliases": ["Austin", "Circuit of the Americas", "United States Grand Prix"]},
+    {"id": "us-2022", "host": "us", "openf1Key": 151, "aliases": ["Miami"]},
+    {"id": "us-2023", "host": "us", "openf1Key": 152, "aliases": ["Las Vegas"]}
+  ]
+}

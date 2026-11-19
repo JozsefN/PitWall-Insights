@@ -188,7 +188,7 @@ export function useTelemetryMaterializationReadiness({
   const request = enabled
     ? {
         session_id: workspace.sessionId,
-        entry_ids: entryIds,
+        entry_ids: [...entryIds].sort(),
         kinds: [kind],
         scope,
         lap_number: scope === "lap" ? lapNumber : undefined,
@@ -241,6 +241,7 @@ export function useTelemetryMaterializationReadiness({
 
   return {
     ready: ensureQuery.data?.ready === true || completed,
+    retry: () => ensureQuery.refetch(),
     isError:
       ensureQuery.isError ||
       jobQuery.data?.status === "failed" ||
@@ -376,6 +377,7 @@ function buildWorkspaceTelemetryResourceResult<TSample>({
     ready,
     isPreparing,
     stage,
+    queueStalled,
     waitMessage: queueStalled
       ? "Preparation has not started. The background service may be offline or busy. Your request is saved and will continue when it becomes available."
       : getTelemetryResourceWaitMessage(kind, stage),
@@ -419,7 +421,7 @@ function useEntryLapsMap(
       dataByEntryId: Object.fromEntries(
         entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
       ) as Record<string, EntryLapDto[]>,
-      isLoading: results.some((result) => result.isLoading),
+      isLoading: enabled && results.some((result) => result.isPending),
       isError: results.some((result) => result.isError),
     }),
   });
@@ -451,7 +453,7 @@ function useCarTelemetryMap(
     dataByEntryId: Object.fromEntries(
       entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
     ) as Record<string, CarTelemetrySampleDto[]>,
-    isLoading: results.some((result) => result.isLoading),
+    isLoading: enabled && results.some((result) => result.isPending),
     isError: results.some((result) => result.isError),
   };
 }
@@ -480,7 +482,7 @@ function usePositionTelemetryMap(
       dataByEntryId: Object.fromEntries(
         entryIds.map((entryId, index) => [entryId, results[index]?.data ?? []]),
       ) as Record<string, PositionSampleDto[]>,
-      isLoading: results.some((result) => result.isLoading),
+      isLoading: enabled && results.some((result) => result.isPending),
       isError: results.some((result) => result.isError),
     }),
   });

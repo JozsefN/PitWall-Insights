@@ -3,10 +3,12 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable
 from datetime import datetime, timezone
 
-from sqlalchemy import func, insert
+from sqlalchemy import func, insert, or_
 from sqlalchemy.orm import Session, joinedload
 
 from modules.normalization.domain.models import SessionSnapshot
+from modules.session_domain.domain.circuit_catalog import openf1_host_country
+from modules.session_domain.domain.source_media import driver_headshot
 from modules.session_domain.domain.models import (
     CarTelemetrySampleModel,
     EntryLapModel,
@@ -90,6 +92,26 @@ class SessionRepository:
         if existing is not None and not force_refresh and not needs_full_refresh:
             existing.last_accessed_at = snapshot.session.last_accessed_at
             existing.expires_at = snapshot.session.expires_at
+            if existing.data_provider == snapshot.session.data_provider == "openf1" and existing.session_key == snapshot.session.session_key:
+                # A core re-import can enrich a cached dataset without replacing
+                # entry IDs, normalized lap clocks or materialized telemetry.
+                current = dict(existing.source_details or {})
+                incoming = snapshot.session.source_details or {}
+                for key in (
+                    "driver_headshots", "qualifying_times", "qualifying_segments",
+                    "pit_out_laps", "circuit_key", "session_end_utc", "session_gmt_offset",
+                    "race_positions", "intervals", "classified_gaps",
+                ):
+                    if incoming.get(key) and not current.get(key):
+                        current[key] = incoming[key]
+                if "team_radio" in incoming and "team_radio" not in incoming.get("unavailable_sources", []):
+                    current["team_radio"] = incoming["team_radio"]
+                    current["unavailable_sources"] = [key for key in current.get("unavailable_sources", []) if key != "team_radio"]
+                existing.source_details = current
+                host = openf1_host_country(current.get("circuit_key"))
+                if host and existing.weekend.country != host:
+                    existing.weekend.country = host
+                self._refresh_driver_links(existing.id, snapshot)
             self.db.add(existing)
             self.db.commit()
             self.db.refresh(existing)
@@ -160,6 +182,7 @@ class SessionRepository:
     def list_sessions(self) -> list[SessionSummary]:
         records = (
             self.db.query(EventSessionRecord)
+            .filter(or_(EventSessionRecord.owner_user_id.is_(None), EventSessionRecord.owner_user_id == self.db.info.get("actor_user_id")))
             .options(joinedload(EventSessionRecord.weekend))
             .order_by(EventSessionRecord.scheduled_start_utc.desc(), EventSessionRecord.imported_at.desc())
             .all()
@@ -169,21 +192,30 @@ class SessionRepository:
         return [self._build_session_summary(record, entry_counts, tick_counts) for record in records]
 
     def get_session(self, session_id: str) -> SessionDetail | None:
-        record = (
-            self.db.query(EventSessionRecord)
+        row = (
+            self.db.query(EventSessionRecord, EventSessionRecord.source_details["circuit_key"].astext)
             .options(joinedload(EventSessionRecord.weekend))
             .filter(EventSessionRecord.id == session_id)
             .first()
         )
-        if record is None:
+        if row is None:
             return None
 
-        entry_counts = self._count_by_session(SessionEntryRecord)
-        tick_counts = self._count_by_session(SessionTickRecord)
+        record, circuit_key = row
+        summary = self._build_session_summary(
+            record,
+            {session_id: self._count_rows(SessionEntryRecord, session_id)},
+            {session_id: self._count_rows(SessionTickRecord, session_id)},
+        )
+        if (record.data_provider or record.source) == "openf1":
+            summary.country = openf1_host_country(circuit_key) or summary.country
+        else:
+            circuit_key = None
         return SessionDetail(
-            **self._build_session_summary(record, entry_counts, tick_counts).model_dump(),
+            **summary.model_dump(),
             meeting_key=record.meeting_key,
             session_key=record.session_key,
+            circuit_key=circuit_key,
             api_path=record.api_path,
             f1_api_support=record.f1_api_support,
             weather_sample_count=self._count_rows(SessionWeatherSampleRecord, record.id),
@@ -204,7 +236,12 @@ class SessionRepository:
             .order_by(SessionEntryRecord.car_number.asc())
             .all()
         )
-        return [self._build_entry_summary(record) for record in records]
+        if not records:
+            return []
+        headshots = self.db.query(EventSessionRecord.source_details["driver_headshots"]).filter(
+            EventSessionRecord.id == session_id,
+        ).scalar()
+        return [self._build_entry_summary(record, headshots) for record in records]
 
     def list_entry_laps(self, session_id: str, entry_id: str) -> list[EntryLapModel]:
         self._assert_entry_belongs_to_session(session_id, entry_id)
@@ -382,6 +419,10 @@ class SessionRepository:
     ) -> EventSessionRecord:
         values = {
             "source": snapshot.session.source,
+            "owner_user_id": snapshot.session.owner_user_id,
+            "data_provider": snapshot.session.data_provider,
+            "session_time_origin_utc": snapshot.session.session_time_origin_utc,
+            "source_details": snapshot.session.source_details,
             "source_session_key": snapshot.session.source_session_key,
             "weekend_id": weekend.id,
             "session_name": snapshot.session.session_name,
@@ -432,6 +473,25 @@ class SessionRepository:
             self.db.flush()
             driver_id_map[payload.source_driver_key] = record.id
         return driver_id_map
+
+    def _refresh_driver_links(self, session_id: str, snapshot: SessionSnapshot) -> None:
+        expected = {entry.source_entry_key: entry.source_driver_key for entry in snapshot.entries}
+        entries = (
+            self.db.query(SessionEntryRecord)
+            .options(joinedload(SessionEntryRecord.driver))
+            .filter(SessionEntryRecord.session_id == session_id)
+            .all()
+        )
+        changed = [
+            (entry, expected[entry.source_entry_key])
+            for entry in entries
+            if entry.source_entry_key in expected
+            and entry.driver.source_driver_key != expected[entry.source_entry_key]
+        ]
+        if changed:
+            driver_ids = self._upsert_drivers(snapshot)
+            for entry, key in changed:
+                entry.driver_id = driver_ids[key]
 
     def _upsert_teams(self, snapshot: SessionSnapshot) -> dict[str, str]:
         team_id_map: dict[str, str] = {}
@@ -752,6 +812,8 @@ class SessionRepository:
             session_name=record.session_name,
             session_type=record.session_type,
             import_profile=record.import_profile,
+            data_provider=record.data_provider,
+            owner_user_id=record.owner_user_id,
             telemetry_status=record.telemetry_status,
             scheduled_start_utc=record.scheduled_start_utc,
             actual_start_utc=record.actual_start_utc,
@@ -766,7 +828,7 @@ class SessionRepository:
         )
 
     @staticmethod
-    def _build_entry_summary(record: SessionEntryRecord) -> SessionEntrySummary:
+    def _build_entry_summary(record: SessionEntryRecord, headshots: object = None) -> SessionEntrySummary:
         return SessionEntrySummary(
             id=record.id,
             car_number=record.car_number,
@@ -778,6 +840,7 @@ class SessionRepository:
             driver_number=record.driver.driver_number,
             driver_abbreviation=record.driver.abbreviation,
             driver_name=record.driver.full_name,
+            headshot_url=driver_headshot(headshots, record.car_number),
             team_id=record.team.id if record.team else None,
             team_name=record.team.name if record.team else None,
             team_color=record.team.team_color if record.team else None,

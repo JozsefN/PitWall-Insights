@@ -54,6 +54,10 @@ class SessionPayload:
     last_accessed_at: datetime
     expires_at: datetime
     error_message: str | None = None
+    data_provider: str | None = None
+    owner_user_id: str | None = None
+    session_time_origin_utc: datetime | None = None
+    source_details: dict = field(default_factory=dict)
 
 
 @dataclass(slots=True)

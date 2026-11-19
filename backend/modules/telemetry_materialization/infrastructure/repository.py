@@ -4,7 +4,7 @@ from collections.abc import Callable, Iterable
 from datetime import datetime, timezone, timedelta
 from itertools import chain
 
-from sqlalchemy import Column, MetaData, Table, func, select, literal_column, text
+from sqlalchemy import Column, MetaData, Table, func, select, literal_column, text, or_
 from psycopg import sql
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session, joinedload
@@ -202,6 +202,8 @@ class TelemetryMaterializationRepository:
     def list_jobs(self, *, limit: int = 50) -> list[TelemetryMaterializationJobRead]:
         records = (
             self.db.query(TelemetryMaterializationJobRecord)
+            .join(EventSessionRecord, EventSessionRecord.id == TelemetryMaterializationJobRecord.session_id)
+            .filter(or_(EventSessionRecord.owner_user_id.is_(None), EventSessionRecord.owner_user_id == self.db.info.get("actor_user_id")))
             .order_by(TelemetryMaterializationJobRecord.created_at.desc())
             .limit(limit)
             .all()
@@ -353,9 +355,23 @@ class TelemetryMaterializationRepository:
             SessionEntryRecord.session_id == job.session_id,
             SessionEntryRecord.id.in_(job.entry_ids),
         ).all()
+        session = self.db.get(EventSessionRecord, job.session_id)
+        origin = session.session_time_origin_utc if session else None
+        if origin is None:
+            sample = self.db.query(CarTelemetrySampleRecord).join(SessionEntryRecord).filter(
+                SessionEntryRecord.session_id == job.session_id,
+                CarTelemetrySampleRecord.source_time_utc.is_not(None)).first()
+            if sample:
+                origin = sample.source_time_utc-timedelta(milliseconds=sample.session_time_ms)
+        anchors = self.db.query(SessionEntryRecord.car_number, EntryLapRecord.lap_number, EntryLapRecord.lap_start_time_ms).join(
+            EntryLapRecord, EntryLapRecord.session_entry_id == SessionEntryRecord.id).filter(
+                SessionEntryRecord.session_id == job.session_id,
+                EntryLapRecord.lap_start_time_ms.is_not(None), EntryLapRecord.lap_number > 1).order_by(EntryLapRecord.lap_number).limit(100).all() if origin is None else []
         return TelemetrySelection(
             driver_numbers=frozenset(number for (number,) in numbers),
             kinds=frozenset(job.kinds),
+            clock_origin_utc=origin,
+            lap_clock_anchors=tuple(tuple(v) for v in anchors),
         )
 
     def materialize_snapshot(
@@ -420,6 +436,11 @@ class TelemetryMaterializationRepository:
             )
 
         self._mark_segments_completed(request, source_version=source_version)
+        session = self.db.get(EventSessionRecord, job.session_id)
+        if session and snapshot.session.session_time_origin_utc and session.session_time_origin_utc is None:
+            session.session_time_origin_utc = snapshot.session.session_time_origin_utc
+        if session and snapshot.session.data_provider:
+            session.data_provider = snapshot.session.data_provider
         refresh_race_control(self.db, job.session_id, getattr(snapshot, "race_control_messages", []))
         self._refresh_session_telemetry_status(job.session_id)
         self.db.commit()

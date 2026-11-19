@@ -305,7 +305,10 @@ class FastF1Adapter:
             import fastf1
 
             self._ensure_cache_dir()
-            fastf1.Cache.enable_cache(str(self.cache_dir))
+            if hasattr(fastf1.Cache, "configure"):
+                fastf1.Cache.configure(cache_dir=str(self.cache_dir))
+            else:
+                fastf1.Cache.enable_cache(str(self.cache_dir))
             self._fastf1 = fastf1
         return self._fastf1
 

@@ -70,7 +70,18 @@ export function getEntryDisplayName(entry: SessionEntryDto) {
 
 export function getEntryAccent(entry: SessionEntryDto, index = 0) {
   const fallback = ["#ff5b4d", "#4db5ff", "#ffcf5d", "#5ef2a2", "#d07cff", "#f98d54"];
-  return entry.team_color ? `#${entry.team_color.replace(/^#/, "")}` : fallback[index % fallback.length];
+  const colour = entry.team_color?.replace(/^#/, "");
+  return colour && /^[\da-f]{6}$/i.test(colour) ? `#${colour}` : fallback[index % fallback.length];
+}
+
+export function starterDrivers(entries: SessionEntryDto[]) {
+  return orderByStartingGrid(entries).slice(0, 3).map((entry) => entry.id);
+}
+
+export function orderByStartingGrid(entries: SessionEntryDto[]) {
+  const gridRank = (entry: SessionEntryDto) => entry.grid_position && entry.grid_position > 0 ? entry.grid_position : Infinity;
+  return [...entries]
+    .sort((a, b) => gridRank(a) - gridRank(b) || Number(a.car_number) - Number(b.car_number));
 }
 
 export function buildMetricChartPoints(
@@ -121,15 +132,15 @@ export function downsamplePoints(points: ChartPoint[], maxPoints = 180): ChartPo
   return points.filter((_, index) => index % step === 0 || index === points.length - 1);
 }
 
-export function buildLinePath(points: ChartPoint[], width: number, height: number) {
+export function buildLinePath(
+  points: ChartPoint[], width: number, height: number,
+  domain: { minX: number; maxX: number; minY: number; maxY: number },
+) {
   if (points.length === 0) {
     return "";
   }
 
-  const minX = Math.min(...points.map((point) => point.x));
-  const maxX = Math.max(...points.map((point) => point.x));
-  const minY = Math.min(...points.map((point) => point.y));
-  const maxY = Math.max(...points.map((point) => point.y));
+  const { minX, maxX, minY, maxY } = domain;
 
   return points
     .map((point, index) => {
@@ -153,23 +164,6 @@ export function buildReplayTrackViewBox(points: ChartPoint[]) {
   const paddingY = Math.max((maxY - minY) * 0.08, 20);
 
   return `${minX - paddingX} ${minY - paddingY} ${Math.max(maxX - minX + paddingX * 2, 100)} ${Math.max(maxY - minY + paddingY * 2, 100)}`;
-}
-
-export function findTelemetrySampleAtTime(
-  samples: CarTelemetrySampleDto[],
-  currentTimeMs: number,
-) {
-  let candidate: CarTelemetrySampleDto | null = null;
-
-  for (const sample of samples) {
-    if (sample.session_time_ms <= currentTimeMs) {
-      candidate = sample;
-      continue;
-    }
-    break;
-  }
-
-  return candidate;
 }
 
 export function findPositionSampleAtTime(

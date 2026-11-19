@@ -93,6 +93,7 @@ class AnalysisInputProvider:
         *,
         required_inputs=None,
         as_of_ms=None,
+        telemetry_lap_ids=None,
     ):
         session = self.session(session_id)
         records = self.entries(session_id, request.entry_ids)
@@ -170,7 +171,7 @@ class AnalysisInputProvider:
                 by_id[stint["session_entry_id"]].stints.append(stint)
         total = 0
         modern = (
-            session.source == "fastf1"
+            session.source in {"fastf1", "openf1"}
             and self.db.scalar(
                 select(WeekendRecord.season_year).where(
                     WeekendRecord.id == session.weekend_id
@@ -194,6 +195,8 @@ class AnalysisInputProvider:
                 statement = statement.where(
                     model.lap_id.in_([lap["id"] for lap in selected])
                 )
+            if telemetry_lap_ids is not None:
+                statement = statement.where(model.lap_id.in_(telemetry_lap_ids))
             sampled = (
                 statement.distinct(model.session_entry_id, bucket)
                 .order_by(model.session_entry_id, bucket, model.session_time_ms)
@@ -240,6 +243,9 @@ class AnalysisInputProvider:
                 session_id, end if as_of_ms is None else as_of_ms
             )
         data.coverage = {
+            "data_provider": session.data_provider or "legacy_fastf1",
+            "quality_policy": (session.source_details or {}).get("quality_policy"),
+            "lap_timing_note": (session.source_details or {}).get("lap_timing_note"),
             "selected_entries": len(records),
             "sampled_car_records": sum(len(entry.car) for entry in data.entries),
             "sampled_position_records": sum(

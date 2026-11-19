@@ -2,6 +2,20 @@ import numpy as np
 from .common import clean_laps, mad, phase_at, clear_interval, band
 
 
+def latest_pit_transitions(entry, cutoff):
+    def last(key):
+        return max(
+            (
+                lap[key]
+                for lap in entry.laps
+                if lap.get(key) is not None and lap[key] <= cutoff
+            ),
+            default=-1,
+        )
+
+    return last("pit_in_time_ms"), last("pit_out_time_ms")
+
+
 def visits(entry, cutoff):
     ins = sorted(
         {
@@ -40,6 +54,81 @@ def visits(entry, cutoff):
                 )
             )
     return output
+
+
+def net_loss_from_pair(data, clean, inlap, outlap, cutoff, baseline_lap_distance=1):
+    if outlap["lap_number"] != inlap["lap_number"] + 1:
+        return None
+    if any(
+        not row.get("lap_time_ms") or row.get("is_generated") or row.get("is_deleted")
+        for row in (inlap, outlap)
+    ):
+        return None
+    start, end = inlap.get("lap_start_time_ms"), outlap.get("lap_end_time_ms")
+    if (
+        start is None
+        or end is None
+        or end > cutoff
+        or not clear_interval(data, start, end)
+    ):
+        return None
+    before = next(
+        (
+            row
+            for row in reversed(clean)
+            if 0 < inlap["lap_number"] - row["lap_number"] <= baseline_lap_distance
+        ),
+        None,
+    )
+    after = next(
+        (
+            row
+            for row in clean
+            if 0 < row["lap_number"] - outlap["lap_number"] <= baseline_lap_distance
+        ),
+        None,
+    )
+    if before is None or after is None:
+        return None
+    loss = (
+        inlap["lap_time_ms"]
+        + outlap["lap_time_ms"]
+        - before["lap_time_ms"]
+        - after["lap_time_ms"]
+    ) / 1000
+    return (
+        {
+            "net_loss_s": loss,
+            "known_at_ms": after["lap_end_time_ms"],
+            "stop_lap_end_ms": inlap["lap_end_time_ms"],
+            "baseline_laps": [before["lap_number"], after["lap_number"]],
+        }
+        if 0 < loss < 100
+        else None
+    )
+
+
+def empirical_pit_losses(data, cutoff, all_visits=None):
+    if all_visits is None:
+        all_visits = [
+            {**visit, "phase": phase_at(data, visit["start"])}
+            for entry in data.entries
+            for visit in visits(entry, cutoff)
+        ]
+    losses = []
+    for entry in data.entries:
+        clean = clean_laps(entry, cutoff)
+        for visit in all_visits:
+            if visit["entry_id"] != entry.id or visit["phase"] != "1":
+                continue
+            loss = net_loss_from_pair(
+                data, clean, visit["inlap"], visit["outlap"], cutoff
+            )
+            if loss:
+                losses.append(
+                    {**loss, "entry_id": entry.id, "lane_duration_s": visit["lane_s"]}
+                )
+    return losses
 
 
 def pit_features(data, request, context, result):
@@ -127,53 +216,10 @@ def pit_features(data, request, context, result):
         n=len(others),
         status="estimated",
     )
-    losses = []
-    for entry in data.entries:
-        clean = clean_laps(entry, request.as_of_ms)
-        for visit in [
-            item
-            for item in all_visits
-            if item["entry_id"] == entry.id and item["phase"] == "1"
-        ]:
-            inlap, outlap = visit["inlap"], visit["outlap"]
-            if (
-                outlap["lap_number"] != inlap["lap_number"] + 1
-                or not outlap.get("lap_time_ms")
-                or not inlap.get("lap_time_ms")
-            ):
-                continue
-            if (
-                outlap.get("lap_end_time_ms") or request.as_of_ms + 1
-            ) > request.as_of_ms:
-                continue
-            before = next(
-                (
-                    row
-                    for row in reversed(clean)
-                    if row["lap_number"] == inlap["lap_number"] - 1
-                ),
-                None,
-            )
-            after = next(
-                (row for row in clean if row["lap_number"] == outlap["lap_number"] + 1),
-                None,
-            )
-            if (
-                not before
-                or not after
-                or not clear_interval(
-                    data, inlap["lap_start_time_ms"], outlap["lap_end_time_ms"]
-                )
-            ):
-                continue
-            loss = (
-                inlap["lap_time_ms"]
-                + outlap["lap_time_ms"]
-                - before["lap_time_ms"]
-                - after["lap_time_ms"]
-            ) / 1000
-            if 0 < loss < 100:
-                losses.append(loss)
+    losses = [
+        row["net_loss_s"]
+        for row in empirical_pit_losses(data, request.as_of_ms, all_visits)
+    ]
     net = float(np.median(losses)) if len(losses) >= 3 else None
     dispersion = mad(losses) if len(losses) >= 3 else None
     result.put(

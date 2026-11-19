@@ -4,15 +4,37 @@
   height: 320px;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #36465d;
+  border: 1px solid var(--color-border-strong);
   border-radius: 10px;
-  background: #0d131e;
+  background: var(--color-recessed);
   padding: 8px;
 }
 .layout-preview--compact {
+  position: relative;
   height: 180px;
   border-radius: 8px;
   padding: 6px;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--color-text-primary) 16%, transparent) 0.5px, transparent 1px) center / 9px 9px,
+    radial-gradient(ellipse at center, var(--color-control), var(--color-recessed) 75%);
+}
+.layout-preview--compact::before,
+.layout-preview--compact::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+.layout-preview--compact::before {
+  inset: 6px auto auto 6px;
+  border-top: 1px solid var(--color-border-strong);
+  border-left: 1px solid var(--color-border-strong);
+}
+.layout-preview--compact::after {
+  inset: auto 6px 6px auto;
+  border-bottom: 1px solid var(--color-border-strong);
+  border-right: 1px solid var(--color-border-strong);
 }
 .layout-preview--full {
   height: auto;

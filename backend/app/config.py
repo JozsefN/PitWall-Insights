@@ -1,4 +1,4 @@
-from pydantic import field_validator
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = True
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/pitwall_insights"
-    ingestion_source: str = "fastf1"
+    ingestion_source: str = "openf1"
     fastf1_cache_dir: str | None = None
     session_cache_ttl_hours: int = 168
     import_job_retention_hours: int = 168
@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     import_worker_poll_seconds: int = 5
     fastf1_import_timeout: int = 180
     default_season_lookback: int = 1
+    provider_credentials_key: SecretStr | None = None
+    provider_credentials_key_file: str | None = None
 
     @field_validator("debug", mode="before")
     @classmethod

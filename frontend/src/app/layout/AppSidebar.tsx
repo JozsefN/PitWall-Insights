@@ -27,10 +27,6 @@ export function AppSidebar() {
             </nav>
           </section>
         ))}
-        <div className="app-sidebar__footer">
-          <span aria-hidden="true" />
-          Built around your race.
-        </div>
       </div>
     </aside>
   );

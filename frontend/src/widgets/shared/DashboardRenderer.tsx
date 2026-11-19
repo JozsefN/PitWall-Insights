@@ -1,8 +1,11 @@
+import type { CSSProperties } from "react";
 import { ResponsiveWidgetFrame } from "./ResponsiveWidgetFrame";
 import { widgetRegistry } from "../registry/widget.registry";
+import { dashboardGrid } from "../registry/widget.catalog";
 import type {
   DashboardConfig,
   DashboardSection,
+  HeightMode,
   SectionLayoutNode,
   LayoutGroupNode,
   LayoutWidgetNode,
@@ -11,6 +14,12 @@ import { WidgetCard } from "./WidgetCard";
 import { WidgetError } from "./WidgetState";
 import "./dashboard-renderer.css";
 import "./widget-responsive.css";
+
+const legacyHeights: Partial<Record<HeightMode, number>> = {
+  sm: 140,
+  md: 240,
+  lg: 320,
+};
 
 type DashboardRendererProps = {
   config: DashboardConfig;
@@ -64,20 +73,27 @@ function DashboardSectionView({ section }: { section: DashboardSection }) {
   );
 }
 
-function LayoutNodeRenderer({ node }: { node: SectionLayoutNode }) {
+function LayoutNodeRenderer({
+  node,
+  panelHeight,
+}: {
+  node: SectionLayoutNode;
+  panelHeight?: number;
+}) {
   if (node.type === "group") {
     return <LayoutGroupRenderer node={node} />;
   }
 
-  return <LayoutWidgetRenderer node={node} />;
+  return <LayoutWidgetRenderer node={node} panelHeight={panelHeight} />;
 }
 
 function LayoutGroupRenderer({ node }: { node: LayoutGroupNode }) {
+  const gap = node.gap ?? 16;
   return (
     <div
       className={`layout-group layout-group--${node.grid ? "grid" : node.direction}`}
       style={{
-        gap: node.gap ?? 16,
+        gap,
         gridTemplateColumns: node.grid
           ? `repeat(${node.grid.columns}, minmax(0, 1fr))`
           : undefined,
@@ -85,55 +101,77 @@ function LayoutGroupRenderer({ node }: { node: LayoutGroupNode }) {
       }}
     >
       {node.children.map((child, index) => (
-        <LayoutNodeRenderer key={index} node={child} />
+        <LayoutNodeRenderer
+          key={index}
+          node={child}
+          panelHeight={
+            node.grid && child.type === "widget" && child.placement
+              ? child.placement.h * (node.grid.rowHeight + gap) - gap
+              : undefined
+          }
+        />
       ))}
     </div>
   );
 }
 
-function LayoutWidgetRenderer({ node }: { node: LayoutWidgetNode }) {
+function LayoutWidgetRenderer({
+  node,
+  panelHeight,
+}: {
+  node: LayoutWidgetNode;
+  panelHeight?: number;
+}) {
   const definition = widgetRegistry[node.widgetId];
-
-  if (!definition) {
-    return (
-      <div className="layout-widget layout-widget--width-fill layout-widget--height-auto">
-        <WidgetCard
-          title="Unavailable Widget"
-          description={`The widget "${node.widgetId}" is not registered in this build.`}
-        >
-          <WidgetError />
-        </WidgetCard>
-      </div>
+  const Component = definition?.component;
+  const defaultRows = definition?.sizing.defaultH ?? 5;
+  const catalogHeight =
+    defaultRows * (dashboardGrid.rowHeight + dashboardGrid.gap) -
+    dashboardGrid.gap;
+  const legacyMinimum = node.minHeight ?? 0;
+  const legacyPreferred =
+    legacyMinimum || (legacyHeights[node.height ?? "auto"] ?? catalogHeight);
+  const height =
+    panelHeight ??
+    Math.max(
+      legacyMinimum,
+      Math.min(legacyPreferred, node.maxHeight ?? Infinity),
     );
-  }
-
-  const Component = definition.component;
 
   return (
     <div
       className={[
         "layout-widget",
         `layout-widget--width-${sanitizeClassToken(node.width ?? "fill")}`,
-        `layout-widget--height-${sanitizeClassToken(node.height ?? "auto")}`,
         node.className ?? "",
       ]
         .filter(Boolean)
         .join(" ")}
-      style={{
-        minHeight: node.minHeight,
-        maxHeight: node.maxHeight,
-        flexGrow: node.grow ?? 0,
-        gridColumn: node.placement
-          ? `${node.placement.x + 1} / span ${node.placement.w}`
-          : undefined,
-        gridRow: node.placement
-          ? `${node.placement.y + 1} / span ${node.placement.h}`
-          : undefined,
-      }}
+      style={
+        {
+          "--panel-height": `${height}px`,
+          flexGrow: node.grow,
+          gridColumn: node.placement
+            ? `${node.placement.x + 1} / span ${node.placement.w}`
+            : undefined,
+          gridRow: node.placement
+            ? `${node.placement.y + 1} / span ${node.placement.h}`
+            : undefined,
+        } as CSSProperties
+      }
     >
-      <ResponsiveWidgetFrame widgetId={node.widgetId}>
-        <Component options={node.options} />
-      </ResponsiveWidgetFrame>
+      {Component ? (
+        <ResponsiveWidgetFrame widgetId={node.widgetId}>
+          <Component options={node.options} />
+        </ResponsiveWidgetFrame>
+      ) : (
+        <WidgetCard
+          title="Unavailable Widget"
+          description={`The widget "${node.widgetId}" is not registered in this build.`}
+        >
+          <WidgetError />
+        </WidgetCard>
+      )}
     </div>
   );
 }

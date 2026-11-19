@@ -9,7 +9,7 @@ export function AppLayout() {
     pathname === "/" || pathname === "/login" || pathname === "/signup";
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-white">
+    <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>

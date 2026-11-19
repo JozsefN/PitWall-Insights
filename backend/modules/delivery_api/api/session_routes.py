@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Literal
 from sqlalchemy.orm import Session
 
 from modules.delivery_api.api.auth_dependencies import require_current_user
@@ -9,6 +10,7 @@ from modules.ingestion.infrastructure.provider_registry import build_session_sou
 from modules.normalization.application.service import NormalizationService
 from modules.session_domain.application.service import SessionService
 from modules.session_domain.domain.models import DeleteSessionResponse, SessionImportRequest
+from modules.session_domain.infrastructure.pit_map import load_pit_map
 from modules.session_domain.infrastructure.repository import SessionRepository
 from modules.storage.infrastructure.db import get_db
 
@@ -21,7 +23,7 @@ router = APIRouter(
 
 def build_session_service(db: Session) -> SessionService:
     repository = SessionRepository(db=db)
-    ingestion_service = IngestionService(source=build_session_source())
+    ingestion_service = IngestionService(source=build_session_source(db=db, user_id=db.info.get("actor_user_id")))
     normalization_service = NormalizationService()
     return SessionService(
         repository=repository,
@@ -32,7 +34,7 @@ def build_session_service(db: Session) -> SessionService:
 
 @router.get("/catalog")
 def list_session_catalog(
-    season: int | None = Query(default=None, ge=2018, le=2100),
+    season: int | None = Query(default=None, ge=2023, le=2100),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     service = build_session_service(db)
@@ -95,6 +97,22 @@ def list_session_entries(
     return [entry.model_dump() for entry in service.list_entries(session_id)]
 
 
+@router.get("/{session_id}/source-details/{kind}")
+def session_source_details(session_id: str, kind: Literal["lap_quality", "pit_stops", "intervals", "race_positions", "coverage", "starting_grid", "overtakes"],
+    offset: int = Query(0, ge=0), limit: int = Query(200, ge=1, le=1000), db: Session = Depends(get_db)):
+    from modules.session_domain.infrastructure.models import EventSessionRecord
+    record = db.get(EventSessionRecord, session_id)
+    if record is None:
+        raise HTTPException(404, "Session not found")
+    details = record.source_details or {}
+    rows = details.get(kind, [])
+    if isinstance(rows, dict):
+        rows = [{"driver_number": key, **value} for key, value in rows.items()]
+    return {"provider": record.data_provider, "quality_policy": details.get("quality_policy"),
+            "timing_note": details.get("lap_timing_note"), "total": len(rows), "offset": offset,
+            "items": rows[offset:offset+limit]}
+
+
 @router.get("/{session_id}/circuit-corners")
 def list_session_circuit_corners(
     session_id: str,
@@ -107,6 +125,14 @@ def list_session_circuit_corners(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@router.get("/{session_id}/pit-map")
+def get_session_pit_map(session_id: str, db: Session = Depends(get_db)) -> dict:
+    pit_map = load_pit_map(db, session_id)
+    if pit_map is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return pit_map
 
 
 @router.get("/{session_id}/entries/{entry_id}/laps")

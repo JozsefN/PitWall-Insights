@@ -5,13 +5,14 @@ import { WidgetBlueprint } from "../../widgets/shared/WidgetBlueprint";
 import { draftFromLayout, GRID_GAP, GRID_ROW_HEIGHT } from "./editor-model";
 import "./layout-preview.css";
 
-type Props = { config: DashboardConfig; compact?: boolean; full?: boolean };
+type Props = { config: DashboardConfig; compact?: boolean; full?: boolean; lead?: boolean };
 
 // One whole-dashboard drawing; editor overview and chooser cards use identical geometry.
 export function LayoutPreview({
   config,
   compact = false,
   full = false,
+  lead = false,
 }: Props) {
   const groups = useMemo(() => {
     const draft = draftFromLayout(
@@ -64,7 +65,7 @@ export function LayoutPreview({
       <svg
         width="100%"
         height="100%"
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${width} ${lead ? Math.min(height, width * 0.45) : height}`}
         preserveAspectRatio="xMidYMin meet"
         role={full ? "img" : undefined}
         aria-label={
@@ -74,11 +75,11 @@ export function LayoutPreview({
         }
         aria-hidden={full ? undefined : true}
       >
-        <rect width={width} height={height} fill="#0d131e" />
+        <rect width={width} height={height} fill="var(--color-control)" />
         {groups.map((group) => (
           <g key={group.id} transform={`translate(0 ${group.top})`}>
             {group.heading ? (
-              <text x="8" y="22" fill="#d7e5f7" fontSize="17" fontWeight="600">
+              <text x="8" y="22" fill="var(--color-text-primary)" fontSize="17" fontWeight="600">
                 {group.label}
               </text>
             ) : null}

@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { logout } from "../../data/api/auth.api";
 import { useAuthSession } from "../../features/auth/useAuthSession";
+import { ThemeToggle } from "../../features/theme/ThemeToggle";
 
 import { navigationItems } from "./navigation";
 
@@ -12,6 +13,7 @@ export function AppHeader() {
 
   async function handleLogout() {
     logout();
+    queryClient.removeQueries({ queryKey: ["profile"] });
 
     await queryClient.setQueryData(["auth-session"], {
       authenticated: false,
@@ -51,16 +53,18 @@ export function AppHeader() {
             ))}
         </nav>
         <div className="app-header__account">
+          <ThemeToggle />
           {isLoading ? (
             <span>Checking session...</span>
           ) : data?.authenticated ? (
             <>
-              <span
-                className="app-header__identity"
+              <Link to="/profile"
+                className="app-header__profile"
+                aria-label="Open profile"
                 title={data.email ?? undefined}
               >
-                {data.email}
-              </span>
+                <span className="app-header__identity">{data.email}</span><span className="app-header__profile-label">Profile</span>
+              </Link>
               <Link
                 to="/system/health"
                 className="button-secondary app-header__diagnostics"

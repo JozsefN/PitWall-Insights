@@ -69,7 +69,10 @@ class TelemetryMaterializationService:
             source, request = self.repository.build_session_import_request(job.session_id)
             request.force_refresh = job.force_refresh
             selection = self.repository.build_telemetry_selection(job)
-            ingestion_service = IngestionService(source=build_session_source(source))
+            from modules.session_domain.infrastructure.models import EventSessionRecord
+            session = self.db.get(EventSessionRecord, job.session_id)
+            ingestion_service = IngestionService(source=build_session_source(source, db=self.db,
+                user_id=session.owner_user_id if session else None, session_id=job.session_id))
 
             self.repository.mark_stage(job_id, stage="loading_source", now=datetime.now(timezone.utc))
             bundle = ingestion_service.load_session(request, telemetry_selection=selection)

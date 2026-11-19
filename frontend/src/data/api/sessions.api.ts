@@ -1,13 +1,14 @@
 import { apiClient } from "./client";
+import type { TimingTowerDto } from "../contracts/session-timing.contracts";
 import type {
   CarTelemetrySampleDto,
   EntryLapDto,
   PositionSampleDto,
   SessionCatalogItemDto,
-  SessionCircuitCornerDto,
   SessionDto,
   SessionEntryDto,
   SessionImportRequestDto,
+  SessionPitMapDto,
   SessionTelemetryQuery,
   SessionTickDto,
   SessionTrackStatusEventDto,
@@ -15,6 +16,11 @@ import type {
 
 export async function listSessions(): Promise<SessionDto[]> {
   const { data } = await apiClient.get("/api/sessions");
+  return data;
+}
+
+export async function getSessionTimingTower(sessionId: string, signal: AbortSignal): Promise<TimingTowerDto> {
+  const { data } = await apiClient.get(`/api/feature-metrics/sessions/${sessionId}/timing-tower`, { signal });
   return data;
 }
 
@@ -46,12 +52,8 @@ export async function listSessionEntries(
   return data;
 }
 
-export async function listSessionCircuitCorners(
-  sessionId: string,
-): Promise<SessionCircuitCornerDto[]> {
-  const { data } = await apiClient.get(
-    `/api/sessions/${sessionId}/circuit-corners`,
-  );
+export async function getSessionPitMap(sessionId: string, signal?: AbortSignal): Promise<SessionPitMapDto> {
+  const { data } = await apiClient.get(`/api/sessions/${sessionId}/pit-map`, { signal });
   return data;
 }
 

@@ -58,7 +58,7 @@ class MigrationTests(unittest.TestCase):
                 self.assertEqual(
                     connection.scalar(text("select current_schema()")), schema
                 )
-            migrate("upgrade", "c9f604e1d723")
+            migrate("upgrade", "head")
             bundle = source_bundle()
             bundle.weather = [dict(SessionTime=0, WindSpeed=10)]
             snapshot = NormalizationService().build_snapshot(bundle, ttl_hours=1)
@@ -66,6 +66,10 @@ class MigrationTests(unittest.TestCase):
                 SessionRepository(db).import_snapshot(
                     snapshot, source_version="fixture", force_refresh=False
                 )
+            # Current ORM models include columns introduced after c9. Seed at head,
+            # then exercise the real downgrade before reproducing old wind units.
+            migrate("downgrade", "c9f604e1d723")
+            with factory() as db:
                 # Reproduce the legacy importer that stored m/s in a km/h column.
                 db.execute(update(SessionWeatherSampleRecord).values(wind_speed_kph=10))
                 db.commit()

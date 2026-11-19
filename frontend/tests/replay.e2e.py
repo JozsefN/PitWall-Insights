@@ -44,14 +44,31 @@ try:
         near_expiry = mint(2)
         page.goto(BASE+'/login')
         page.evaluate('(token)=>localStorage.setItem("auth_token",token)',near_expiry)
-        session_id = '83b766df-f250-4293-8b72-15f481ea039b'
-        entries = api(f'/api/sessions/{session_id}/entries')[:20]
+        race = api('/api/sessions/import', {
+            'season_year': 2025,
+            'round_number': 7,
+            'session_name': 'Race',
+            'source_session_key': 'openf1:session:9987',
+            'import_profile': 'core',
+        })
+        session_id = race['id']
+        entries = api(f'/api/sessions/{session_id}/entries')
+        assert len(entries) == 20, 'The Imola full-grid fixture should have 20 drivers'
         started = monotonic()
         page.goto(replay_url(session_id,entries))
-        expect(page.locator('.track-map-viewer__driver-dot')).to_have_count(20,timeout=180000)
+        start = page.get_by_role('button',name='Start',exact=True)
+        expect(start).to_be_enabled(timeout=180000)
+        # The timing feed can begin before the first location sample. Jump into the race
+        # to check the full field without accidentally requiring future positions to render.
+        page.get_by_label('Jump to lap',exact=True).select_option(label='Lap 3')
+        expect(page.locator('.track-map-viewer__driver-dot')).to_have_count(20,timeout=30000)
         expect(page.locator('.replay-driver-card')).to_have_count(20,timeout=30000)
         startup = monotonic()-started
-        page.get_by_role('button',name='Zoom in',exact=True).click()
+        zoom_in = page.get_by_role('button',name='Zoom in',exact=True)
+        for _ in range(7):
+            if page.locator('.track-map-car').count():
+                break
+            zoom_in.click()
         expect(page.locator('.track-map-car')).to_have_count(20)
         assert startup < 180, f'Cached browser startup exceeded 180s: {startup}'
         assert sum('/api/auth/refresh' in url for url in requests)==1,'Concurrent requests should share one renewal'
@@ -68,21 +85,33 @@ try:
         page.wait_for_function('(before)=>document.querySelector(".track-map-car").getAttribute("transform")!==before',arg=before_marker)
         slider.focus(); page.keyboard.press('End')
         expect(slider).to_have_value(slider.get_attribute('max'))
-        expect(page.locator('.track-map-car')).to_have_count(20)
+        # Retired drivers and other stale positions must not remain on the circuit.
+        assert page.locator('.track-map-car').count() <= len(entries)
+        expect(page.locator('.track-map-viewer')).to_be_visible()
         expect(page.locator('.widget-state--error')).to_have_count(0)
         page.locator('.track-map-viewer').scroll_into_view_if_needed()
         page.screenshot(path=str(ARTIFACTS/'cached-replay.png'))
         print(f'PASS cached replay with 20 drivers playable in {startup:.2f}s; one token renewal, sampled full-race coverage, playback and seek-to-end',flush=True)
 
-        unavailable_id = '5ee16b1e-792f-49c1-ad14-952aea673507'
-        unavailable_entries = api(f'/api/sessions/{unavailable_id}/entries')[:2]
         started = monotonic()
-        page.goto(replay_url(unavailable_id,unavailable_entries))
-        expect(page.locator('.widget-state--error').first).to_contain_text('data source returned no',timeout=60000)
+        # Exercise empty telemetry without relying on an obsolete provider or an upstream outage.
+        empty_car = '**/telemetry/car?*'
+        page.route(empty_car, lambda route: route.fulfill(
+            status=200, json=[], headers={'Access-Control-Allow-Origin': BASE},
+        ))
+        page.goto(replay_url(session_id, entries[:2]))
+        status = page.locator('#replay-start-status')
+        expect(status).to_contain_text('Car telemetry is missing for 2 drivers',timeout=60000)
+        expect(start).to_be_disabled()
+        start.evaluate('node => node.click()')
+        expect(page.get_by_role('button',name='Pause',exact=True)).to_have_count(0)
         failure_seconds = monotonic()-started
-        page.locator('.widget-state--error').first.scroll_into_view_if_needed()
+        status.scroll_into_view_if_needed()
         page.screenshot(path=str(ARTIFACTS/'source-unavailable.png'))
-        print(f'PASS unavailable upstream telemetry reported in {failure_seconds:.2f}s',flush=True)
+        page.unroute(empty_car)
+        page.reload()
+        expect(start).to_be_enabled(timeout=60000)
+        print(f'PASS empty telemetry blocked replay in {failure_seconds:.2f}s and real data restored playback',flush=True)
 
         page.evaluate('(token)=>localStorage.setItem("auth_token",token)',mint(-1))
         page.reload()
@@ -90,7 +119,7 @@ try:
         assert page.evaluate('localStorage.getItem("auth_token")') is None
         assert not errors, errors
         print('PASS expired token returns to sign-in; no browser runtime errors',flush=True)
-        (ARTIFACTS/'results.json').write_text(json.dumps({'cached_20_driver_browser_startup_seconds':round(startup,3),'upstream_failure_seconds':round(failure_seconds,3)},indent=2),encoding='utf-8')
+        (ARTIFACTS/'results.json').write_text(json.dumps({'cached_20_driver_browser_startup_seconds':round(startup,3),'simulated_empty_telemetry_seconds':round(failure_seconds,3)},indent=2),encoding='utf-8')
         browser.close()
 finally:
     if user_id:

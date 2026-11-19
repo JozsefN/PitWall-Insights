@@ -1,0 +1,76 @@
+{
+  "event": "Emilia Romagna Grand Prix",
+  "session_key": "9987",
+  "selected_drivers": 20,
+  "active_drivers": 20,
+  "closed_outline": true,
+  "pit_map": {
+    "team_boxes": 10,
+    "visits": 37,
+    "lane_points": 115
+  },
+  "1x": {
+    "elapsed_ms": 6031.800000000745,
+    "frame_p95_ms": 16.799999999999272,
+    "longest_frame_ms": 83.39999999999964,
+    "frames_over_50_ms": 1,
+    "long_tasks": 0,
+    "simulated_ms": 6023,
+    "clock_ratio": 0.999
+  },
+  "5x": {
+    "elapsed_ms": 6034.800000000745,
+    "frame_p95_ms": 16.799999999999272,
+    "longest_frame_ms": 66.59999999999854,
+    "frames_over_50_ms": 1,
+    "long_tasks": 0,
+    "simulated_ms": 30023,
+    "clock_ratio": 0.995
+  },
+  "errors": [],
+  "wind_5x": {
+    "elapsed_ms": 6004.9000000003725,
+    "frame_p95_ms": 16.799999999999272,
+    "longest_frame_ms": 49.900000000001455,
+    "frames_over_50_ms": 0,
+    "long_tasks": 1,
+    "simulated_ms": 29952,
+    "clock_ratio": 0.998
+  },
+  "car_scale": {
+    "original_zoom": {
+      "length_m": 5.50053146982832,
+      "width_m": 2.0001932617557525,
+      "length_px": 27.210441614806967
+    },
+    "maximum_zoom": {
+      "length_m": 5.500119360229171,
+      "width_m": 2.000043403719699,
+      "length_px": 71.99999999999999
+    },
+    "previous_zoom": {
+      "length_m": 5.500558533413189,
+      "width_m": 2.000203103059341,
+      "length_px": 44.26230694855926
+    },
+    "compact_close_up": {
+      "length_m": 5.5003068757324645,
+      "width_m": 2.000111591175441,
+      "length_px": 41.99999953391336
+    }
+  },
+  "illustrated_road_metres": {
+    "narrowest": 12.5,
+    "widest": 12.5
+  },
+  "workflows": [
+    "stable whole-circuit camera",
+    "two named close-up cars",
+    "fixed car dimensions at expanded zoom",
+    "readable car in a compact map",
+    "smooth closed road without a reference line",
+    "max zoom, pan, reset",
+    "moving wind arrows, km/h and reduced motion",
+    "readable light mode at desktop and phone widths"
+  ]
+}

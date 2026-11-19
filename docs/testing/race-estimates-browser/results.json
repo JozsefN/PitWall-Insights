@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "builder_search_category_settings_database_save_and_reload",
+    "all_15_panels_real_openf1_snapshot_and_shared_request",
+    "replay_rewind_removes_future_notifications",
+    "driver_comparison_and_metric_evidence_render",
+    "fixed_five_and_height_dependent_notification_capacity",
+    "mobile_panels_do_not_overflow_page"
+  ],
+  "count": 6,
+  "browser_errors": [],
+  "panels": 15,
+  "source": "openf1:session:9693",
+  "mocked_telemetry": false,
+  "as_of_ms": 10000000,
+  "panel_startup_seconds": 3.098,
+  "cached_api_seconds": 0.021,
+  "cache_hit": true,
+  "version": "race_estimation_v1",
+  "metric_count": 75,
+  "events": 63,
+  "telemetry_coverage_pct": {
+    "1": 99.760333,
+    "16": 99.760333,
+    "4": 99.760333
+  },
+  "requests_at_target_cutoff": 2,
+  "test_account_removed": true
+}

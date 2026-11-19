@@ -27,7 +27,7 @@ A címeket a felhasználó által bemásolt portáladatok szerint használjuk; a
 ## Beillesztett adatok és fogalmazás
 
 - Név: Novák József Pál, a felhasználó javítása alapján.
-- Neptun-kód: IT8VSG.
+- Neptun-kód: ______.
 - Képzés: alapképzés, mérnökinformatikus szak; szakdolgozat.
 - Tanszék: BME VIK, Automatizálási és Alkalmazott Informatikai Tanszék.
 - Konzulens: Albert István, mérnöktanár. A beosztást az AUT telefonkönyvében ellenőriztük.

@@ -5,3 +5,12 @@ __pycache__/
 .venv/
 .env
 backend/.fastf1-cache/
+
+# Local thesis inputs and reproducible export workspace
+/docs/DiplomatervSablon*.docx
+/docs/F1app.docx
+/docs/Milyenarangosdiplomaterv.pdf
+/docs/Szakdolgozat pontozólap.pdf
+/docs/generated/architecture-review-before-*/
+/docs/generated/thesis-before-*/
+/docs/generated/szakdolgozat-forrasok/

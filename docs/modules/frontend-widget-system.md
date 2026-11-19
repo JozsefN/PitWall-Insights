@@ -447,11 +447,11 @@ This gives the product a stronger base for the future map work:
   predictably without overwhelming the track
 - racing lines and previous-lap ghosts can be toggled independently from the
   current car markers
-- FastF1 circuit-corner metadata is exposed through
+- OpenF1 circuit-corner metadata is exposed through
   `GET /api/sessions/{session_id}/circuit-corners` and rendered as numbered
   turn markers when the source provides it
 
-The current renderer uses the data available from FastF1-derived position
+The current renderer uses the data available from OpenF1-derived position
 samples, `EntryLapDto` rows, and source-backed circuit-corner metadata. The
 track surface is still derived from a representative lap rather than an
 official vector circuit polygon; this keeps side-by-side car positions and

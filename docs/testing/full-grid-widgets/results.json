@@ -1,0 +1,29 @@
+{
+  "replay_map_and_driver_cards": 20,
+  "stint_full_grid": {
+    "height": 319,
+    "width": 1063,
+    "paintedWidth": 1063,
+    "overlap": false
+  },
+  "late_lap_drivers_with_data": 18,
+  "single_lap_table_drivers": 20,
+  "pace_desktop": {
+    "height": 182,
+    "width": 706,
+    "paintedWidth": 706,
+    "overlap": false
+  },
+  "pace_mobile": {
+    "height": 182,
+    "width": 269,
+    "paintedWidth": 269,
+    "overlap": false
+  },
+  "speed_throttle_brake_traces_per_plot": 20,
+  "traces_when_one_driver_has_no_samples": 19,
+  "timing_visuals_follow_replay": true,
+  "tyre_profile_and_stint_pace": true,
+  "new_panels_work_in_saved_dashboard": true,
+  "pace_pit_racecraft_api_selection": 20
+}

@@ -1,0 +1,91 @@
+{
+  "checked_at": "2026-11-19",
+  "model_version": "race_estimation_v1",
+  "definitions": 75,
+  "new_panels": 15,
+  "new_factory_layouts": 4,
+  "backend": {
+    "command": "backend/.venv/Scripts/python.exe -m unittest discover -s tests -q",
+    "working_directory": "backend",
+    "passed": 140,
+    "failed": 0,
+    "seconds": 36.219,
+    "new_model_and_api_tests": 21,
+    "failure_logs_expected": "Source-denial and cache-write PermissionError messages are exercised failure-path tests, not failing tests."
+  },
+  "frontend": {
+    "tests_passed": 21,
+    "failed": 0,
+    "full_eslint": "passed",
+    "typescript_and_production_build": "passed",
+    "build_warning": "JavaScript chunk above 500 kB"
+  },
+  "browser": {
+    "checks": [
+      "builder_search_category_settings_database_save_and_reload",
+      "all_15_panels_real_openf1_snapshot_and_shared_request",
+      "replay_rewind_removes_future_notifications",
+      "driver_comparison_and_metric_evidence_render",
+      "fixed_five_and_height_dependent_notification_capacity",
+      "mobile_panels_do_not_overflow_page"
+    ],
+    "count": 6,
+    "browser_errors": [],
+    "panels": 15,
+    "source": "openf1:session:9693",
+    "mocked_telemetry": false,
+    "as_of_ms": 10000000,
+    "panel_startup_seconds": 3.098,
+    "cached_api_seconds": 0.021,
+    "cache_hit": true,
+    "version": "race_estimation_v1",
+    "metric_count": 75,
+    "events": 63,
+    "telemetry_coverage_pct": {
+      "1": 99.760333,
+      "16": 99.760333,
+      "4": 99.760333
+    },
+    "requests_at_target_cutoff": 2,
+    "test_account_removed": true
+  },
+  "layout_builder_regression": {
+    "passed": true,
+    "coverage": [
+      "drag and resize constraints",
+      "all preview types",
+      "whole dashboard",
+      "save retry and persistence",
+      "factory copy and protection",
+      "favorites and owner isolation",
+      "mobile layout",
+      "sticky creation toolbar"
+    ]
+  },
+  "physical_calibration": {
+    "status": "not_calibrated",
+    "meaning": "Numerical correctness, exclusions, API and UI behavior tested; detection precision, tyre wear and optimal strategy accuracy are not established."
+  },
+  "source_sha256": {
+    "backend/modules/delivery_api/api/race_estimation_routes.py": "558b4fc4a873422585be32dfb9e2c0946c911ea2b2084c80cd5f927cf82b7a45",
+    "backend/modules/feature_metrics/application/race_estimation_service.py": "bcbac8b7506801409c1a05344658772344001e42c94a0ce373ab66a367cac9b5",
+    "backend/modules/feature_metrics/domain/race_estimation/__init__.py": "e2c6bfec05505156ff9aa3088475651a70c200502c904584f2845e841674fbf2",
+    "backend/modules/feature_metrics/domain/race_estimation/catalog.py": "a87fe2f3dfec3d83742f172f9587db2a30707994cc9820ae9af9b76cea479e61",
+    "backend/modules/feature_metrics/domain/race_estimation/common.py": "349ac2730e69e51ed2c293c19c3a85852fd2a4bd1a9abc2c709e790f814e3b92",
+    "backend/modules/feature_metrics/domain/race_estimation/driver.py": "4c5bf9ee5e5068565ade4215a15ca5616421495ea76d05aa2567c2bd887ffbbf",
+    "backend/modules/feature_metrics/domain/race_estimation/engine.py": "198878a08fdb37b2667250c81852c85e7381163f1766570a9ac0060e3c5b6ece",
+    "backend/modules/feature_metrics/domain/race_estimation/events.py": "8b4db69cbdeda74dcae0ecb71d905836ea215d2cf8339cea8127f07b7ce3dfab",
+    "backend/modules/feature_metrics/domain/race_estimation/models.py": "fd83b4153c40d932fb5ed5976f52d288b6eb0d3753385472d36ae1a5a3e2b122",
+    "backend/modules/feature_metrics/domain/race_estimation/traffic.py": "71fd5e31bbecd7342b726519a827f8eac967e2c6e1e21897307495cbf6cc4ca0",
+    "frontend/src/features/race-insights/contracts.ts": "05a9becd4736d3b0773c3c58a5bc7fa865376c7f0f3d15910aeef689c57ae095",
+    "frontend/src/features/race-insights/presentation.ts": "8094c2721fc23e55e8a0f24ffafabb19e1c57841a677517eec8047f35006ba07",
+    "frontend/src/features/race-insights/race-estimation-context.ts": "47e03af00c566bef6090d8231afe6dc260701c3e8c3cef67882c8690c51f4473",
+    "frontend/src/features/race-insights/RaceEstimationProvider.tsx": "2dae3e6819a6f966ad0617f9ff1078737399f26892cd0001a73f7e72051e23ec",
+    "frontend/src/features/race-insights/useRaceEstimates.ts": "0df481b0c556c7d470cfdebc3d5dd9c5224c30893d80aeea329d0cc3a44044b2",
+    "frontend/src/widgets/insights/insight.registry.tsx": "721dcbdb5f14a76ee4edfbe7b7aa3c24fc3a38b4f171828f3944db9d75498caa",
+    "frontend/src/widgets/insights/insights.css": "8659cc7487f0ec5242393215752f78d8e61578651b35be9ca13180000b80f2bd",
+    "frontend/src/widgets/insights/InsightWidgets.tsx": "87b6d9d9e4ce033ec05b5da58731074277341680b573f2a83b1fef7117fa6a28",
+    "frontend/src/widgets/insights/panel-specs.ts": "fe8c3f3af647a8071d6598b1e36a6a97c22ede57a500010e505481717b4a247f",
+    "shared/dashboard-widgets.json": "887961079bc78a9627e023cdff3fb1562446f847b0e066deb1bc94a294755699"
+  }
+}

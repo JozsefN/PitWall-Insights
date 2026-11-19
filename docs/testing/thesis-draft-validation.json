@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-11-20",
+  "pages": 54,
+  "pages_before_appendix": 42,
+  "appendix_pages": 12,
+  "remaining_pages_to_50": 8,
+  "main_figures": 9,
+  "appendix_figures": 14,
+  "technology_section_pages": [
+    9,
+    10
+  ],
+  "net_characters_with_spaces": 57876,
+  "heading_sizes_verified_in_word_and_pdf": true,
+  "source_word_pdf_content_matches": true,
+  "source_html_content_matches": true,
+  "figure_captions_checked": true
+}

@@ -1,0 +1,38 @@
+{
+  "checks": [
+    "Guest access and keyboard skip link",
+    "Real session selection and retry after a simulated upstream failure",
+    "Beginner layout opens with three drivers, working playback, lap jump, race updates and radio",
+    "Replay starts at 0:00, reveals team-coloured radio clips, plays and pauses real audio, and removes clips on reset",
+    "A real archive clip appears at its estimated timestamp and hides on rewind without refetching the timeline",
+    "Dark and light themes preserve view and meet sampled text contrast",
+    "Direct dashboard navigation keeps the selected replay time",
+    "Viewer layout fits narrow mobile, phone and tablet widths",
+    "Clearing and restoring the starter drivers, favourites and theme persistence",
+    "Incompatible direct link is blocked and a failed layout save keeps the complete editable draft",
+    "Builder library remains readable and its New layout control visible on a phone",
+    "Theme follows navigation into the profile"
+  ],
+  "cached_viewer_ready_seconds": 2.492,
+  "sampled_text_contrast": {
+    "dark": {
+      "session title": 16.38,
+      "primary action": 11.38,
+      "driver name": 10.66,
+      "driver team": 7.96,
+      "mode label": 13.56,
+      "viewer purpose": 7.96,
+      "recommended label": 8.49
+    },
+    "light": {
+      "session title": 16.38,
+      "primary action": 11.38,
+      "driver name": 11.91,
+      "driver team": 8.63,
+      "mode label": 12.79,
+      "viewer purpose": 8.63,
+      "recommended label": 6.14
+    }
+  },
+  "browser_errors": []
+}

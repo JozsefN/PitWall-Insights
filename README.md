@@ -1,20 +1,40 @@
 # PitWall-Insights
 A Motorsport Telemetry and Race Strategy Analysis System
 
+Use the [handoff](docs/handoff.md) to resume work on a new machine or in a new Codex session. It links the current architecture, tests, thesis and open tasks.
+
+## Local startup on Windows
+
+Install Python 3.12, Node.js 24 and Docker with Compose. Open a terminal in the repository root and create the backend environment:
+
+```powershell
+py -3.12 -m venv backend\.venv
+.\backend\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
+```
+
 Start the local API, PostgreSQL and background import/telemetry worker together from the repository root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\start-backend.ps1
 ```
 
-The backend virtual environment and Docker must already be installed. This command applies migrations; Ctrl+C stops the worker started by this command. Worker logs are in `%TEMP%\pitwall-worker`.
+This command applies migrations. Ctrl+C stops the worker started by this command. Worker logs are in `%TEMP%\pitwall-worker` and the API is on port 8000 by default.
+
+After updating this checkout, install the updated backend requirements (`cd backend; .\.venv\Scripts\python.exe -m pip install -r requirements.txt`) before starting it. OpenF1 provides the calendar and historical session data from 2023 onwards.
+
+The [data-source decision history and final architecture](docs/architecture/11-hybrid-data-and-accounts.md) explain how the application reached its OpenF1 data path. Open `/profile` to edit account details and inspect available data. Historical replay uses the same stored data as the analysis tools. Live streaming is a separate, unfinished feature.
+
+No external account, data-source subscription or browser extension is required for historical sessions. Set a strong `PITWALL_AUTH_SECRET` for a deployed application and use HTTPS for account authentication.
 
 Start the frontend in a second terminal:
 
 ```powershell
 cd frontend
+npm.cmd ci
 npm.cmd run dev
 ```
+
+Open `http://localhost:5173` and register a local app account. To point Vite at another API, set `VITE_API_BASE_URL` in your ignored `frontend/.env` file.
 
 Replay architecture, startup measurements and the current upstream archive limitation: [replay loading](docs/architecture/08-replay-loading.md).
 

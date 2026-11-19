@@ -62,10 +62,16 @@ def main():
     for paragraph, (level, _) in zip(exported.paragraphs, headings):
         assert paragraph.style.name == ('Title' if level == 1 else f'Heading {level - 1}')
     chapter_numbers = [int(re.match(r'(\d+)\.', text)[1]) for level, text in headings if level == 2 and re.match(r'\d+\.', text)]
-    assert chapter_numbers == list(range(1, 10))
-    assert all(level < 4 or re.match(r'\d+\.\d+\.\d+\.', text) for level, text in headings)
+    assert chapter_numbers == list(range(1, len(chapter_numbers) + 1))
+    in_appendix = False
+    for level, text in headings:
+        if level == 2:
+            in_appendix = text == 'Függelékek'
+        if level == 4:
+            pattern = r'[A-Z]\.\d+\.' if in_appendix else r'\d+\.\d+\.\d+\.'
+            assert re.match(pattern, text), text
     print(TARGET)
-    print(f'Validated: {len(headings) - 1} headings, nine numbered chapters; no body paragraphs; Markdown and Word match.')
+    print(f'Validated: {len(headings) - 1} headings, {len(chapter_numbers)} numbered chapters; no body paragraphs; Markdown and Word match.')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,37 @@
+{
+  "race": {
+    "entries": 20,
+    "size_bytes": 529808,
+    "request_ms": 324,
+    "interval_samples": 23973
+  },
+  "qualifying": {
+    "entries": 20,
+    "size_bytes": 5714,
+    "request_ms": 49,
+    "interval_samples": 0
+  },
+  "practice": {
+    "entries": 20,
+    "size_bytes": 10691,
+    "request_ms": 45,
+    "interval_samples": 0
+  },
+  "sprint": {
+    "entries": 22,
+    "size_bytes": 9722,
+    "request_ms": 27,
+    "interval_samples": 0
+  },
+  "browser_checks": [
+    "Full field with no layout and no drivers selected",
+    "Gap to leader and interval",
+    "Safety car and lap counter follow seeking and rewinding",
+    "One timing request while seeking",
+    "Layout change keeps the column choice",
+    "Sticky desktop rail and full width on collapse",
+    "Mobile sheet, scroll, Escape and focus return",
+    "Light and dark themes",
+    "Race and sprint running order, qualifying and practice best laps"
+  ]
+}

@@ -23,8 +23,8 @@ The synchronous import route still exists for local/dev and simple clients.
 
 1. Frontend or client calls `POST /api/sessions/import`.
 2. The session route builds a `SessionService`.
-3. `IngestionService` calls the FastF1 adapter.
-4. The FastF1 adapter:
+3. `IngestionService` calls the OpenF1 adapter.
+4. The OpenF1 adapter:
    - lists or loads the selected session
    - fetches the selected import profile
    - converts source objects to plain record-like data
@@ -53,14 +53,27 @@ The preferred deployed flow is job-based:
    - `normalizing`
    - `persisting`
    - `completed` or `failed`
-6. The worker loads FastF1 using the job's import profile.
+6. The worker loads OpenF1 using the job's import profile.
 7. The worker persists canonical session data through `SessionRepository`.
 8. The client polls `GET /api/session-import/jobs/{job_id}` until the job has
    a terminal status.
 9. On success, the job response contains `session_id`.
 
-This lets the API return quickly while long FastF1 loads continue outside the
+This lets the API return quickly while long OpenF1 loads continue outside the
 request/response cycle.
+
+The queue is stored in PostgreSQL. The PitWall API creates the job and reads its
+state; the worker independently claims it from the same database. There is no
+direct API-to-worker HTTP request.
+
+Both core import and detailed telemetry use this source-access chain:
+
+`OpenF1Adapter` / `OpenF1Catalog` -> `OpenF1Client` -> validated HTTP response or
+`OpenF1ResponseCache` -> `SourceSessionBundle` -> normalization -> PostgreSQL.
+
+Transient HTTP failures have a bounded retry budget. A failed or malformed
+download is never stored as a completed source response. File caching is optional;
+the normalized database and job state remain the durable application boundary.
 
 ## Import Profile Data Shape
 

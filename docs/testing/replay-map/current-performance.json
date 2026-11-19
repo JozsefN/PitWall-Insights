@@ -1,0 +1,72 @@
+{
+  "closed_outline": true,
+  "pit_map": {
+    "team_boxes": 10,
+    "visits": 37,
+    "lane_points": 115
+  },
+  "1x": {
+    "elapsed_ms": 6040.100000000093,
+    "frame_p95_ms": 16.799999999999272,
+    "longest_frame_ms": 50,
+    "frames_over_50_ms": 0,
+    "long_tasks": 0,
+    "simulated_ms": 5998,
+    "clock_ratio": 0.993
+  },
+  "5x": {
+    "elapsed_ms": 6083.600000000093,
+    "frame_p95_ms": 33.29999999999927,
+    "longest_frame_ms": 100,
+    "frames_over_50_ms": 9,
+    "long_tasks": 7,
+    "simulated_ms": 30445,
+    "clock_ratio": 1.001
+  },
+  "errors": [],
+  "wind_5x": {
+    "elapsed_ms": 6056.899999999907,
+    "frame_p95_ms": 33.20000000000073,
+    "longest_frame_ms": 83.40000000000146,
+    "frames_over_50_ms": 5,
+    "long_tasks": 7,
+    "simulated_ms": 30163,
+    "clock_ratio": 0.996
+  },
+  "car_scale": {
+    "original_zoom": {
+      "length_m": 5.501107272336071,
+      "width_m": 2.000402644485844,
+      "length_px": 27.196099077611454
+    },
+    "maximum_zoom": {
+      "length_m": 5.500119360229171,
+      "width_m": 2.000043403719699,
+      "length_px": 71.99999999999999
+    },
+    "previous_zoom": {
+      "length_m": 5.500176849355986,
+      "width_m": 2.0000643088567216,
+      "length_px": 44.25064155833433
+    },
+    "compact_close_up": {
+      "length_m": 5.5003068757324645,
+      "width_m": 2.000111591175441,
+      "length_px": 41.99999953391336
+    }
+  },
+  "illustrated_road_metres": {
+    "narrowest": 12.5,
+    "widest": 12.5
+  },
+  "workflows": [
+    "stable whole-circuit camera",
+    "two named close-up cars",
+    "fixed car dimensions at expanded zoom",
+    "readable car in a compact map",
+    "smooth closed road without a reference line",
+    "max zoom, pan, reset",
+    "moving wind arrows, km/h and reduced motion",
+    "readable light mode at desktop and phone widths"
+  ]
+}

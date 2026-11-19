@@ -1,0 +1,45 @@
+{
+  "checked_on": "2026-11-19",
+  "backend_tests": {
+    "command": ".venv/Scripts/python.exe -m unittest discover -s tests -v",
+    "passed": 119,
+    "failed": 0,
+    "seconds": 36.071
+  },
+  "openf1_transport_cache_tests": 18,
+  "frontend_tests": {
+    "command": "npm.cmd test",
+    "passed": 16,
+    "failed": 0
+  },
+  "frontend_typescript_build": "passed",
+  "build_warning": "JavaScript chunk exceeds 500 kB",
+  "real_openf1": {
+    "report": "openf1-architecture-data-validation.json",
+    "provider": "openf1",
+    "telemetry_rows": 233940,
+    "job_status": "completed",
+    "repeat_ensure_ready": true,
+    "startup_seconds": 18.714,
+    "disposable_schema_removed": true,
+    "existing_historical_source_cache": true,
+    "repeated_performance_benchmark": false
+  },
+  "browser_rerun": false,
+  "code_sha256": {
+    "backend/modules/ingestion/infrastructure/openf1_adapter.py": "5e5c9236749962e0645d75aa1b65b73eef3c97b93ae3d2770896f18fe2a90562",
+    "backend/modules/ingestion/infrastructure/openf1_client.py": "dcff6ab014d0f2dd65ab500e14ee335ebfbc4ab0aa77352081ad108f08f70150",
+    "backend/modules/ingestion/infrastructure/openf1_cache.py": "8e089421ab41b0ca3fc40224b4d7e5a379019123b14fdc799afc739df1e9b38b",
+    "backend/tests/test_openf1_client.py": "b7c839b3ff5777505487ce2411e36365bb490a91505df8544455c06881dc7688"
+  },
+  "architecture": {
+    "http_boundary": "PitWall API",
+    "web_framework": "FastAPI",
+    "queue": "PostgreSQL",
+    "direct_api_to_worker_call": false,
+    "external_source": "OpenF1",
+    "transport": "OpenF1Client",
+    "disposable_cache": "OpenF1ResponseCache",
+    "race_mapping": "OpenF1Adapter"
+  }
+}

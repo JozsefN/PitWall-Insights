@@ -8,7 +8,7 @@ PitWall-Insights is a motorsport data platform centered on Formula 1 session exp
 
 The current product direction has four major capabilities:
 
-- import a selected historical session from FastF1
+- import a selected historical session from OpenF1
 - normalize that session into a stable internal schema
 - expose the cached session through backend APIs
 - power archive, telemetry, and future metric-driven frontend surfaces
@@ -72,3 +72,7 @@ The frontend currently:
 - [Data Flow](./04-data-flow.md) for request and import lifecycles
 - [Database and Migrations](./06-database-and-migrations.md) for the current relational model
 - [Session Domain](../modules/session-domain.md) for the core motorsport data model
+
+## Physics-informed race panels
+
+The existing numerical and strategy services are complemented by 75 transparent physical/scenario definitions and 15 configurable race panels. See [race estimation architecture and extension runbook](12-race-estimation.md) and the [generated calculation catalogue](race-estimation-catalog.md). Historical replay uses causal snapshots; the estimates are not a calibrated prediction system.

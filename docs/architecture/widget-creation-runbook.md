@@ -9,7 +9,9 @@ Write down the stable widget id, one analysis question, supported audiences, dat
 Audience meanings:
 
 - `session-lookback`: completed-session analysis; full-session and selected-lap queries are possible.
-- `live-race`: replay-compatible information bounded by the replay clock. Do not display future laps or future positions.
+- `live-race`: the Replay mode. Bound events, timing samples, statistics and their baselines to the replay clock. On rewind, rebuild summaries and exclude any later samples.
+
+Choose the narrowest session coverage supported by the data and the question. Use `qualifying` for Q1/Q2/Q3 results, including sprint qualifying where phase data exists. Use `race` for live gap tactics and pit-rejoin scenarios that depend on Grand Prix interval timing. `sprint`, `practice` and `other` are separate session kinds. General lap comparison can also support other session types when it uses completed laps.
 
 Session widgets must not contain platform administration, service health, account management, or import-volume information. Platform widgets can remain registered for other pages with `builderEnabled: false` and no session audiences.
 
@@ -27,6 +29,8 @@ Example entry (replace the id, text, preview kind and measured sizes):
   "previewKind": "trace",
   "builderEnabled": true,
   "supportedAudiences": ["session-lookback"],
+  "sessionKinds": ["race", "sprint", "qualifying", "practice", "other"],
+  "availabilityNote": "Compares completed laps using the selected drivers and lap scope.",
   "accessTier": 0,
   "sizing": {
     "minW": 5, "minH": 4,
@@ -43,6 +47,8 @@ Example entry (replace the id, text, preview kind and measured sizes):
 Allowed categories are `platform`, `telemetry`, `strategy`, `track`, `replay`. `accessTier` is `0` for Free, or `1`, `2`, `3` for future subscription tiers. All current widgets are Free. A paid label is not entitlement enforcement: before adding a paid widget, implement trusted server entitlement checks on layout writes and data reads. Never trust a submitted tier or client-side disabled button as authorization.
 
 `WidgetId` is derived from the JSON keys in `widget.types.ts`. Adding a catalog id makes the TypeScript runtime component map incomplete until step 4 is done. New categories or preview kinds also require extending `WidgetPolicy` and implementing their presentation.
+
+Set `supportedAudiences`, `sessionKinds`, and `availabilityNote` for every builder panel. The note should identify the time horizon, data prerequisite, or reason for the restriction. Verify the panel is addable in each declared mode and session type, searchable with a visible restriction outside them, and absent from the runtime when an incompatible layout is opened directly. Any built-in layout containing it must share its allowed modes and session types.
 
 Sizing units and checks:
 

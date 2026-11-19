@@ -182,7 +182,7 @@ This matches the database design, where raw samples belong to a `session_entry`.
 ### Circuit metadata reads
 
 `GET /api/sessions/{session_id}/circuit-corners` exposes source-backed corner
-marker coordinates when the source provides them. The current FastF1 adapter
+marker coordinates when the source provides them. The current OpenF1 adapter
 loads `CircuitInfo.corners` on demand and returns numbered x/y markers for the
 frontend track-map renderer. This route is metadata-only; car positions and
 racing lines still come from imported position telemetry.

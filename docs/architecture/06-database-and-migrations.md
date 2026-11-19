@@ -87,9 +87,9 @@ These tables hold race/session detail attached to one `session_entry`.
 
 These tables describe what happened across the session as a whole.
 
-`ingestion_runs` stores generic source metadata in application code. The
-database column for source version is still named `fastf1_version` until a later
-migration renames it to `source_version`.
+`ingestion_runs` records the source version and import metadata. The application
+uses `source_version` to identify the adapter and quality-policy revision that
+produced a snapshot.
 
 ### Import job tables
 
@@ -163,7 +163,7 @@ The current database design deliberately separates:
 
 Examples:
 
-- raw FastF1 car channels belong in telemetry tables
+- raw OpenF1 car channels belong in telemetry tables
 - lap timing and tyre data belong in canonical session tables
 - current values such as pace rating, consistency score, and recent lap trend live in [Feature Metrics](../modules/feature-metrics.md)
 - rule-selected highlights such as pace leader or recent improver live in [Decision Engine](../modules/decision-engine.md)

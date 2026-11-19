@@ -297,7 +297,7 @@ route.
 It currently exposes:
 
 - list imported sessions
-- fetch FastF1 session catalog
+- fetch OpenF1 session catalog
 - import one selected session
 - fetch session detail
 - fetch session entries

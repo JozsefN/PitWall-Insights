@@ -1,126 +1,58 @@
 # Ingestion
 
-Back to [Backend Architecture](../architecture/02-backend-architecture.md)
+The active provider is OpenF1. The provider registry constructs OpenF1Adapter;
+source selection is not part of the user workflow.
 
-## Purpose
+## Responsibilities
 
-The ingestion module owns communication with external session data sources.
+- OpenF1Catalog obtains meetings and sessions directly from OpenF1.
+- OpenF1Adapter loads a selected historical session and maps source rows to SourceSessionBundle.
+- OpenF1Client owns HTTP access, response validation, request limits and bounded transient retries.
+- OpenF1ResponseCache owns compressed files, expiry and atomic replacement across processes.
+- Core imports include drivers, laps, stints, weather, race control and available source reports.
+- Full materialization fetches only the selected drivers and requested car/location streams.
+- The normalization module converts the bundle to the canonical SessionSnapshot.
 
-Today that means:
+Native keys use `openf1:meeting:<meeting_key>` and `openf1:session:<session_key>`.
+The calendar identifies completed history, upcoming sessions and cancellations.
+The data path permits history after the provider's post-session waiting period.
 
-- FastF1 is the only active source
+## Cache and limits
 
-The goal of ingestion is to load source data and convert it into plain source-facing structures that the normalization module can understand.
+Successful responses are stored as compressed JSON outside the repository in
+`%LOCALAPPDATA%/pitwall-insights/openf1` on Windows, or the platform cache directory.
+The calendar uses a short cache lifetime; historical responses have a longer one.
+The cache is disposable. PostgreSQL holds the normalized application data.
 
-## Current Responsibilities
+`openf1_adapter.py` handles session identity and race-data conversion;
+`openf1_client.py` handles HTTP; `openf1_cache.py` handles disposable files.
+The adapter and calendar use the same client contract. These are Python
+components of the API/worker processes, not separately deployed services.
 
-- report ingestion module health and FastF1 readiness
-- list a season/session catalog through FastF1
-- load one selected session from FastF1
-- convert FastF1 objects into plain record collections
-- honor the selected import profile when deciding whether to request telemetry
+Requests use bounded connect/read timeouts, a bounded response size and a local
+rate limiter shared by clients in one process. Timeouts, connection failures and
+HTTP 429/502/503/504 receive at most three attempts. Retry-After is respected; a
+provider wait exceeding the bounded retry window returns an actionable failure
+instead of retrying too early. Authentication and permanent HTTP errors do not retry.
+Empty or malformed telemetry does not count as a successful complete
+materialization. Missing optional resources are recorded in coverage metadata.
+Multiple deployed processes would need a shared provider rate limiter.
 
-## Current Main Components
+Cached content is validated before reuse. Corrupt, expired, empty or incorrectly
+shaped responses fall back to HTTP. Writers use unique temporary files and atomic
+replacement, so processes cannot share the same in-progress filename. Cache-write
+failures are logged and do not discard an already validated download. PostgreSQL
+remains responsible for durable normalized session data.
 
-### `IngestionService`
+## Quality and calculations
 
-Application-level facade used by the session domain.
+The adapter retains native lap, pit-stop, interval and race-position reports.
+`openf1_clean_lap_v1` computes conservative lap eligibility from observed clocks,
+sectors, flags, pit events and deletions. Unknown evidence stays unknown.
+Normalization aligns units and timestamps; feature_metrics computes derived values.
+Neither layer invents unavailable engineering measurements.
 
-It depends on `SessionSourcePort`, so the application layer does not know which
-provider implementation is active.
-
-### `SessionSourcePort`
-
-Application-layer protocol for session data providers.
-
-Provider implementations must support:
-
-- reporting source health/status
-- listing a season catalog
-- loading one selected session bundle
-
-### Provider Registry
-
-`provider_registry.py` selects the active provider from `settings.ingestion_source`.
-
-The only registered provider today is `fastf1`.
-
-### `FastF1Adapter`
-
-The real source implementation for v1.
-
-It is responsible for:
-
-- enabling FastF1 local cache
-- loading season schedule data
-- loading one selected session
-- extracting source records for:
-  - drivers/results
-  - laps
-  - weather
-  - session status
-  - track status
-  - race control messages
-  - car telemetry
-  - position telemetry
-
-For `core` imports, FastF1 is called with telemetry disabled and the telemetry
-collections stay empty. For `full` imports, FastF1 telemetry is loaded and
-extracted.
-
-## Provider Cache Policy
-
-FastF1's own cache is treated as provider scratch storage, not application
-state.
-
-By default, the cache is resolved outside the repository under the operating
-system's user cache directory:
-
-- Windows: `%LOCALAPPDATA%/pitwall-insights/fastf1`
-- macOS: `~/Library/Caches/pitwall-insights/fastf1`
-- Linux: `$XDG_CACHE_HOME/pitwall-insights/fastf1` or `~/.cache/pitwall-insights/fastf1`
-
-`FASTF1_CACHE_DIR` can still override this. Absolute paths are used directly.
-Relative paths are resolved under the PitWall app cache root, not under the
-current working directory.
-
-This keeps FastF1 pickle and HTTP cache files disposable and out of source
-control. The durable application cache is the PostgreSQL-backed canonical
-session cache owned by `session_domain`.
-
-If the project later needs reproducible raw imports, ingestion should add an
-app-owned raw artifact store using stable file formats such as Parquet or JSONL
-plus database metadata. FastF1 `.ff1pkl` files should not become the durable
-application contract.
-
-## What Ingestion Should Not Do
-
-The ingestion module should not:
-
-- write directly to canonical session tables
-- decide long-term relational structure
-- own derived metrics
-
-Those responsibilities belong to normalization and session-domain persistence.
-
-## Storage Relationship
-
-The ingestion module is related to:
-
-- `ingestion_runs` for import tracking
-- `import_jobs` indirectly through the session-import worker
-
-At the moment it does not persist raw files or raw payload archives. If the project later needs reproducibility at the source-payload level, this module is the right place to introduce raw-payload storage or file references.
-
-## Design Notes
-
-- Source-specific assumptions should stay here.
-- If additional providers are added later, they should plug in beside FastF1 rather than leaking provider logic into the rest of the backend.
-- Imported telemetry should stay as close as possible to the source when first extracted.
-
-## Future Work
-
-- support additional sources if needed
-- introduce better import error classification
-- keep source loading profile-aware as more providers are added
-- optionally store raw payload references for reprocessing/debugging
+The project's selected historical testing scope is 2023-2025. The provider's
+history starts in 2023; 2025 is the project test boundary, not a provider-wide maximum.
+The [decision history](../architecture/11-hybrid-data-and-accounts.md) explains how
+the application reached this architecture.

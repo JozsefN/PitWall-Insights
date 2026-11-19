@@ -6,6 +6,8 @@ Back to [Backend Architecture](../architecture/02-backend-architecture.md)
 
 The identity-auth module owns basic user authentication.
 
+Profile details live in `account_profile`; PitWall passwords are bcrypt hashes. The application uses its own JWT signing secret. Historical OpenF1 access requires no external user account. See the [data-source decision history](../architecture/11-hybrid-data-and-accounts.md).
+
 Current responsibilities:
 
 - sign up a user
@@ -46,10 +48,10 @@ This module currently handles authentication, not a full account or permission s
 
 Not implemented yet:
 
-- refresh tokens
+- OAuth-style refresh tokens (the current app renews active JWT sessions through its refresh endpoint)
 - role-based authorization
 - server-side session revocation
-- profile management
+- optional multi-factor authentication
 
 ## Why The Current Shape Is Fine
 

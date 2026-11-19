@@ -1,0 +1,41 @@
+{
+  "bahrain_plans": 20,
+  "bahrain_green_pit_samples": 17,
+  "bahrain_green_pit_basis": "timing_sectors",
+  "bahrain_drivers_with_rival_scenarios": 20,
+  "bahrain_focus_max_post_pit_advantage_s_per_lap": 1.183,
+  "imola_warning_weighted_pit_options": 22,
+  "imola_vsc_pit_discount_s": 4.689361,
+  "imola_vsc_pit_basis": {
+    "scope": "pooled_sector_archive",
+    "samples": 3
+  },
+  "melbourne_pit_lane_closure_checked": true,
+  "imola_incident_forecast": {
+    "horizon_s": 120,
+    "episodes": 56,
+    "scope": "pooled",
+    "races": 27,
+    "reference_episodes": 132,
+    "outcomes_pct": {
+      "sc": 15.82975,
+      "vsc": 11.478624,
+      "red": 3.446749,
+      "none": 69.244877
+    },
+    "sc_interval_pct": [
+      7.709409,
+      26.173309
+    ]
+  },
+  "api_latency_ms": [
+    206,
+    124,
+    206,
+    234,
+    177,
+    218,
+    213
+  ],
+  "browser": "Rival action, sector deltas, shared driver selection, replay cutoff, VSC replaces forecast, rewind, desktop/mobile, lookback blocked"
+}

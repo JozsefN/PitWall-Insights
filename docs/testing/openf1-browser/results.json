@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "signup_has_no_external_account_or_extension_step",
+    "profile_persists_without_external_connection_controls",
+    "one_source_availability_and_mobile_layout",
+    "unavailable_session_explained_without_provider_selection",
+    "real_openf1_core_import_opens_workspace",
+    "start_waits_for_timeline_and_required_car_and_position_samples",
+    "real_three_driver_replay_loads_and_advances_under_180_seconds",
+    "changing_drivers_pauses_and_missing_selection_explains_start_lock",
+    "factory_replay_panels_keep_their_height_during_load_playback_and_driver_changes",
+    "timeline_failure_keeps_start_locked_with_retry_guidance"
+  ],
+  "count": 10,
+  "browser_errors": [],
+  "replay_startup_seconds": 3.885,
+  "real_openf1_import_and_replay": true,
+  "future_calendar_case_simulated": true,
+  "external_account_requests": 0,
+  "test_accounts_removed": true
+}

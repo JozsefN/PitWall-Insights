@@ -35,7 +35,7 @@ Its job is not just field renaming. It is where the backend decides:
 
 ## Source-Specific Snapshot Builders
 
-The current normalization logic lives in `FastF1SessionSnapshotBuilder`.
+The current normalization logic lives in `SessionSnapshotBuilder`.
 `NormalizationService` selects a builder from the source on the incoming
 `SourceSessionBundle`.
 
@@ -55,7 +55,7 @@ adds car and position telemetry payloads.
 
 ## Why This Module Exists Separately
 
-Without normalization, the repository would need to understand FastF1-specific shapes and rules.
+Without normalization, the repository would need to understand OpenF1-specific shapes and rules.
 
 Separating normalization gives several benefits:
 

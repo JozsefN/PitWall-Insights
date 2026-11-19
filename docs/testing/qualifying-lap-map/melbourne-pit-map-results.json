@@ -1,0 +1,14 @@
+{
+  "circuit": "Melbourne",
+  "session_key": 9693,
+  "reported_visits": 82,
+  "mapped_visits": 82,
+  "team_boxes": 10,
+  "before_preparation_boxes": 10,
+  "lane_points": 78,
+  "lookback_sampled_driver_requests": 6,
+  "fallback_without_reports": {
+    "lane_points": 136,
+    "matched_visits": 34
+  }
+}

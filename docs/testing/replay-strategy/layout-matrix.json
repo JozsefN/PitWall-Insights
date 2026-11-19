@@ -1,0 +1,26 @@
+{
+  "Grand Prix": [
+    "Lookback",
+    "Replay"
+  ],
+  "Sprint": [
+    "Lookback",
+    "Replay",
+    "replay timing populated and rewound with 3 drivers"
+  ],
+  "Qualifying": [
+    "Lookback",
+    "Replay",
+    "replay timing populated and rewound with 3 drivers"
+  ],
+  "Practice": [
+    "Lookback",
+    "Replay",
+    "replay timing populated and rewound with 20 drivers"
+  ],
+  "Sprint Qualifying": [
+    "Lookback",
+    "Replay",
+    "replay timing populated and rewound with 3 drivers"
+  ]
+}

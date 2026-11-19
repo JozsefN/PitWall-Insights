@@ -1,0 +1,44 @@
+{
+  "archive_races": 82,
+  "comparison": "Observed target-race green cost anchors both predictions. Only earlier races set the neutralisation adjustment.",
+  "sc": {
+    "scored_races": 22,
+    "model_mae_s": 2.769,
+    "green_baseline_mae_s": 5.405,
+    "pooled_baseline_mae_s": 2.843,
+    "featured_races": [
+      {
+        "race": 10014,
+        "observed_s": 20.257,
+        "green_s": 23.729,
+        "predicted_s": 18.836
+      },
+      {
+        "race": 9987,
+        "observed_s": 23.656,
+        "green_s": 28.259,
+        "predicted_s": 22.571
+      }
+    ]
+  },
+  "vsc": {
+    "scored_races": 8,
+    "model_mae_s": 2.716,
+    "green_baseline_mae_s": 7.248,
+    "pooled_baseline_mae_s": 2.75,
+    "featured_races": [
+      {
+        "race": 9987,
+        "observed_s": 22.178,
+        "green_s": 28.259,
+        "predicted_s": 23.543
+      },
+      {
+        "race": 11234,
+        "observed_s": 15.382,
+        "green_s": 26.531,
+        "predicted_s": 21.463
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "source_races": 89,
+  "source_episodes": 352,
+  "horizon_seconds": 120,
+  "chronological_scores": [
+    {
+      "episode_age_seconds": 0,
+      "scored_episodes": 290,
+      "races": 70,
+      "safety_car_first": 41,
+      "regularized_brier": 0.12193,
+      "incident_cohort_only_brier": 0.12266,
+      "pooled_brier": 0.12258
+    },
+    {
+      "episode_age_seconds": 15,
+      "scored_episodes": 144,
+      "races": 55,
+      "safety_car_first": 30,
+      "regularized_brier": 0.16812,
+      "incident_cohort_only_brier": 0.16736,
+      "pooled_brier": 0.1686
+    },
+    {
+      "episode_age_seconds": 30,
+      "scored_episodes": 83,
+      "races": 38,
+      "safety_car_first": 7,
+      "regularized_brier": 0.08332,
+      "incident_cohort_only_brier": 0.09343,
+      "pooled_brier": 0.08079
+    }
+  ],
+  "pit_phase_occupancy_scores": [
+    {
+      "episode_age_seconds": 0,
+      "pit_delay_seconds": 30,
+      "scored_episodes": 290,
+      "races": 70,
+      "safety_car_at_projected_pit": 29,
+      "regularized_brier": 0.28581,
+      "incident_cohort_only_brier": 0.28661,
+      "pooled_brier": 0.28842
+    },
+    {
+      "episode_age_seconds": 0,
+      "pit_delay_seconds": 60,
+      "scored_episodes": 290,
+      "races": 70,
+      "safety_car_at_projected_pit": 41,
+      "regularized_brier": 0.3764,
+      "incident_cohort_only_brier": 0.37921,
+      "pooled_brier": 0.38039
+    },
+    {
+      "episode_age_seconds": 0,
+      "pit_delay_seconds": 90,
+      "scored_episodes": 290,
+      "races": 70,
+      "safety_car_at_projected_pit": 42,
+      "regularized_brier": 0.39863,
+      "incident_cohort_only_brier": 0.40157,
+      "pooled_brier": 0.40418
+    }
+  ]
+}

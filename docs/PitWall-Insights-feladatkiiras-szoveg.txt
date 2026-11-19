@@ -5,7 +5,7 @@ ANGOL CÍM
 Development of a Formula 1 Telemetry Analysis App
 
 NÉV: Novák József Pál
-NEPTUN-KÓD: IT8VSG
+NEPTUN-KÓD: ______
 KÉPZÉS: Mérnökinformatikus BSc
 TANSZÉK: Automatizálási és Alkalmazott Informatikai Tanszék
 KONZULENS: Albert István, mérnöktanár

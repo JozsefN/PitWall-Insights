@@ -1,0 +1,29 @@
+{
+  "checked_on": "2026-11-19",
+  "active_provider": "openf1",
+  "backend_tests": {
+    "passed": 101,
+    "failed": 0
+  },
+  "frontend_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "frontend_build": "passed",
+  "browser_workflows": 6,
+  "browser_errors": [],
+  "external_account_requests": 0,
+  "actual_provider_data_used": true,
+  "direct_three_driver_materialization_seconds": 17.601,
+  "three_driver_browser_replay_seconds": 50.583,
+  "source_cache": "existing warm cache",
+  "direct_validation_ran_alongside_backend_tests": true,
+  "test_scope_years": [
+    2023,
+    2024,
+    2025
+  ],
+  "measured_race": "Australian Grand Prix 2025",
+  "fresh_network_all_driver_SLA_proven": false,
+  "strategy_calibration_complete": false
+}

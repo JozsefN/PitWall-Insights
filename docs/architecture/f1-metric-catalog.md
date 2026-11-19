@@ -100,7 +100,7 @@ See [calculation contracts and extension runbook](09-f1-analytics.md) for sampli
 | `observed_upshifts` | changes | entry | measured | car | Observed upward gear steps; reverse/neutral excluded. |
 | `observed_downshifts` | changes | entry | measured | car | Observed downward gear steps; reverse/neutral excluded. |
 | `top_gear` | gear | entry | measured | car | Largest reported gear in the valid 1–8 range. |
-| `reported_drs_open_pct` | % | entry | measured | car | Observed fraction with historical FastF1 DRS codes 10, 12 or 14; not eligibility or regulation compliance. |
+| `reported_drs_open_pct` | % | entry | measured | car | Observed fraction with historical OpenF1 DRS codes 10, 12 or 14; not eligibility or regulation compliance. |
 | `reported_drs_activations` | activations | entry | measured | car | Observed transitions to a historical DRS-open code. |
 | `gear_1_time_pct` | % | entry | measured | car | Share of known valid gear time reported in gear 1. |
 | `gear_2_time_pct` | % | entry | measured | car | Share of known valid gear time reported in gear 2. |

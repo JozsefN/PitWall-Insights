@@ -25,6 +25,11 @@ The goal of these docs is practical clarity:
 12. [F1 Metric Catalogue](./f1-metric-catalog.md)
 13. [Strategy Foundation, Methods and Runbook](./10-strategy-foundation.md)
 14. [Decision-oriented Strategy Catalogue](./strategy-metric-catalog.md)
+15. [Physics-informed Race Estimation and Panel Runbook](./12-race-estimation.md)
+16. [Race Estimation Calculation Catalogue](./race-estimation-catalog.md)
+17. [Adatforrás-váltás és végleges OpenF1-architektúra](./11-hybrid-data-and-accounts.md)
+
+18. [Session Review Analytics and Calibration](./13-session-review.md)
 
 ## Module Reference
 
@@ -52,7 +57,7 @@ The goal of these docs is practical clarity:
 The current architecture is centered on one main workflow:
 
 1. discover a Formula 1 session
-2. import it from FastF1
+2. import it from OpenF1
 3. optionally run that import through a background job
 4. normalize it into a canonical internal snapshot
 5. store it in a relational selected-session cache
@@ -74,7 +79,7 @@ The backend has moved beyond the original placeholder session model.
 
 It now includes:
 
-- a FastF1-backed ingestion path
+- an OpenF1-backed ingestion path
 - profile-based `core` and `full` imports
 - import jobs and a worker entrypoint
 - an entry-centric session model

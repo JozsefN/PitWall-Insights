@@ -8,9 +8,9 @@ External source -> [Ingestion](../modules/ingestion.md) -> [Normalization](../mo
 
 ## Primary External Dependency
 
-The active v1 source is FastF1.
+The active v1 source is OpenF1.
 
-FastF1 provides:
+OpenF1 provides:
 
 - season schedule and event/session discovery
 - lap timing data
@@ -18,7 +18,7 @@ FastF1 provides:
 - weather samples
 - session status, track status, and race control data
 
-The system currently treats FastF1 as the import source of truth and stores a normalized representation internally.
+The system currently treats OpenF1 as the import source of truth and stores a normalized representation internally.
 
 ## Main Runtime Components
 
@@ -74,7 +74,7 @@ The driver/car combination inside one session is modeled as `session_entries`. T
 
 ### Raw vs derived data
 
-- Raw FastF1 channels should stay in the canonical session cache.
+- Raw OpenF1 channels should stay in the canonical session cache.
 - Derived values such as pace rating, consistency, distance-driven, driver-ahead, or tyre indicators should live in feature metrics unless there is a strong reason to treat them as canonical.
 - Rule-selected highlights such as strongest pace driver or recent improver should live in the decision engine and be exposed through feature-metric insight APIs.
 

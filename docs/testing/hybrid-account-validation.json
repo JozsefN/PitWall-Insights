@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-11-14",
+  "backend_suite": {
+    "command": "python -m unittest discover -s tests -v",
+    "passed": 97,
+    "seconds": 32.551
+  },
+  "frontend": {
+    "build": "passed",
+    "unit_tests_passed": 14,
+    "known_build_note": "Existing bundle exceeds the 500 kB warning threshold"
+  },
+  "browser": {
+    "flows_passed": 7,
+    "runtime_errors": 0,
+    "profile_and_signup": "real local database",
+    "f1_provider_responses": "simulated"
+  },
+  "migrations": {
+    "head": "i5f260e7d389",
+    "alembic_check": "no pending operations",
+    "fresh_upgrade_and_downgrade": "passed in disposable schema"
+  },
+  "real_data": {
+    "provider": "OpenF1",
+    "race": "Australian GP 2025",
+    "drivers": 3,
+    "telemetry_rows": 233940,
+    "clean_laps": 470,
+    "initial_startup_seconds": 52.487,
+    "provider_cache_warm_startup_seconds": 16.82
+  },
+  "limitations": [
+    "No subscribed F1 account was available: live F1 sign-in and downloading were not verified end to end.",
+    "Live viewer remains planned; billing remains a skeleton.",
+    "Provider terms have not been replaced by a data redistribution licence."
+  ],
+  "evidence": [
+    "hybrid-openf1-validation.json",
+    "hybrid-openf1-validation-final.json",
+    "profile-browser/results.json"
+  ]
+}

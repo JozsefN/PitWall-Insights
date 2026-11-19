@@ -1,0 +1,7 @@
+{
+  "chromium_extension_handoff": "passed",
+  "unknown_extension_rejected": true,
+  "real_extension_origin_and_cors": true,
+  "upstream_subscription_verifier_simulated": true,
+  "real_f1_credentials_or_cookies_used": false
+}

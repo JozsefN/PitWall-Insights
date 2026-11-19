@@ -8,7 +8,7 @@ The frontend sessions module owns the archive-style session explorer and the tel
 
 It is responsible for:
 
-- browsing the FastF1-backed session catalog
+- browsing the OpenF1-backed session catalog
 - importing a selected session into the backend cache
 - opening a session-specific workspace
 - expressing workspace state through URL search params

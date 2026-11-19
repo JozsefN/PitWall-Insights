@@ -6,13 +6,13 @@ Back to [Backend Architecture](../architecture/02-backend-architecture.md)
 
 The session import module owns asynchronous import orchestration.
 
-It does not own FastF1 parsing, canonical session tables, or telemetry storage.
+It does not own OpenF1 parsing, canonical session tables, or telemetry storage.
 Its job is to make imports observable and worker-driven so the API process does
-not have to sit on a slow FastF1 load.
+not have to sit on a slow OpenF1 load.
 
 ## Why This Exists
 
-FastF1 session loading can be slow, especially when full telemetry is requested.
+OpenF1 session loading can be slow, especially when full telemetry is requested.
 The first architecture temptation was a full artifact system, but that would add
 raw-file lifecycle, object storage, replay manifests, and reprocessing contracts
 before the project has proven that PostgreSQL telemetry is the bottleneck.
@@ -48,7 +48,7 @@ It loads the session structure needed to open a session quickly:
 - race control messages
 - session ticks derived from the available timeline data
 
-It does not load FastF1 car telemetry or position telemetry.
+It does not load OpenF1 car telemetry or position telemetry.
 
 Persisted sessions imported with this profile use:
 
@@ -67,7 +67,7 @@ Persisted sessions imported with this profile use:
 - `event_sessions.import_profile = "full"`
 - `event_sessions.telemetry_status = "loaded"` when both telemetry streams load
 - `event_sessions.telemetry_status = "partial"` when only one telemetry stream loads
-- `event_sessions.telemetry_status = "unavailable"` when FastF1 cannot provide telemetry
+- `event_sessions.telemetry_status = "unavailable"` when OpenF1 cannot provide telemetry
 
 If a `full` import is requested for a session already cached as `core`, the
 repository refreshes the cached session so telemetry is actually written.
@@ -148,7 +148,7 @@ Current cleanup behavior:
 
 Relevant settings:
 
-- `ingestion_source`: active source provider, currently `fastf1`
+- `ingestion_source`: active source provider, currently `openf1`
 - `session_cache_ttl_hours`: TTL for cached canonical sessions
 - `import_job_retention_hours`: how long finished job rows remain
 - `import_job_stale_after_minutes`: heartbeat age before a running job is stale
@@ -167,10 +167,10 @@ Request body uses the same shape as `SessionImportRequest`:
 
 ```json
 {
-  "season_year": 2024,
+  "season_year": 2025,
   "round_number": 1,
   "session_name": "Race",
-  "source_session_key": "fastf1:2024:1:20240302:bahrain-grand-prix:20240302T150000Z:race",
+  "source_session_key": "openf1:session:9693",
   "import_profile": "core",
   "force_refresh": false
 }
@@ -218,6 +218,6 @@ Artifacts would be justified if one of these becomes true:
 - deployed storage needs to decouple raw bulk data from relational query data
 
 Until one of those is proven, artifacts would mostly add moving parts without
-making FastF1 load itself faster. The current design gets the important benefits
+making OpenF1 load itself faster. The current design gets the important benefits
 first: profile-based faster imports, background execution, operational status,
 retry behavior, and real timing/row-count measurements.

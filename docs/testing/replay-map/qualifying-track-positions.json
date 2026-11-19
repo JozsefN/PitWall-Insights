@@ -1,0 +1,228 @@
+{
+  "location_source": "https://api.openf1.org/v1/location",
+  "geometry_source": "https://github.com/TUMFTM/racetrack-database",
+  "geometry_revision": "e59595d1f3573b30d1ded6a08984935b957688e0",
+  "imola_geometry_source": "https://github.com/bacinger/f1-circuits/blob/8094e957b8d6aa8b9f4510c93968556cccd30e02/circuits/it-1953.geojson",
+  "circuits": [
+    {
+      "circuit": "Sakhir",
+      "session_key": 10010,
+      "driver": 81,
+      "lap": 14,
+      "time_s": 89.841,
+      "estimated_nominal_width_m": null,
+      "corner": {
+        "name": "Turn 1",
+        "offset_m_in_apex_out": [
+          2.68,
+          -8.42,
+          2.87
+        ],
+        "openf1_xy_in_apex_out": [
+          [
+            -113.0,
+            8044.0
+          ],
+          [
+            23.0,
+            8318.0
+          ],
+          [
+            340.0,
+            8225.0
+          ]
+        ],
+        "estimated_edge_clearance_at_apex_m": 0.04
+      },
+      "calibration_drivers": [
+        63,
+        16
+      ],
+      "reflection": 1,
+      "registration": [
+        -0.0005433193708638585,
+        37.40926524696482,
+        -106.40723722888899
+      ],
+      "samples": 336,
+      "left_offset_p95_m": 4.98,
+      "right_offset_p95_m": 5.92,
+      "median_edge_clearance_m": 4.5,
+      "within_2m_of_edge_pct": 11.0,
+      "outside_by_over_2m_pct": 0.6,
+      "race_frame_check": {
+        "session_key": 10014,
+        "driver": 81,
+        "lap": 20,
+        "samples": 375,
+        "centre_distance_p95_m": 6.12,
+        "within_18m_pct": 100.0
+      }
+    },
+    {
+      "circuit": "Suzuka",
+      "session_key": 10002,
+      "driver": 1,
+      "lap": 16,
+      "time_s": 86.983,
+      "estimated_nominal_width_m": null,
+      "corner": {
+        "name": "Hairpin",
+        "offset_m_in_apex_out": [
+          -1.91,
+          4.12,
+          -2.01
+        ],
+        "openf1_xy_in_apex_out": [
+          [
+            -5910.0,
+            1480.0
+          ],
+          [
+            -5939.0,
+            1881.0
+          ],
+          [
+            -6240.0,
+            1877.0
+          ]
+        ],
+        "estimated_edge_clearance_at_apex_m": 2.04
+      },
+      "calibration_drivers": [
+        4,
+        81
+      ],
+      "reflection": 1,
+      "registration": [
+        0.0009113872016917239,
+        -147.3977085379281,
+        41.21653817817493
+      ],
+      "samples": 329,
+      "left_offset_p95_m": 2.89,
+      "right_offset_p95_m": 3.04,
+      "median_edge_clearance_m": 3.54,
+      "within_2m_of_edge_pct": 15.2,
+      "outside_by_over_2m_pct": 0.0,
+      "race_frame_check": {
+        "session_key": 10006,
+        "driver": 1,
+        "lap": 20,
+        "samples": 347,
+        "centre_distance_p95_m": 3.26,
+        "within_18m_pct": 100.0
+      }
+    },
+    {
+      "circuit": "Silverstone",
+      "session_key": 9943,
+      "driver": 1,
+      "lap": 17,
+      "time_s": 84.892,
+      "estimated_nominal_width_m": null,
+      "corner": {
+        "name": "Vale",
+        "offset_m_in_apex_out": [
+          -2.4,
+          5.05,
+          -3.52
+        ],
+        "openf1_xy_in_apex_out": [
+          [
+            -591.0,
+            -1012.0
+          ],
+          [
+            -808.0,
+            -918.0
+          ],
+          [
+            -1208.0,
+            -1046.0
+          ]
+        ],
+        "estimated_edge_clearance_at_apex_m": 1.7
+      },
+      "calibration_drivers": [
+        81,
+        4
+      ],
+      "reflection": 1,
+      "registration": [
+        6.285417302621301,
+        177.286444699038,
+        -119.05767355374877
+      ],
+      "samples": 320,
+      "left_offset_p95_m": 7.03,
+      "right_offset_p95_m": 6.38,
+      "median_edge_clearance_m": 3.91,
+      "within_2m_of_edge_pct": 22.8,
+      "outside_by_over_2m_pct": 1.6,
+      "race_frame_check": {
+        "session_key": 9947,
+        "driver": 4,
+        "lap": 47,
+        "samples": 339,
+        "centre_distance_p95_m": 8.15,
+        "within_18m_pct": 100.0
+      }
+    },
+    {
+      "circuit": "Imola",
+      "session_key": 9983,
+      "driver": 81,
+      "lap": 17,
+      "time_s": 74.67,
+      "estimated_nominal_width_m": 12.5,
+      "corner": {
+        "name": "Tamburello",
+        "offset_m_in_apex_out": [
+          1.02,
+          -4.66,
+          -2.15
+        ],
+        "openf1_xy_in_apex_out": [
+          [
+            -10420.0,
+            -2135.0
+          ],
+          [
+            -10560.0,
+            -2419.0
+          ],
+          [
+            -10876.0,
+            -2646.0
+          ]
+        ],
+        "estimated_edge_clearance_at_apex_m": 1.59
+      },
+      "calibration_drivers": [
+        1,
+        63
+      ],
+      "reflection": 1,
+      "registration": [
+        -0.03145461774466979,
+        357.2366233607379,
+        153.58615532213656
+      ],
+      "samples": 282,
+      "left_offset_p95_m": 4.03,
+      "right_offset_p95_m": 3.9,
+      "median_edge_clearance_m": 4.56,
+      "within_2m_of_edge_pct": 6.7,
+      "outside_by_over_2m_pct": 0.0,
+      "race_frame_check": {
+        "session_key": 9987,
+        "driver": 81,
+        "lap": 58,
+        "samples": 304,
+        "centre_distance_p95_m": 4.64,
+        "within_18m_pct": 99.7
+      }
+    }
+  ]
+}

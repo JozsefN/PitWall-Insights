@@ -1,0 +1,22 @@
+{
+  "closed_outline": false,
+  "1x": {
+    "elapsed_ms": 6061.89999999851,
+    "frame_p95_ms": 116.59999999999854,
+    "longest_frame_ms": 133.20000000000073,
+    "frames_over_50_ms": 52,
+    "long_tasks": 54,
+    "simulated_ms": 5300,
+    "clock_ratio": 0.874
+  },
+  "5x": {
+    "elapsed_ms": 6158.89999999851,
+    "frame_p95_ms": 116.70000000000073,
+    "longest_frame_ms": 133.40000000000146,
+    "frames_over_50_ms": 50,
+    "long_tasks": 51,
+    "simulated_ms": 24000,
+    "clock_ratio": 0.779
+  },
+  "errors": []
+}

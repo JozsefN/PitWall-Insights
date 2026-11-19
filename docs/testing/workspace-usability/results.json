@@ -1,0 +1,31 @@
+{
+  "checks": [
+    "Guest access and keyboard skip link",
+    "Real session selection and retry after a simulated upstream failure",
+    "Beginner layout opens with three drivers, working playback, lap jump, race updates and radio",
+    "Dark and light themes preserve view and meet sampled text contrast",
+    "Viewer layout fits narrow mobile, phone and tablet widths",
+    "Clearing and restoring the starter drivers, favourites and theme persistence",
+    "Incompatible direct link is blocked and a failed layout save keeps the complete editable draft",
+    "Builder library remains readable and its New layout control visible on a phone",
+    "Theme follows navigation into the profile"
+  ],
+  "cached_viewer_ready_seconds": 2.507,
+  "sampled_text_contrast": {
+    "dark": {
+      "driver name": 11.68,
+      "driver team": 7.71,
+      "mode label": 15.66,
+      "viewer purpose": 7.71,
+      "recommended label": 7.38
+    },
+    "light": {
+      "driver name": 12.42,
+      "driver team": 6.26,
+      "mode label": 14.97,
+      "viewer purpose": 6.26,
+      "recommended label": 6.7
+    }
+  },
+  "browser_errors": []
+}

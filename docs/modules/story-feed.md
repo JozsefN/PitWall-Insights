@@ -96,7 +96,7 @@ primary calculation surface.
 
 - low-level feature metric calculations
 - decision-engine thresholds for current-session signals
-- raw FastF1 access
+- raw OpenF1 access
 - canonical session persistence
 - frontend widget rendering
 

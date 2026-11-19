@@ -1,0 +1,116 @@
+{
+  "checked_at_utc": "2026-11-14T16:59:17.219167+00:00",
+  "session": "fastf1:2025:1:20250316:australian-grand-prix:20250316T040000Z:race",
+  "provider": "openf1",
+  "account_or_subscription_used": false,
+  "core_source_seconds": 20.119,
+  "quality_policy": "openf1_clean_lap_v1",
+  "clean_laps": 470,
+  "coverage": {
+    "4": {
+      "expected_laps": 57,
+      "available_laps": 58
+    },
+    "1": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "63": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "12": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "23": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "18": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "27": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "16": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "81": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "44": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "10": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "22": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "31": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "87": {
+      "expected_laps": 57,
+      "available_laps": 57
+    },
+    "30": {
+      "expected_laps": 46,
+      "available_laps": 47
+    },
+    "5": {
+      "expected_laps": 45,
+      "available_laps": 46
+    },
+    "14": {
+      "expected_laps": 32,
+      "available_laps": 33
+    },
+    "55": {
+      "expected_laps": 0,
+      "available_laps": 1
+    },
+    "7": {
+      "expected_laps": 0,
+      "available_laps": 1
+    },
+    "6": {
+      "expected_laps": 0,
+      "available_laps": 1
+    }
+  },
+  "selected_drivers": [
+    "1",
+    "16",
+    "4"
+  ],
+  "job_status": "completed",
+  "telemetry_rows": 233940,
+  "startup_seconds": 52.487,
+  "repeat_ensure_ready": true,
+  "strategy_metric_values": 256,
+  "strategy_available_values": 74,
+  "strategy_status": "missing_model_inputs",
+  "timeline": {
+    "start_time_ms": 8302973,
+    "end_time_ms": 14470121
+  },
+  "supplement_rows": {
+    "pit_stops": 82,
+    "intervals": 18965,
+    "race_positions": 335,
+    "lap_quality": 928
+  },
+  "disposable_schema_removed": true,
+  "coverage_count_note": "In this original measurement available_laps counts all source lap records, including unfinished final laps. The production adapter now distinguishes completed available_laps from source_lap_records.",
+  "scope_note": "Three selected drivers in one race, initially absent database telemetry and initially absent OpenF1 adapter cache; existing season catalogue cache. Not a multi-race or 20-driver latency guarantee."
+}

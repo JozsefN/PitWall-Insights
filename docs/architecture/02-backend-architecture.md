@@ -106,11 +106,23 @@ The session import flow is intentionally split across modules:
 1. `delivery_api` exposes synchronous import and import-job routes.
 2. `session_import` owns queued jobs, worker progress, retries, and cleanup.
 3. `session_domain` owns canonical session persistence and reads.
-4. `ingestion` pulls source data from FastF1 through a provider port.
+4. `ingestion` pulls source data from OpenF1 through a provider port.
 5. `normalization` converts source data into a canonical snapshot.
 6. `session_domain` repository persists the snapshot into PostgreSQL.
 
-This keeps source-specific logic out of the repository and keeps the repository free of FastF1-specific assumptions.
+This keeps source-specific logic out of the repository and keeps the repository free of OpenF1-specific assumptions.
+
+The application HTTP boundary is called the **PitWall API**. FastAPI is the
+framework used by `app/bootstrap.py` and the delivery routes; it is not a
+business service named "FastAPI service". Background work is queued in PostgreSQL
+and claimed by `app/worker.py`; the API does not call the worker directly.
+
+Within ingestion, `OpenF1Adapter` handles session identity and race-data mapping,
+`OpenF1Catalog` supplies the selectable sessions, `OpenF1Client` handles HTTP and
+bounded retries, and `OpenF1ResponseCache` handles disposable compressed files.
+The HTTP client and cache can be checked independently of conversion or database
+writes. API catalogue requests and worker imports reuse these components inside
+their own processes.
 
 The current strategic choice is to keep telemetry in PostgreSQL and measure
 real import/read pain before adding an artifact store. Import profiles and
@@ -132,7 +144,7 @@ It contains:
 
 External-provider caches are separate from application storage.
 
-FastF1 uses a local scratch cache for HTTP responses and parsed provider data.
+OpenF1 uses a local scratch cache for HTTP responses and parsed provider data.
 The backend resolves this outside the repository by default and treats it as
 disposable. PostgreSQL remains the application-owned cache for imported
 canonical sessions.

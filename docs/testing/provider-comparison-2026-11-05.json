@@ -1,0 +1,239 @@
+{
+  "checked_at_utc": "2026-11-05T11:21:19.099562+00:00",
+  "session": "Miami 2025 Race",
+  "openf1_session_key": 10033,
+  "driver_number": 1,
+  "window_start_utc": "2025-05-04T20:15:00.041000+00:00",
+  "window_end_utc": "2025-05-04T20:16:00.041000+00:00",
+  "notes": [
+    "Read-only comparison against existing PitWall telemetry originally imported through FastF1, not a new authenticated download.",
+    "Car and XYZ comparison covers one driver in one 60-second active-race window; it does not establish equality or completeness for other windows, drivers or sessions.",
+    "Lap coverage comparison separately queries the complete driver/session laps endpoint. A direct query for missing lap 2 also returned 404.",
+    "Raw XYZ values agree in this sample; OpenF1 coordinate units and frame still require explicit adapter validation before sharing spatial calibration."
+  ],
+  "car_data": {
+    "http_status": 500,
+    "request_seconds": 0.338,
+    "openf1_rows": 0,
+    "fastf1_db_rows": 227,
+    "exact_timestamp_matches": 0,
+    "field_comparisons": {
+      "speed": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "rpm": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "n_gear": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "throttle": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "brake": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "drs": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      }
+    },
+    "successful_retry": {
+      "http_status": 200,
+      "filter": "strict UTC date bounds, no timezone suffix",
+      "openf1_rows": 227,
+      "fastf1_db_rows": 227,
+      "exact_timestamp_matches": 114,
+      "field_comparisons": {
+        "speed": {
+          "compared": 114,
+          "equal": 114,
+          "max_absolute_difference": 0.0
+        },
+        "rpm": {
+          "compared": 114,
+          "equal": 114,
+          "max_absolute_difference": 0.0
+        },
+        "n_gear": {
+          "compared": 114,
+          "equal": 114,
+          "max_absolute_difference": 0.0
+        },
+        "throttle": {
+          "compared": 114,
+          "equal": 114,
+          "max_absolute_difference": 0.0
+        },
+        "brake": {
+          "compared": 114,
+          "equal": 114,
+          "max_absolute_difference": 0.0
+        },
+        "drs": {
+          "compared": 114,
+          "equal": 114,
+          "max_absolute_difference": 0.0
+        }
+      },
+      "within_1ms_matches": 227,
+      "unique_matched_db_samples": 227,
+      "max_timestamp_difference_ms": 1.0,
+      "within_1ms_field_comparisons": {
+        "speed": {
+          "compared": 227,
+          "equal": 227
+        },
+        "rpm": {
+          "compared": 227,
+          "equal": 227
+        },
+        "n_gear": {
+          "compared": 227,
+          "equal": 227
+        },
+        "throttle": {
+          "compared": 227,
+          "equal": 227
+        },
+        "brake": {
+          "compared": 227,
+          "equal": 227
+        },
+        "drs": {
+          "compared": 227,
+          "equal": 227
+        }
+      }
+    }
+  },
+  "location": {
+    "http_status": 500,
+    "request_seconds": 0.324,
+    "openf1_rows": 0,
+    "fastf1_db_rows": 229,
+    "exact_timestamp_matches": 0,
+    "field_comparisons": {
+      "x": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "y": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      },
+      "z": {
+        "compared": 0,
+        "equal": 0,
+        "max_absolute_difference": null
+      }
+    },
+    "successful_retry": {
+      "http_status": 200,
+      "filter": "strict UTC date bounds, no timezone suffix",
+      "openf1_rows": 229,
+      "fastf1_db_rows": 229,
+      "exact_timestamp_matches": 118,
+      "field_comparisons": {
+        "x": {
+          "compared": 118,
+          "equal": 118,
+          "max_absolute_difference": 0.0
+        },
+        "y": {
+          "compared": 118,
+          "equal": 118,
+          "max_absolute_difference": 0.0
+        },
+        "z": {
+          "compared": 118,
+          "equal": 118,
+          "max_absolute_difference": 0.0
+        }
+      },
+      "within_1ms_matches": 229,
+      "unique_matched_db_samples": 229,
+      "max_timestamp_difference_ms": 1.0,
+      "within_1ms_field_comparisons": {
+        "x": {
+          "compared": 229,
+          "equal": 229
+        },
+        "y": {
+          "compared": 229,
+          "equal": 229
+        },
+        "z": {
+          "compared": 229,
+          "equal": 229
+        }
+      }
+    }
+  },
+  "laps": {
+    "http_status": 200,
+    "request_seconds": 0.34,
+    "openf1_rows": 33,
+    "matched_laps": 33,
+    "lap_time_max_difference_ms": 3146.0,
+    "lap_time_exact_within_1ms": 32,
+    "fastf1_db_laps": 57,
+    "duration_differences": [
+      {
+        "lap_number": 1,
+        "openf1_duration_s": 92.523,
+        "fastf1_duration_ms": 95669
+      }
+    ],
+    "missing_lap_numbers": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "missing_lap_direct_probe": {
+      "lap_number": 2,
+      "http_status": 404,
+      "returned_rows": null
+    }
+  },
+  "comparison_method": {
+    "car_and_location": "One-to-one nearest stored FastF1 timestamp within 1 ms; each stored sample matched at most once. Compare values without interpolation.",
+    "brake": "OpenF1 numeric brake converted to boolean to match the existing FastF1/PitWall brake_on channel; this does not measure braking pressure.",
+    "laps": "All returned OpenF1 lap rows compared by lap number against the existing imported FastF1 driver laps.",
+    "initial_http_500": "Initial UTC bounds including timezone suffix and a non-strict lower comparator returned 500; a retry using strict UTC bounds without timezone suffix succeeded. This is not evidence that the resource itself is unavailable."
+  }
+}

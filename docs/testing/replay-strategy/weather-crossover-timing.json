@@ -1,0 +1,26 @@
+{
+  "outlap_checks": [
+    {
+      "race": "2025 Bahrain",
+      "driver": "Verstappen",
+      "lap": 11,
+      "sector": 2,
+      "split_s": 41.985,
+      "evidence_before_outlap_end_s": 22.841
+    },
+    {
+      "race": "2024 British GP",
+      "driver": "Hamilton",
+      "lap": 39,
+      "sector": 2,
+      "split_s": 38.414,
+      "evidence_before_outlap_end_s": 24.163
+    }
+  ],
+  "melbourne_later_switch": {
+    "lead_to_reported_stop_s": 49.711,
+    "margin_to_estimated_earliest_pit_entry_s": 30.99,
+    "gain_per_lap_s": 9.456
+  },
+  "reading": "Positive lead is relative to the raw published stop clock. Estimated entry subtracts reported lane duration as a conservative bound."
+}

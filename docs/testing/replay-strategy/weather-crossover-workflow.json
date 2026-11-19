@@ -1,0 +1,81 @@
+{
+  "silverstone_early_sector": {
+    "target": "SLICK",
+    "sectors": [
+      {
+        "sector": 2,
+        "gain_s": 0.36725,
+        "spread_s": 0.756497,
+        "comparisons": 7
+      }
+    ],
+    "scouts": 3,
+    "references": 7,
+    "reference_compound": null,
+    "gain_s_lap": 0.36725,
+    "box_s": -19.05275,
+    "wait_s": -19.42,
+    "earlier_switch_s": 0.36725,
+    "warmup_s": 0.169,
+    "warmup_included": true,
+    "spread_s": 2.256497,
+    "historical_races": 0,
+    "forecast_driven": false,
+    "supported": true
+  },
+  "melbourne_switch": {
+    "entry_id": "f47c4895-1c5f-4699-884a-a30208f1ebec",
+    "compound": "MEDIUM",
+    "action": "box",
+    "target": "INTERMEDIATE",
+    "options": [
+      {
+        "target": "INTERMEDIATE",
+        "sectors": [
+          {
+            "sector": 1,
+            "gain_s": 2.2845,
+            "spread_s": 0.35,
+            "comparisons": 6
+          },
+          {
+            "sector": 2,
+            "gain_s": -0.11625,
+            "spread_s": 0.35,
+            "comparisons": 2
+          },
+          {
+            "sector": 3,
+            "gain_s": 6.7155,
+            "spread_s": 0.363978,
+            "comparisons": 6
+          }
+        ],
+        "scouts": 7,
+        "references": 5,
+        "reference_compound": "MEDIUM",
+        "gain_s_lap": 8.88375,
+        "box_s": 23.49725,
+        "wait_s": 14.6135,
+        "earlier_switch_s": 8.88375,
+        "warmup_s": 0.8615,
+        "warmup_included": true,
+        "spread_s": 1.063978,
+        "historical_races": 0,
+        "forecast_driven": false,
+        "supported": true
+      }
+    ],
+    "laps": 5,
+    "arrival_s": 10.756,
+    "pit_cost_s": 20.06
+  },
+  "canada_full_wet_cars": 2,
+  "bahrain_rain_scenario_before_first_switch": true,
+  "browser": [
+    "Early sectors",
+    "Mobile",
+    "Rain scenario",
+    "Rewind hides unissued scenario"
+  ]
+}

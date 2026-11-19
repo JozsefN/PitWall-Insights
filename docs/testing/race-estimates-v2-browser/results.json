@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "builder_search_category_settings_database_save_and_reload",
+    "all_15_panels_real_openf1_snapshot_and_shared_request",
+    "race_estimates_remain_visible_during_delayed_refresh",
+    "replay_rewind_removes_future_notifications",
+    "driver_comparison_and_metric_evidence_render",
+    "fixed_five_and_height_dependent_notification_capacity",
+    "mobile_panels_do_not_overflow_page",
+    "engineering_desk_actual_driver_positions_wind_speed_flag_layer_and_panel_guidance",
+    "lookback_map_weather_uses_selected_lap_end_time"
+  ],
+  "count": 9,
+  "browser_errors": [],
+  "panels": 15,
+  "source": "openf1:session:9693",
+  "mocked_telemetry": false,
+  "as_of_ms": 10000000,
+  "panel_startup_seconds": 3.254,
+  "cached_api_seconds": 0.074,
+  "cache_hit": true,
+  "version": "race_estimation_v2",
+  "metric_count": 75,
+  "events": 63,
+  "telemetry_coverage_pct": {
+    "1": 99.760333,
+    "16": 99.760333,
+    "4": 99.760333
+  },
+  "requests_at_target_cutoff": 2,
+  "test_account_removed": true
+}

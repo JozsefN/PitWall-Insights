@@ -1,0 +1,26 @@
+[
+  {
+    "circuit": "Sakhir",
+    "lap": 14,
+    "audited_apex_drawn": true,
+    "mapped_road_drawn": true
+  },
+  {
+    "circuit": "Suzuka",
+    "lap": 16,
+    "audited_apex_drawn": true,
+    "mapped_road_drawn": true
+  },
+  {
+    "circuit": "Silverstone",
+    "lap": 17,
+    "audited_apex_drawn": true,
+    "mapped_road_drawn": true
+  },
+  {
+    "circuit": "Imola",
+    "lap": 17,
+    "audited_apex_drawn": true,
+    "mapped_road_drawn": true
+  }
+]

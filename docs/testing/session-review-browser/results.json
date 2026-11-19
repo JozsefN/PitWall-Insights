@@ -1,0 +1,38 @@
+{
+  "qualifying_radio_clips": 12,
+  "qualifying_phase_counts": [
+    19,
+    15,
+    10
+  ],
+  "bahrain_net_pit_loss": {
+    "sample_count": 17,
+    "median_s": 23.27,
+    "robust_scatter_s": 0.982964
+  },
+  "bahrain_practice_compounds": [
+    "HARD",
+    "MEDIUM",
+    "SOFT"
+  ],
+  "australia_supported_segment_laps": 3,
+  "bahrain_timing_visuals": {
+    "projected_drivers": 20,
+    "rejoin_scenarios": 20,
+    "active_or_closing_pairs": 2,
+    "rival_pit_windows": 0
+  },
+  "browser_checks": [
+    "qualifying cards and in-panel radio playback control",
+    "qualifying-only and Grand Prix-only layouts blocked outside supported sessions",
+    "real lap segment comparison",
+    "replay projection horizon and fuel scenario",
+    "field projection focus, pace evidence, pit rejoin selection, timed benchmarks and active battle rows",
+    "rival-stop position flip visual with controlled comparison data",
+    "strategy data and panel heights stay stable during delayed refresh on desktop and mobile",
+    "rewind excludes future strategy values and preserves scenario controls",
+    "strategy replay waits for its review snapshot without requiring raw telemetry",
+    "mobile viewport and no runtime errors"
+  ],
+  "errors": []
+}

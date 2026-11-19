@@ -8,7 +8,7 @@ This extends the existing `feature_metrics` module. The original driver scores a
 
 ```mermaid
 flowchart LR
-    Provider[FastF1 and provider disk cache] --> Worker[Independent materialization worker]
+    Provider[OpenF1 and provider disk cache] --> Worker[Independent materialization worker]
     Worker --> Normalize[Canonical normalization]
     Normalize --> Raw[(Raw PostgreSQL telemetry and context)]
     UI[Authenticated consumer] --> API[Analytics API]
@@ -66,12 +66,12 @@ Events have a kind, start/end feed-clock times, entry, evidence, confidence and 
 - PostgreSQL selects the first actual sample per entry and time bucket. This is display/analysis sampling, not an anti-alias filter or a replacement for stored raw telemetry. Short brake applications, rapid gear changes and peak forces can be missed. Request a smaller interval and window for closer investigation.
 - Default interval is 500 ms; accepted range is 100–5000 ms. By default, the maximum continuous gap is `max(2000,2*sample_interval_ms)`. An explicit maximum must be at least the requested interval. Never interpolate or differentiate across larger gaps, invalid points or missing endpoints.
 - Time-weighted channels use bounded observation intervals. The final sample has at most one nominal median sample interval of support, clipped to the window. Gaps receive zero support. Position proximity instead requires valid observations at both ends of its sampled time interval.
-- Speed is km/h. Derivatives convert it to m/s; acceleration divides by 9.80665 to report g. FastF1's 2020+ XYZ coordinates are decimetres and are multiplied by 0.1 for geometric calculations. Position calculations are unavailable for unsupported sources/years instead of guessing a coordinate scale.
-- Source weather wind is m/s and is converted to km/h on normalization. Migration `d0a715f2e834` corrects existing FastF1 weather values once. Wind direction uses a duration-weighted circular mean, so 359° and 1° average to 0°, not 180°.
+- Speed is km/h. Derivatives convert it to m/s; acceleration divides by 9.80665 to report g. OpenF1's 2020+ XYZ coordinates are decimetres and are multiplied by 0.1 for geometric calculations. Position calculations are unavailable for unsupported sources/years instead of guessing a coordinate scale.
+- Source weather wind is m/s and is converted to km/h on normalization. Migration `d0a715f2e834` corrects existing OpenF1 weather values once. Wind direction uses a duration-weighted circular mean, so 359° and 1° average to 0°, not 180°.
 - Missing/non-finite speed, speed outside 0–450 km/h by default, non-finite XY and `(0,0)` positions are unusable. Continuous XY steps implying speed above the limit are jumps; they contribute neither distance nor motion-derived forces. Longitudinal derivative spikes above 10 g are excluded. Heading change is path direction, not chassis yaw or steering angle; estimated lateral acceleration is capped at 10 g.
 - `quality` exposes counts, supported duration, gaps, invalid channels, GPS jumps and repeated positions. Coverage is reported separately for each entry's car and position streams. Cross-driver proximity uses a shared clock and fresh, bounded interpolation, never differently timed raw points.
 
-The source coordinate and channel definitions are documented in [FastF1's primary source](https://github.com/theOehrly/Fast-F1/blob/v3.6.1/fastf1/core.py); weather units and source status handling are in [the provider parser](https://github.com/theOehrly/Fast-F1/blob/v3.6.1/fastf1/_api.py).
+The current source channel, location and weather definitions are documented in the [OpenF1 API reference](https://openf1.org/docs/). Public coordinates are approximate. Metric results that depend on physical track geometry require validated units and per-session calibration; extra samples or normalization do not establish track-edge precision.
 
 ## Calculation rules
 
@@ -87,14 +87,14 @@ The source coordinate and channel definitions are documented in [FastF1's primar
 | Powertrain | Reported RPM and gears 1–8. Shift counts sum observed gear-step magnitudes and exclude gaps/neutral/reverse. Historical source DRS codes 10, 12 and 14 indicate reported opening; they do not establish current regulatory eligibility. |
 | Reference line | A completed accurate non-pit lap with position samples, known clear/empty lap flags, at least 20 finite points, closure gap at most 150 m, length 500–15000 m and no segment longer than 300 m. Five early candidates are tried; unavailable reference geometry stays unavailable. Projection uses nearby polyline segments. |
 | Line deviation | XY distance from that sampled racing line. Time beyond 15 m is configurable; supported episodes of at least one second emit candidate events. Adjacent GPS jumps are excluded. There are no authoritative track-boundary polygons, so this is **not an off-track verdict**. Adjacent circuit sections can make projection ambiguous. |
-| Reported OffTrack | The source's flag, counted only with usable coordinates. FastF1 can fill missing position records with this flag; even a reported episode does not prove an official track-limits breach. |
+| Reported OffTrack | The source's flag, counted only with usable coordinates. OpenF1 can fill missing position records with this flag; even a reported episode does not prove an official track-limits breach. |
 | Rapid speed drop | Drop of at least 100 km/h inside two seconds of continuous finite speed data by default. Overlapping detections merge. Ordinary F1 braking can meet this threshold. |
 | Possible incident | A rapid drop followed within five seconds by a supported stop at or below 5 km/h for at least four seconds, outside known pit-in/out laps, matched pit visits with a five-second buffer, and known non-clear track periods. A linked driver incident message can add support. It remains a candidate; **never confirmed crash detection**. Missing pit/flag context limits interpretation. |
 | Timing position | Latest completed-lap report and differences between reports. Grid gain, timing gains/losses and pit cycles are not asserted to be on-track overtakes. Field pace comparison uses the selected entries' fastest clean lap at each matching lap number. |
 | Nearby cars | Simultaneous Euclidean XY distance, sampled at no less than one second. Proximity time means another observed car within 30 m; pit lanes, crossing paths and adjacent circuit sections can contribute. It establishes neither drafting nor contact. |
 | Conditions | Weather means over covered intervals (weather gap cap 180 s); rainfall is a reported boolean. Track status intervals use 1 clear, 2 yellow, 4 safety car, 5 red, 6/7 VSC. Status 3 is unknown. Messages are counted by source text and structured driver association. |
 
-Race-control `Time` is a UTC timestamp and `RacingNumber` identifies the driver. Normalization subtracts the true FastF1 feed-clock origin (`t0_date`), **not the scheduled race start**. Core imports can lack this origin because telemetry was not loaded; they do not invent message times. A successful telemetry materialization aligns and refreshes the entire session's messages atomically, including drivers outside the requested telemetry selection. Duplicate source messages collapse; unavailable context does not erase existing messages.
+Race-control `Time` is a UTC timestamp and `RacingNumber` identifies the driver. Normalization subtracts the true OpenF1 feed-clock origin (`t0_date`), **not the scheduled race start**. Core imports can lack this origin because telemetry was not loaded; they do not invent message times. A successful telemetry materialization aligns and refreshes the entire session's messages atomically, including drivers outside the requested telemetry selection. Duplicate source messages collapse; unavailable context does not erase existing messages.
 
 For an already-cached session that predates this fix, `python scripts/backfill_race_control.py SESSION_ID` resolves the source clock and updates only race-control context. It needs available provider data; it does not replace stored car/position telemetry. The validated Miami fixture was repaired this way.
 

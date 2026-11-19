@@ -1,0 +1,27 @@
+{
+  "event": "Australian Grand Prix",
+  "session_key": "9693",
+  "selected_drivers": 20,
+  "active_drivers": 19,
+  "closed_outline": true,
+  "pit_map": null,
+  "1x": {
+    "elapsed_ms": 6047.0999999996275,
+    "frame_p95_ms": 16.799999999999272,
+    "longest_frame_ms": 50,
+    "frames_over_50_ms": 0,
+    "long_tasks": 1,
+    "simulated_ms": 5994,
+    "clock_ratio": 0.991
+  },
+  "5x": {
+    "elapsed_ms": 6006.10000000149,
+    "frame_p95_ms": 16.799999999999272,
+    "longest_frame_ms": 66.70000000000073,
+    "frames_over_50_ms": 3,
+    "long_tasks": 1,
+    "simulated_ms": 29994,
+    "clock_ratio": 0.999
+  },
+  "errors": []
+}

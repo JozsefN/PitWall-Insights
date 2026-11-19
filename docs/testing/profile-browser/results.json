@@ -1,0 +1,20 @@
+{
+  "checks": [
+    "signup_without_external_account",
+    "profile_persists_in_real_database_after_reload",
+    "data_availability_shows_free_brake_replay_strategy_and_unavailable_live_with_checks",
+    "mobile_profile_and_comparison_do_not_overflow_page",
+    "failed_f1_connection_preserves_free_account_and_no_provider_secret_in_local_storage",
+    "simulated_f1_connect_verify_and_confirmed_disconnect",
+    "real_local_browser_handoff_start_wait_and_cancel_without_sending_credentials",
+    "simulated_verified_browser_access_requires_explicit_profile_confirmation",
+    "unlinked_f1_blocked_with_connector_round_trip_preserving_race_and_free_fallback",
+    "structured_import_error_keeps_actual_reason_and_offers_profile_or_openf1",
+    "signup_f1_failure_recovers_to_new_profile_without_leaking_previous_profile"
+  ],
+  "count": 11,
+  "browser_errors": [],
+  "f1_provider_responses_simulated": true,
+  "profile_and_signup_used_real_database": true,
+  "test_accounts_removed": true
+}

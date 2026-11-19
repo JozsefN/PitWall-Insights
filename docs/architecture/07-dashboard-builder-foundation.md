@@ -59,3 +59,9 @@ See [Layout Builder Validation](../testing/layout-builder-validation.md) for rep
 ## Widget development
 
 Follow the [precise widget creation runbook](widget-creation-runbook.md) for registration, the shared contract, data resources, sizing, structural previews, adaptive behavior, API validation and required checks. Backend source deployments must include the sibling `shared` directory; restart the backend when changing JSON policies.
+
+## Mode and session compatibility
+
+The shared manifest defines the supported modes, applicable session types, and a short explanation for every panel. A layout can target Lookback, Replay, or both, and can target one session type or use the session types shared by all its panels. `config.enabledAudiences` stores the modes when both are selected. Existing layouts without this field use their stored `audience`. `config.sessionKind` narrows the session types when set. Save validation checks every panel, and the session workspace repeats the check before mounting a dashboard from a saved link.
+
+The Engineering desk uses Grand Prix replay. The Qualifying review uses qualifying lookback. Historical weather, team radio, and other shared panels read to the replay clock when opened in Replay. The builder shows which panels need replacement when a user changes an existing layout's scope. The numerical and panel extension contract is in [Race Estimation](12-race-estimation.md).

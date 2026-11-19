@@ -2,144 +2,122 @@
 
 ## Feladatkiírás
 
-## Hallgatói nyilatkozat
-
-## Kivonat
-
-## Abstract
+## Címoldal
 
 ## Tartalomjegyzék
 
-## Rövidítések jegyzéke
+## Hallgatói nyilatkozat
+
+## Összefoglaló
+
+## Abstract
 
 ## 1. Bevezetés
 
-### 1.1. Motiváció és a megoldandó probléma
+### 1.1. A feladat háttere és motivációja
 
-### 1.2. A dolgozat célkitűzései és felépítése
-
-### 1.3. Az önálló labor előzményei és a saját hozzájárulás
+### 1.2. Célkitűzés és önálló hozzájárulás
 
 ## 2. Szakmai és technológiai háttér
 
-### 2.1. A Forma–1 verseny- és telemetriaadatai
+### 2.1. Versenyadatok és értelmezési határok
 
-### 2.2. Meglévő telemetriaelemző megoldások összehasonlítása
+### 2.2. Az OpenF1 mint aktív adatforrás
 
-### 2.3. Idősorok, mintavételezés és adatminőség
+### 2.3. A technológiaválasztás indokai
 
-### 2.4. A webes elemzőrendszer technológiai alapjai
+### 2.4. Közös időalap és adatminőség
 
-#### 2.4.1. React, TypeScript és TanStack Query
+## 3. Követelményspecifikáció
 
-#### 2.4.2. FastAPI, API-kérések és háttérfeladatok
+### 3.1. Használati esetek
 
-#### 2.4.3. PostgreSQL, SQLAlchemy és Alembic
+### 3.2. Funkcionális követelmények
 
-### 2.5. Nyelvi modellek alkalmazása adatok szöveges értelmezésére
+### 3.3. Nem funkcionális követelmények
 
-## 3. Követelmények és architekturális döntések
+## 4. Rendszerterv
 
-### 3.1. Felhasználói csoportok és használati esetek
+### 4.1. A fő komponensek felelőssége
 
-### 3.2. Funkcionális és minőségi követelmények
+### 4.2. Adatmodell és a hozzáférés szétválasztása
 
-### 3.3. A rendszer felépítése és a modulok felelőssége
+### 4.3. A numerikus és a döntési réteg kapcsolata
 
-### 3.4. Adatmodell, perzisztencia és API-szerződések
+## 5. Az alkalmazás megvalósítása
 
-### 3.5. A fő feldolgozási és kommunikációs folyamatok
+### 5.1. Az adatbetöltés szervezése
 
-## 4. Adatfeldolgozás és összetett versenyelemzések
+#### 5.1.1. Katalógus, alapimport és forráskezelés
 
-### 4.1. FastF1-integráció és az adatok egységesítése
+#### 5.1.2. Háttérmunka és adatbázis-írás
 
-### 4.2. Háttérben futó import és igény szerinti telemetriabetöltés
+#### 5.1.3. Normalizálás és tiszta körök
 
-### 4.3. Időbélyegek összehangolása és a visszajátszás adatmodellje
+### 5.2. Történeti visszajátszás
 
-### 4.4. Származtatott metrikák számítása
+#### 5.2.1. A lejátszás elindítása
 
-#### 4.4.1. Tempó, egyenletesség és köridőtrendek
+#### 5.2.2. Közös idő, eltérő frissítési gyakoriság
 
-#### 4.4.2. Pilóták közötti különbségek és felzárkózási helyzetek
+#### 5.2.3. Pályatérkép és időmérő torony
 
-#### 4.4.3. Etapok, gumihasználat és teljesítményváltozások
+### 5.3. A munkaterület és a menthető panelek
 
-### 4.5. Jelentős versenyhelyzetek kiválasztása szabályokkal
+### 5.4. Stratégiai számítás és forgatókönyv
 
-### 4.6. Hiányos adatok, gyorsítótárazás és lekérdezési költségek
+#### 5.4.1. A döntési pillanatkép és a számítások eredete
 
-## 5. Interaktív elemzőfelület és felhasználói hozzáférés
+#### 5.4.2. Tempó, gumidegradáció és hátralévő táv
 
-### 5.1. Edzések és versenyek kiválasztása, adatbetöltési állapotok
+#### 5.4.3. A kiállás tényleges vesztesége és a riválisok
 
-### 5.2. Közös állapotkezelés és a visszajátszás vezérlése
+#### 5.4.4. Incidensek és a várható bokszköltség
 
-### 5.3. Widgetrendszer és elrendezésszerkesztő
+#### 5.4.5. Tervkeresés és a felületen olvasható eredmény
 
-#### 5.3.1. Panelek kiválasztása, átrendezése és átméretezése
+#### 5.4.6. Kivezető kör, eső és száradó pálya
 
-#### 5.3.2. Panelbeállítások és személyes elrendezések mentése
+#### 5.4.7. Fizikai kiegészítések és a bizonyíték határa
 
-### 5.4. Felhasználói fiókok és előfizetési szintek
+## 6. Tesztelés és értékelés
 
-#### 5.4.1. Szerveroldali jogosultságok és használati korlátok
+### 6.1. A próbák és a követelmények kapcsolata
 
-#### 5.4.2. Tesztfizetés, csomagváltás és lemondás
+### 6.2. Betöltési idők és valódi OpenF1-adatút
 
-### 5.5. Kezdőoldal, bajnoki tabella és hírfolyam
+### 6.3. Stratégiai esettanulmányok
 
-## 6. AI-alapú elemzőpanelek
+### 6.4. Időrendi visszateszt és a becslés korlátai
 
-### 6.1. Az AI feladata és a feldolgozott adatokból képzett kontextus
+## 7. Fejlesztési tapasztalatok
 
-### 6.2. Panelbeállítások, promptok és a modellhívás folyamata
+### 7.1. Az adatforrás megváltozása
 
-### 6.3. A magyarázatok kapcsolata a hivatkozott adatokkal
+### 7.2. A visszajátszás fejlesztési tanulságai
 
-### 6.4. Hibás, hiányos és nem alátámasztható válaszok kezelése
+### 7.3. A felület olvashatósága
 
-### 6.5. Modellválasztás és erőforráskorlátok
+## 8. Összefoglalás
 
-## 7. Tesztelés és értékelés
+### 8.1. Elkészült eredmények
 
-### 7.1. Tesztadatok, tesztesetek és futtatási környezet
-
-### 7.2. A metrikák helyességének és az adatminőség kezelésének ellenőrzése
-
-### 7.3. Felhasználói folyamatok és hozzáférési szabályok tesztelése
-
-### 7.4. Adatbetöltés, lekérdezések és visszajátszás teljesítményvizsgálata
-
-### 7.5. Az AI-magyarázatok pontossága, válaszideje és költsége
-
-## 8. Fejlesztési tapasztalatok és korlátok
-
-### 8.1. A prototípustól a bővíthető alkalmazásig
-
-### 8.2. Adatforrásokból és aszinkron működésből adódó nehézségek
-
-### 8.3. Átdolgozott megoldások és mérnöki kompromisszumok
-
-### 8.4. A fejlesztési munkafolyamat és a levont tanulságok
-
-### 8.5. Az elkészült rendszer korlátai
-
-## 9. Összefoglalás és továbbfejlesztés
-
-### 9.1. Elért eredmények és a feladatkiírás teljesítése
-
-### 9.2. Továbbfejlesztési lehetőségek
+### 8.2. További fejlesztések és eredeti ütemezés
 
 ## Irodalomjegyzék
 
 ## Függelékek
 
-### A. Telepítési, konfigurációs és futtatási útmutató
+### A. Futtatási és ellenőrzési környezet
 
-### B. Kiegészítő adatmodellek és metrikadefiníciók
+### B. Korábbi fejlesztési változatok mérési eredményei
 
-### C. Kiegészítő teszteredmények
+### C. További képernyőképek
 
-### D. Nyilatkozat a generatív MI-eszközök használatáról
+#### C.1. Elrendezések készítése
+
+#### C.2. Pályatérkép és időmérés
+
+#### C.3. Futamesemények és gumihasználat
+
+### D. Kiegészítő műszaki ábrák

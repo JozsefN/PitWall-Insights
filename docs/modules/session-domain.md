@@ -100,7 +100,7 @@ The repository handles:
 - reading entry-scoped laps and telemetry
 - reading replay-alignment ticks
 
-The repository should not contain FastF1-specific parsing logic. By the time data reaches the repository, it should already be in the normalization module's canonical snapshot format.
+The repository should not contain OpenF1-specific parsing logic. By the time data reaches the repository, it should already be in the normalization module's canonical snapshot format.
 
 ## Public API Surface
 
@@ -132,7 +132,7 @@ The session domain is exposed through:
 
 ### Does not belong here
 
-- direct FastF1 ingestion details
+- direct OpenF1 ingestion details
 - source-specific cleanup/parsing rules
 - import job queue state and worker heartbeats
 - advanced derived metrics like acceleration or driver-ahead analytics

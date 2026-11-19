@@ -316,7 +316,7 @@ Good future candidates:
 
 ## What Does Not Belong Here
 
-- raw FastF1 access
+- raw OpenF1 access
 - canonical lap or telemetry persistence
 - editorial/news story feed content
 - frontend layout decisions

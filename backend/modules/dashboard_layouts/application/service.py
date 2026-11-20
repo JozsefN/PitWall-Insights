@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from modules.billing.application.entitlements import user_plan
+from modules.billing.domain.plans import EntitlementError, Plan
 from modules.dashboard_layouts.domain.models import (
     LayoutCreateRequest,
     LayoutRecord,
@@ -9,7 +11,24 @@ from modules.dashboard_layouts.domain.models import (
 )
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord
 from modules.dashboard_layouts.infrastructure.repository import DashboardLayoutRepository
-from modules.dashboard_layouts.domain.validation import validate_dashboard_config
+from modules.dashboard_layouts.domain.validation import WIDGET_POLICIES, validate_dashboard_config
+
+
+def validate_plan(config: dict, plan: Plan) -> None:
+    def widgets(node):
+        if node["type"] == "widget":
+            yield node["widgetId"]
+        else:
+            for child in node["children"]:
+                yield from widgets(child)
+
+    panel_ids = [item for section in config["sections"] for item in widgets(section["layout"])]
+    if len(panel_ids) > plan.panels_per_layout:
+        raise EntitlementError(f"{plan.name} allows {plan.panels_per_layout} panels per saved layout.")
+    for panel_id in panel_ids:
+        policy = WIDGET_POLICIES[panel_id]
+        if policy["accessTier"] > plan.level:
+            raise EntitlementError(f"{policy['title']} requires Analyst or Pro.")
 
 
 class DashboardLayoutService:
@@ -29,6 +48,11 @@ class DashboardLayoutService:
         if not request.name.strip():
             raise ValueError("Layout name cannot be blank")
         config = validate_dashboard_config(request.config, request.audience, request.schema_version)
+        self.repository.lock_owner(user_id)
+        plan = user_plan(self.repository.db, user_id)
+        validate_plan(config, plan)
+        if self.repository.count_for_user(user_id) >= plan.saved_layouts:
+            raise EntitlementError(f"{plan.name} allows {plan.saved_layouts} saved layouts.")
         record = self.repository.create(
             owner_user_id=user_id,
             name=request.name.strip(),
@@ -45,17 +69,19 @@ class DashboardLayoutService:
         layout_id: str,
         request: LayoutUpdateRequest,
     ) -> LayoutRecord | None:
+        self.repository.lock_owner(user_id)
         record = self.repository.get_for_user(user_id, layout_id)
         if record is None:
             return None
 
         if request.name is not None and not request.name.strip():
             raise ValueError("Layout name cannot be blank")
-        validate_dashboard_config(
+        validated = validate_dashboard_config(
             request.config if request.config is not None else record.config_json,
             request.audience or record.audience,
             request.schema_version or record.schema_version,
         )
+        validate_plan(validated, user_plan(self.repository.db, user_id))
         config = deepcopy(request.config) if request.config is not None else None
         updated = self.repository.update(
             record,
@@ -69,6 +95,7 @@ class DashboardLayoutService:
         return self._build_record(updated)
 
     def delete_layout(self, user_id: str, layout_id: str) -> bool:
+        self.repository.lock_owner(user_id)
         record = self.repository.get_for_user(user_id, layout_id)
         if record is None:
             return False

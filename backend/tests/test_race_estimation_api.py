@@ -18,7 +18,7 @@ from modules.feature_metrics.infrastructure.db_models import SessionAnalysisCach
 from modules.feature_metrics.application.calculation_guard import _ANALYSIS_GATE
 from modules.feature_metrics.domain.race_estimation.catalog import DEFINITIONS
 from modules.dashboard_layouts.domain.validation import validate_dashboard_config
-from support import isolated_database, seed_session
+from support import isolated_database, paid_membership, seed_session
 
 
 class RaceEstimationApiTests(unittest.TestCase):
@@ -35,6 +35,9 @@ class RaceEstimationApiTests(unittest.TestCase):
                     for name in ("alice", "bob")
                 ]
             )
+            db.flush()
+            for name in ("alice", "bob"):
+                paid_membership(db, name)
             self.ids = list(
                 db.scalars(
                     select(SessionEntryRecord.id).order_by(

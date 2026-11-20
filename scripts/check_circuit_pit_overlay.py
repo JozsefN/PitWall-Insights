@@ -1,4 +1,5 @@
 """Check Melbourne's telemetry-aligned road and pit overlay with archived race data."""
+from local_test_accounts import seed_verified_account
 from filter_controls import select_control
 
 import json
@@ -34,7 +35,7 @@ with SessionLocal() as db, patch(
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"circuit-pit-e2e-{secrets.token_hex(6)}@example.com"
-    token = api("POST", "/api/auth/signup", payload={"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
+    token = seed_verified_account({"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
         sid = next(row["id"] for row in api("GET", "/api/sessions", token) if row["source_session_key"] == "openf1:session:9693")

@@ -328,7 +328,7 @@
       "title": "Rival gaps & lap comparison",
       "description": "Compare current and pre-pit gaps, recent lap pace and individual sectors against likely rivals.",
       "category": "strategy", "previewKind": "insights", "previewDetail": "delta-bars", "previewLabels": ["Sector 1", "Sector 2", "Sector 3"],
-      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 1,
       "sizing": {"minW": 4, "minH": 5, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
       "searchTerms": ["rival", "sector", "gap", "championship", "grid", "pace"],
       "availabilityNote": "Grand Prix replay. Compare sectors after three matched clean laps."
@@ -337,7 +337,7 @@
       "title": "Rival pit scenarios",
       "description": "Compare boxing, extending and finishing as a rival pits or stays out.",
       "category": "strategy", "previewKind": "insights", "previewDetail": "timing-bars", "previewLabels": ["Box", "Extend", "Finish"],
-      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 1,
       "sizing": {"minW": 4, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
       "searchTerms": ["rival", "undercut", "rejoin", "pit or stay", "pit strategy"],
       "availabilityNote": "Dry Grand Prix replay. Requires a current timing gap and a feasible plan for both drivers."
@@ -346,7 +346,7 @@
       "title": "Tyre crossover",
       "description": "Compare slick, intermediate and wet pace using newly completed sectors from the field.",
       "category": "strategy", "previewKind": "insights", "previewDetail": "delta-bars", "previewLabels": ["Slicks", "Intermediates", "Full wets"],
-      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 1,
       "sizing": {"minW": 5, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
       "searchTerms": ["rain", "wet weather", "tyre crossover", "slicks", "intermediates", "out-lap"],
       "availabilityNote": "Grand Prix replay. Uses matched timing sectors from the whole field. An optional rain scenario compares earlier races."
@@ -356,7 +356,7 @@
       "description": "See the fastest supported route to the flag, the first pit window and the margin over the next call.",
       "category": "strategy", "previewKind": "insights", "previewDetail": "timing-bars",
       "previewLabels": ["Current set", "Next set", "Pit window"],
-      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 1,
       "sizing": {"minW": 4, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
       "searchTerms": ["best strategy", "pit stop", "undercut", "box", "stay out"],
       "availabilityNote": "For dry Grand Prix replay. Plans need comparable tyre runs, known tyre ages and a same-circuit pit benchmark."
@@ -365,7 +365,7 @@
       "title": "Race warnings & safety car",
       "description": "See incident warnings and compare the odds of the first intervention over the next two minutes.",
       "category": "race", "previewKind": "notifications",
-      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 1,
       "sizing": {"minW": 4, "minH": 6, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
       "searchTerms": ["safety car", "VSC", "contact", "stopped", "yellow", "retirement"],
       "availabilityNote": "Grand Prix replay. A percentage needs an active race-control episode and enough earlier comparable episodes."
@@ -375,7 +375,7 @@
       "description": "Compare observed tyre ages and measured pace changes across compounds and this driver’s current set.",
       "category": "strategy", "previewKind": "insights", "previewDetail": "timing-bars",
       "previewLabels": ["Soft", "Medium", "Hard"],
-      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 0,
+      "builderEnabled": true, "supportedAudiences": ["live-race"], "sessionKinds": ["race"], "accessTier": 1,
       "sizing": {"minW": 4, "minH": 5, "maxW": 12, "maxH": 20, "defaultW": 6, "defaultH": 8, "compactBelowPx": 420, "shortBelowPx": 340},
       "searchTerms": ["compound", "degradation", "tyre life", "practice", "stint"],
       "availabilityNote": "Grand Prix replay. Uses clean recorded dry long runs. Same-weekend practice and earlier same-circuit races enrich the estimates when imported."
@@ -402,7 +402,7 @@
         "shortBelowPx": 340
       },
       "defaultOptions": {
-        "includeCandidates": true,
+        "includeCandidates": false,
         "minSeverity": "info",
         "driverScope": "all",
         "maxItems": "auto",
@@ -438,7 +438,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "sizing": {
         "minW": 4,
@@ -475,7 +475,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "sizing": {
         "minW": 4,
@@ -518,7 +518,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 2,
       "sizing": {
         "minW": 4,
@@ -562,7 +562,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 2,
       "sizing": {
         "minW": 4,
@@ -605,7 +605,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 2,
       "sizing": {
         "minW": 4,
@@ -653,7 +653,7 @@
         "session-lookback",
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 2,
       "sizing": {
         "minW": 4,
@@ -692,7 +692,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "sizing": {
         "minW": 4,
@@ -729,7 +729,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "sizing": {
         "minW": 4,
@@ -766,7 +766,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "sizing": {
         "minW": 4,
@@ -808,7 +808,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "sizing": {
         "minW": 4,
@@ -848,7 +848,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "sizing": {
         "minW": 4,
@@ -889,7 +889,7 @@
         "session-lookback",
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "sizing": {
         "minW": 4,
@@ -929,7 +929,7 @@
         "session-lookback",
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 2,
       "sizing": {
         "minW": 4,
@@ -970,7 +970,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 2,
       "sizing": {
         "minW": 4,
@@ -1071,7 +1071,7 @@
       "supportedAudiences": [
         "session-lookback"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "previewLabels": [
         "Segment time",
@@ -1154,7 +1154,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "previewDetail": "timing-bars",
       "previewLabels": [
@@ -1191,7 +1191,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "previewDetail": "timing-bars",
       "previewLabels": [
@@ -1229,7 +1229,7 @@
       "supportedAudiences": [
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 1,
       "previewDetail": "timing-bars",
       "previewLabels": [
@@ -1268,7 +1268,7 @@
         "session-lookback",
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "previewLabels": [
         "Contact",
@@ -1352,7 +1352,7 @@
         "session-lookback",
         "live-race"
       ],
-      "accessTier": 0,
+      "accessTier": 1,
       "plannedAccessTier": 0,
       "previewLabels": [
         "Racing surface",

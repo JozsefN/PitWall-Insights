@@ -1,4 +1,5 @@
-"""Current OpenF1 workflow: real signup/profile/import/worker/replay, one fixture calendar case."""
+"""Current OpenF1 workflow with a verified test account and one fixture calendar case."""
+from local_test_accounts import seed_verified_account
 import json
 from pathlib import Path
 import re
@@ -29,13 +30,16 @@ def main():
             page.goto(BASE + "/signup")
             expect(page.get_by_label("F1 account email")).to_have_count(0)
             expect(page.get_by_role("checkbox")).to_have_count(0)
-            page.get_by_label("Email",exact=True).fill("openf1-e2e-" + secrets.token_hex(6) + "@example.com")
-            page.get_by_label("Password",exact=True).fill(secrets.token_urlsafe(20))
-            page.get_by_role("button",name="Sign up",exact=True).click()
+            credentials = {"email": "openf1-e2e-" + secrets.token_hex(6) + "@example.com", "password": secrets.token_urlsafe(20)}
+            fixture = seed_verified_account(credentials)
+            users.append(fixture["user_id"])
+            page.goto(BASE + "/login")
+            page.get_by_label("Email",exact=True).fill(credentials["email"])
+            page.get_by_label("Password",exact=True).fill(credentials["password"])
+            page.locator(".account-access__form").get_by_role("button",name="Sign in",exact=True).click()
             page.wait_for_url(BASE + "/")
             token = page.evaluate("localStorage.getItem('auth_token')")
-            users.append(api("/api/auth/session",token)["user_id"])
-            checks.append("signup_has_no_external_account_or_extension_step")
+            checks.append("verified_local_login_works_without_an_f1_account_or_extension")
             page.get_by_role("link",name="Open profile",exact=True).click()
             page.get_by_label("Display name").fill("OpenF1 Browser Driver")
             page.get_by_label("Nickname").fill("Apex")

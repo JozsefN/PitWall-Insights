@@ -1,4 +1,5 @@
 """Exercise the review panels with real OpenF1 sessions and a temporary profile."""
+from local_test_accounts import seed_verified_account
 from filter_controls import select_control
 
 import json
@@ -27,6 +28,25 @@ def api(method, path, token=None, payload=None):
         return json.load(response)
 
 
+def seed_test_membership(owner, prefix):
+    """Give a temporary browser-test account access to advanced panels."""
+    script = """
+from datetime import datetime, timedelta, timezone
+import sys
+from modules.billing.infrastructure.db_models import BillingAccountRecord
+from modules.identity_auth.infrastructure.db_models import UserRecord
+from modules.storage.infrastructure.db import SessionLocal
+with SessionLocal() as db:
+    user = db.get(UserRecord, sys.argv[1])
+    assert user and user.email.startswith(sys.argv[2]) and user.email.endswith('@example.com')
+    db.add(BillingAccountRecord(user_id=user.id, plan_code='pro', status='active',
+                                paid_until=datetime.now(timezone.utc) + timedelta(hours=1)))
+    db.commit()
+"""
+    subprocess.run([str(ROOT / "backend/.venv/Scripts/python.exe"), "-c", script, owner, prefix],
+                   cwd=ROOT / "backend", check=True)
+
+
 def capture(locator, filename):
     locator.evaluate("node => node.scrollIntoView({block: 'center', inline: 'nearest'})")
     locator.screenshot(path=str(ARTIFACTS / filename))
@@ -36,12 +56,11 @@ def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"review-e2e-{secrets.token_hex(6)}@example.com"
     password = secrets.token_urlsafe(20)
-    token = api(
-        "POST", "/api/auth/signup", payload={"email": email, "password": password}
-    )["access_token"]
+    token = seed_verified_account({"email": email, "password": password})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     report = {}
     try:
+        seed_test_membership(owner, "review-e2e-")
         sources = [(1, "Qualifying"), (4, "Race"), (4, "Practice 2")]
         catalogue = api("GET", "/api/sessions/catalog?season=2025", token)
         sessions = {}

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.delivery_api.api.auth_dependencies import require_admin, require_analyst_user
 from modules.decision_engine.application.service import DecisionEngineService
 from modules.decision_engine.domain.models import DecisionSignalId
 from modules.decision_engine.domain.registry import SUPPORTED_SIGNAL_IDS
@@ -15,7 +15,7 @@ from modules.storage.infrastructure.db import get_db
 router = APIRouter(prefix="/api/feature-metrics", tags=["feature_metrics"])
 
 
-@router.get("/health")
+@router.get("/health", dependencies=[Depends(require_admin)])
 def feature_metrics_health() -> dict:
     service = FeatureMetricsService()
     return {
@@ -25,7 +25,7 @@ def feature_metrics_health() -> dict:
     }
 
 
-@router.get("/sessions/{session_id}/driver-scores", dependencies=[Depends(require_current_user)])
+@router.get("/sessions/{session_id}/driver-scores", dependencies=[Depends(require_analyst_user)])
 def get_session_driver_scores(
     session_id: str,
     metric_ids: str | None = Query(
@@ -67,7 +67,7 @@ def get_session_driver_scores(
     return response.model_dump()
 
 
-@router.get("/sessions/{session_id}/insights", dependencies=[Depends(require_current_user)])
+@router.get("/sessions/{session_id}/insights", dependencies=[Depends(require_analyst_user)])
 def get_session_metric_insights(
     session_id: str,
     signal_ids: str | None = Query(

@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from modules.delivery_api.api.auth_dependencies import require_admin
 
 from modules.ingestion.application.service import IngestionService
 from modules.ingestion.infrastructure.provider_registry import build_session_source
@@ -16,7 +18,7 @@ def data_capabilities():
             "note": "Availability depends on the selected session. Live streaming, fuel mass, tyre temperatures and precise track edges are unavailable."}
 
 
-@router.get("/health")
+@router.get("/health", dependencies=[Depends(require_admin)])
 def ingestion_health() -> dict:
     return {
         "module": "ingestion",

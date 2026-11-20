@@ -10,6 +10,7 @@ from modules.storage.infrastructure.db import SessionLocal
 from modules.identity_auth.infrastructure.db_models import UserRecord
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord
 from modules.dashboard_layouts.domain.validation import validate_dashboard_config, validate_widget_size, WIDGET_POLICIES
+from support import create_verified_test_account
 
 BASE = "http://127.0.0.1:8000"
 
@@ -42,12 +43,15 @@ class LayoutApiTests(unittest.TestCase):
         try:
             for _ in range(2):
                 email = f"layout-test-{secrets.token_hex(8)}@example.com"
-                status, auth = request("POST", "/api/auth/signup", {"email": email, "password": secrets.token_urlsafe(20)})
+                password = secrets.token_urlsafe(20)
+                with SessionLocal() as db:
+                    user_id = create_verified_test_account(db, email, password)
+                cls.accounts.append((user_id, None))
+                status, auth = request("POST", "/api/auth/login", {"email": email, "password": password})
                 if status != 200:
                     raise RuntimeError(f"Test account creation failed: {status}")
                 token = auth["access_token"]
-                _, session = request("GET", "/api/auth/session", token=token)
-                cls.accounts.append((session["user_id"], token))
+                cls.accounts[-1] = (user_id, token)
         except Exception:
             cls.tearDownClass()
             raise

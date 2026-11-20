@@ -1,68 +1,19 @@
-# Identity Auth
+﻿# Identity and account access
 
-Back to [Backend Architecture](../architecture/02-backend-architecture.md)
+The identity module owns account credentials, mailbox verification, Google sign-in, and the member or administrator role. Profile preferences remain in `account_profile`, and subscription access belongs to `billing`. [Backend architecture](../architecture/02-backend-architecture.md)
 
-## Purpose
+## Password sign-up and verification
 
-The identity-auth module owns basic user authentication.
+`POST /api/auth/signup` returns an email challenge. The pending record holds the proposed bcrypt password hash and a keyed digest of the six-digit code. The app sends the code through the configured TLS-protected SMTP transport. `POST /api/auth/verify-email` checks the code and creates a member with `email_verified_at`, then issues the PitWall bearer token. For a legacy password account with no verification timestamp, the first successful password check opens the same challenge. Future sign-ins use the verified account and password.
 
-Profile details live in `account_profile`; PitWall passwords are bcrypt hashes. The application uses its own JWT signing secret. Historical OpenF1 access requires no external user account. See the [data-source decision history](../architecture/11-hybrid-data-and-accounts.md).
+Codes expire in ten minutes. A challenge allows five incorrect attempts. Resends replace the previous challenge, and the database limits sends by mailbox and client. The `email_verifications` records are pruned on subsequent requests. The configuration response exposes availability only. [Local mail setup](../setup.md#email-verification)
 
-Current responsibilities:
+## Google sign-in and account linking
 
-- sign up a user
-- log in a user
-- return a lightweight auth-session view from a bearer token
+The login and signup pages render the Google Identity Services button when a web client is configured. The backend checks the signed credential and consumes a short-lived nonce. Google `sub` identifies the linked account. An authoritative Google email claim can verify a new account. A third-party mailbox requires a PitWall code. Existing local accounts link Google from the profile with their current password. Google signing credentials and access tokens stay outside PostgreSQL. [Google ID token checks](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token)
 
-## Current Storage
+## Session and administrator access
 
-The module currently persists:
+`GET /api/auth/session` validates the token and reads the role and verification status from `users`. The API checks that same state on protected requests. A trusted operator grants the `admin` role with the local provisioning command. Administrators sign in with their existing password and can open the diagnostics screen and module diagnostics endpoints. Public readiness routes expose basic status. [Administrator setup](../setup.md#local-administrator)
 
-- `users`
-
-Each user stores:
-
-- `id`
-- `email`
-- `password_hash`
-
-## Current API Surface
-
-- `GET /api/auth/health`
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `GET /api/auth/session`
-
-## Current Auth Flow
-
-1. user signs up or logs in
-2. backend validates credentials
-3. backend returns a bearer token
-4. frontend stores the token locally
-5. frontend sends the token in the `Authorization` header
-6. `/api/auth/session` decodes the token and reports whether the session is authenticated
-
-## Scope Boundaries
-
-This module currently handles authentication, not a full account or permission system.
-
-Not implemented yet:
-
-- OAuth-style refresh tokens (the current app renews active JWT sessions through its refresh endpoint)
-- role-based authorization
-- server-side session revocation
-- optional multi-factor authentication
-
-## Why The Current Shape Is Fine
-
-The current auth surface is small, but it is enough for:
-
-- protected frontend flows later on
-- user-specific saved behavior in the future
-- realistic local development and route gating
-
-## Future Work
-
-- add refresh/revocation strategy if required
-- introduce authorization rules once user-specific data matters
-- optionally add persistent session tracking beyond stateless bearer tokens
+The frontend renews active sessions through `POST /api/auth/refresh`. Expired sessions require sign-in.

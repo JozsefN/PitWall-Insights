@@ -371,7 +371,7 @@ test("every session widget has a usable default, explicit size policy and distin
     assert.ok(!policy.sizing.maxAspect || policy.sizing.maxAspect > 0);
     if (!policy.builderEnabled) continue;
     assert.ok(policy.supportedAudiences.length);
-    assert.equal(policy.accessTier, 0);
+    assert.ok([0, 1].includes(policy.accessTier));
     const size = fitWidgetSize(id as WidgetId);
     assert.equal(
       widgetSizeError(id as WidgetId, { x: 0, y: 0, ...size }),
@@ -380,6 +380,9 @@ test("every session widget has a usable default, explicit size policy and distin
     );
     assert.ok(widgetSizeError(id as WidgetId, { x: 0, y: 0, w: 2, h: 2 }));
   }
+  assert.equal(widgetCatalog["stint-analysis"].accessTier, 0);
+  assert.equal(widgetCatalog["strategy-call"].accessTier, 1);
+  assert.equal(widgetCatalog["wake-exposure"].accessTier, 1);
 });
 
 test("chart size and shape constraints apply to resizing and draft validation", () => {

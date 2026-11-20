@@ -4,6 +4,7 @@ Requires the API on :8000, Vite on :5173, Playwright, and the stored 2025
 Bahrain race/practice, Australian qualifying and a sprint session.
 Creates and removes its own test profile; does not save layouts or import data.
 """
+from local_test_accounts import seed_verified_account
 import json
 import os
 import secrets
@@ -155,7 +156,7 @@ def driver_filters(page, coverage, context, screenshot=False):
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"filter-e2e-{secrets.token_hex(6)}@example.com"
-    token = api("POST", "/api/auth/signup", payload={"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
+    token = seed_verified_account({"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     report = {"complete": False, "native_filters": set(), "driver_filters": set(), "layouts": [], "errors": [],
               "fixtures": ["Telemetry readiness is forced ready; telemetry and timing rows come from stored sessions.",

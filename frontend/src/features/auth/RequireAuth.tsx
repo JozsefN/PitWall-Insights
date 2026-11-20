@@ -7,18 +7,27 @@ import { useAuthSession } from "./useAuthSession";
 type RequireAuthProps = PropsWithChildren<{
   title?: string;
   description?: string;
+  adminOnly?: boolean;
 }>;
 
 export function RequireAuth({
   children,
   title = "Session Explorer",
   description = "Sign in to open the session archive, prepare lookback workspaces, run replay mode, and keep your motorsport analysis tied to your account.",
+  adminOnly = false,
 }: RequireAuthProps) {
   const location = useLocation();
   const authSession = useAuthSession();
   const redirectState = buildAuthRedirectState(location);
 
   if (authSession.data?.authenticated) {
+    if (adminOnly && authSession.data.role !== "admin") {
+      return <PageContainer><section className="surface-card p-8">
+        <h1 className="display-font text-2xl">Administrator access required</h1>
+        <p className="my-4">System diagnostics are available to PitWall administrators.</p>
+        <Link className="button-secondary" to="/profile">Back to profile</Link>
+      </section></PageContainer>;
+    }
     return <>{children}</>;
   }
 

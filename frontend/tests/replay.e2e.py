@@ -11,6 +11,10 @@ from urllib.request import Request, urlopen
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[2]
+
+import sys
+sys.path.insert(0, str(ROOT / 'scripts'))
+from local_test_accounts import seed_verified_account
 BASE = os.environ.get('PITWALL_FRONTEND_URL', 'http://127.0.0.1:5173')
 PYTHON = ROOT / 'backend/.venv/Scripts/python.exe'
 ARTIFACTS = Path(tempfile.gettempdir()) / 'pitwall-replay-e2e'
@@ -33,7 +37,7 @@ def replay_url(session_id, entries):
 
 try:
     email = f'replay-browser-{secrets.token_hex(8)}@example.com'
-    token = api('/api/auth/signup', {'email':email,'password':secrets.token_urlsafe(24)})['access_token']
+    token = seed_verified_account({'email':email,'password':secrets.token_urlsafe(24)})['access_token']
     user_id = api('/api/auth/session')['user_id']
     with sync_playwright() as p:
         browser = p.chromium.launch()

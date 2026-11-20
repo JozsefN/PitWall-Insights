@@ -1,4 +1,5 @@
 """Real local API/browser checks; no mocked telemetry or event responses."""
+from local_test_accounts import seed_verified_account
 
 import json
 import secrets
@@ -38,9 +39,7 @@ def main():
     try:
         email = "race-insights-e2e-" + secrets.token_hex(6) + "@example.com"
         password = secrets.token_urlsafe(20)
-        auth = api(
-            "POST", "/api/auth/signup", payload={"email": email, "password": password}
-        )
+        auth = seed_verified_account({"email": email, "password": password})
         token = auth["access_token"]
         user_id = api("GET", "/api/auth/session", token)["user_id"]
         sid = next(

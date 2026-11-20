@@ -1,6 +1,10 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.billing.application.entitlements import require_analyst
+from modules.identity_auth.domain.models import User
 from modules.storage.infrastructure.db import get_db
 from modules.feature_metrics.domain.race_estimation.models import (
     RaceEstimateRequest,
@@ -45,10 +49,16 @@ def race_estimates_catalog():
     "/sessions/{session_id}/race-estimates", response_model=RaceEstimateResponse
 )
 def race_estimates(
-    session_id: str, payload: RaceEstimateRequest, db: Session = Depends(get_db)
+    session_id: str, payload: RaceEstimateRequest, view: Literal["full", "reports"] = "full",
+    db: Session = Depends(get_db), user: User = Depends(require_current_user),
 ):
+    if view == "full":
+        require_analyst(db, user.id)
     try:
-        return RaceEstimationService(db).compute(session_id, payload)
+        service = RaceEstimationService(db)
+        if view == "reports":
+            return service.reports(session_id, payload)
+        return service.compute(session_id, payload)
     except LookupError as error:
         raise HTTPException(404, str(error)) from error
     except AnalysisLimitError as error:

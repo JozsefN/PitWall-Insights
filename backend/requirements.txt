@@ -12,3 +12,5 @@ python-jose[cryptography]
 requests>=2.31,<3
 numpy>=1.26,<3
 scipy>=1.11,<2
+stripe==17.1.0
+google-auth[requests]>=2.40,<3

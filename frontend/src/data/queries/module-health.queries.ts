@@ -18,16 +18,18 @@ export function useStoryFeedHealthQuery() {
   });
 }
 
-export function useIngestionHealthQuery() {
+export function useIngestionHealthQuery(enabled = true) {
   return useQuery({
     queryKey: ["module-health", "ingestion"],
     queryFn: getIngestionHealth,
+    enabled,
   });
 }
 
-export function useNormalizationHealthQuery() {
+export function useNormalizationHealthQuery(enabled = true) {
   return useQuery({
     queryKey: ["module-health", "normalization"],
     queryFn: getNormalizationHealth,
+    enabled,
   });
 }

@@ -4,18 +4,20 @@ import type { EditorWidget } from "./editor-model";
 import { TierBadge } from "./TierBadge";
 import { Availability } from "./Availability";
 import { eventLabels } from "../race-insights/contracts";
-import { defaultEventTypes } from "../race-insights/presentation";
+import { defaultEventTypes, reportedEventTypes } from "../race-insights/presentation";
 import { insightPanels } from "../../widgets/insights/panel-specs";
 import { resolveTrackMapLayer, trackMapLayers } from "../../widgets/track-map/models";
 
 type Props = {
   widget: EditorWidget;
+  modelAccess: boolean;
   onPlace: (box: GridPlacement) => void;
   onOptions: (options: Record<string, unknown>) => void;
   onDuplicate: () => void;
 };
 export function PanelSettings({
   widget,
+  modelAccess,
   onPlace,
   onOptions,
   onDuplicate,
@@ -211,10 +213,10 @@ export function PanelSettings({
           </label>
           <fieldset className="editor-event-options">
             <legend>Notification categories</legend>
-            <label>
+            {modelAccess ? <label>
               <input
                 type="checkbox"
-                checked={widget.options?.includeCandidates !== false}
+                checked={widget.options?.includeCandidates === true}
                 onChange={(event) =>
                   onOptions({
                     ...widget.options,
@@ -222,9 +224,9 @@ export function PanelSettings({
                   })
                 }
               />{" "}
-              Include detection candidates (unconfirmed)
-            </label>
-            {defaultEventTypes.map((kind) => {
+              Include model detections (unconfirmed)
+            </label> : null}
+            {(modelAccess ? defaultEventTypes : reportedEventTypes).map((kind) => {
               const selected = Array.isArray(widget.options?.eventTypes)
                 ? (widget.options.eventTypes as string[])
                 : defaultEventTypes;

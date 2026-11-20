@@ -1,4 +1,5 @@
 """Capture the current layout editor and real replay panels without account chrome."""
+from local_test_accounts import seed_verified_account
 
 import json
 import secrets
@@ -32,14 +33,10 @@ def capture_top(page, element, filename, max_height):
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    token = api(
-        "POST",
-        "/api/auth/signup",
-        payload={
+    token = seed_verified_account({
             "email": f"thesis-capture-{secrets.token_hex(6)}@example.com",
             "password": secrets.token_urlsafe(24),
-        },
-    )["access_token"]
+        })["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
         imola = next(

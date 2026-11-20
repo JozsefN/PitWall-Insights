@@ -47,7 +47,7 @@ class ModelAssumptions(BaseModel):
 
 class RaceEstimateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    as_of_ms: int = Field(ge=0)
+    as_of_ms: int = Field(ge=0, le=86_400_000)
     entry_ids: list[str] | None = Field(None, min_length=1, max_length=64)
     lookback_ms: int = Field(300000, ge=30000, le=1800000)
     sample_interval_ms: int = Field(500, ge=250, le=1000)

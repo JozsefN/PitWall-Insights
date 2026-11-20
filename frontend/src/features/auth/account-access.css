@@ -1,0 +1,28 @@
+.account-access {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 5vw, 64px) 16px;
+}
+.account-access__card {
+  width: min(100%, 450px);
+  overflow: hidden;
+  padding: clamp(22px, 5vw, 36px);
+  border-top: 3px solid var(--color-focus);
+  background: radial-gradient(ellipse at 100% 0, color-mix(in srgb, var(--color-focus) 12%, transparent), transparent 55%), var(--color-bg-secondary);
+}
+.account-access__heading h1 { font-size: clamp(1.85rem, 7vw, 2.35rem); line-height: 1.05; margin: 0; }
+.account-access__heading p, .account-access__help { color: var(--color-text-secondary); font-size: .9rem; line-height: 1.55; }
+.account-access__heading p { margin: 12px 0 20px; overflow-wrap: anywhere; }
+.account-access__form { display: grid; gap: 14px; }
+.account-access__form label { display: grid; gap: 6px; font-size: .85rem; }
+.account-access__form input { background: var(--color-control); color: var(--color-text-primary); border: 1px solid var(--color-border-strong); border-radius: 9px; width: 100%; padding: 10px 13px; }
+.account-access__form input[autocomplete="one-time-code"] { letter-spacing: .3em; font-variant-numeric: tabular-nums; }
+.account-access__divider { display: flex; align-items: center; gap: 10px; font-size: .8rem; color: var(--color-text-secondary); margin: 17px 0; }
+.account-access__divider::before, .account-access__divider::after { content: ""; flex: 1; height: 1px; background: var(--color-border-subtle); }
+.account-access__links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.account-access__help a { color: var(--color-text-primary); text-decoration: underline; text-underline-offset: .2em; }
+.account-access__error { color: var(--color-danger); background: var(--color-danger-surface); border-radius: 8px; padding: 10px; font-size: .85rem; }
+.google-signin { display: grid; gap: 8px; min-width: 0; }
+.google-signin__button { min-height: 40px; width: fit-content; max-width: 100%; }
+.google-signin p { color: var(--color-text-secondary); margin: 0; font-size: .8rem; }

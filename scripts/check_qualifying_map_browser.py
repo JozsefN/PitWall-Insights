@@ -1,4 +1,5 @@
 """Verify that the real qualifying workspace draws audited apex samples and mapped roads."""
+from local_test_accounts import seed_verified_account
 
 import json
 import re
@@ -18,7 +19,7 @@ def main():
     audit = json.loads((ARTIFACTS / "qualifying-track-positions.json").read_text(encoding="utf-8"))
     email = f"qualifying-map-browser-{secrets.token_hex(6)}@example.com"
     credentials = {"email": email, "password": secrets.token_urlsafe(24)}
-    token = api("POST", "/api/auth/signup", payload=credentials)["access_token"]
+    token = seed_verified_account(credentials)["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     checks = []
     errors = []

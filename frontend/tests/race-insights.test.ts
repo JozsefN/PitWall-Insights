@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   filterEvents,
+  raceUpdateSelection,
   notificationCapacity,
   snapshotCutoff,
   formatEstimate,
@@ -128,6 +129,27 @@ test("selected-driver notifications retain global control and related rivals", (
     ),
     ["global", "rival"],
   );
+});
+test("model filters require paid access and work on reports-only saved layouts", () => {
+  const rows = [
+    event("pit", "pit_stop"),
+    event("yellow", "yellow_flag", 100000, null),
+    event("brake", "braking_anomaly", 100000, "a", "candidate"),
+    event("incident", "possible_incident", 100000, "b", "candidate"),
+  ];
+  const saved = { includeCandidates: false, eventTypes: ["pit_stop", "yellow_flag"] };
+  const visible = (filter: Parameters<typeof raceUpdateSelection>[1], modelAccess: boolean) => {
+    const selection = raceUpdateSelection(saved, filter, modelAccess);
+    return filterEvents(rows, selection.options, [], 100000).map((row) => row.id);
+  };
+  assert.deepEqual(visible("braking", false), ["pit", "yellow"]);
+  assert.deepEqual(visible("all", true), ["pit", "yellow"]);
+  assert.deepEqual(visible("braking", true), ["brake"]);
+  assert.deepEqual(visible("incidents", true), ["incident"]);
+  assert.deepEqual(visible("flags", false), ["yellow"]);
+  assert.deepEqual(visible("pits", false), ["pit"]);
+  assert.equal(raceUpdateSelection({ includeCandidates: true }, "all", false).includeCandidates, false);
+  assert.equal(raceUpdateSelection({ includeCandidates: true }, "all", true).includeCandidates, true);
 });
 test("replay rewind excludes future messages, deduplicates, and limits the trailing window", () => {
   const rows = [

@@ -20,6 +20,7 @@ from modules.session_domain.domain.models import SessionImportRequest
 from modules.session_domain.infrastructure.models import EventSessionRecord, SessionTickRecord
 from modules.storage.infrastructure.db import SessionLocal
 from modules.telemetry_materialization.infrastructure.repository import TelemetryMaterializationRepository
+from support import create_verified_test_account
 
 
 def api(method, path, data=None, token=None):
@@ -129,12 +130,14 @@ class ReplayApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.user_id = None
         cls.email = f"replay-test-{secrets.token_hex(8)}@example.com"
-        status, auth = api("POST", "/api/auth/signup", {"email": cls.email, "password": secrets.token_urlsafe(24)})
+        password = secrets.token_urlsafe(24)
+        with SessionLocal() as db:
+            cls.user_id = create_verified_test_account(db, cls.email, password)
+        status, auth = api("POST", "/api/auth/login", {"email": cls.email, "password": password})
         if status != 200:
+            cls.tearDownClass()
             raise RuntimeError("Could not create replay test account")
         cls.token = auth["access_token"]
-        _, session = api("GET", "/api/auth/session", token=cls.token)
-        cls.user_id = session["user_id"]
 
     @classmethod
     def tearDownClass(cls):

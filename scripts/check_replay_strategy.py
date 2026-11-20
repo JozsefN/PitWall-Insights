@@ -1,4 +1,5 @@
 """Check the strategy endpoint and the race strategy layout with stored OpenF1 races."""
+from local_test_accounts import seed_verified_account
 
 import json
 import re
@@ -9,7 +10,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 
 from playwright.sync_api import expect, sync_playwright
-from check_session_review_browser import BASE, ROOT, api
+from check_session_review_browser import BASE, ROOT, api, seed_test_membership
 
 ARTIFACTS = ROOT / "docs/testing/replay-strategy"
 
@@ -21,16 +22,13 @@ def capture(panel, name):
 
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    token = api(
-        "POST",
-        "/api/auth/signup",
-        payload={
+    token = seed_verified_account({
             "email": f"strategy-e2e-{secrets.token_hex(6)}@example.com",
             "password": secrets.token_urlsafe(24),
-        },
-    )["access_token"]
+        })["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
+        seed_test_membership(owner, "strategy-e2e-")
         sessions = {
             row["source_session_key"]: row["id"]
             for row in api("GET", "/api/sessions", token)

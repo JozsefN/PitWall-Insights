@@ -8,6 +8,9 @@ import {
   filterEvents,
   formatEstimate,
   notificationCapacity,
+  raceUpdateFilters,
+  raceUpdateSelection,
+  type RaceUpdateFilter,
 } from "../../features/race-insights/presentation";
 import { useSessionTimeLabel } from "../../features/sessions/SessionWorkspaceContext";
 import type {
@@ -236,6 +239,52 @@ function EventList({
   );
 }
 
+function RaceUpdatesFeed({ events, options, modelAccess, selectedDrivers, currentTime, capacity, name, truncated }: {
+  events: RaceEvent[] | undefined;
+  options: Options;
+  modelAccess: boolean;
+  selectedDrivers: string[];
+  currentTime: number;
+  capacity: number;
+  name: (id: string | null) => string;
+  truncated: boolean;
+}) {
+  const [requestedFilter, setFilter] = useState<RaceUpdateFilter>("all");
+  const [scope, setScope] = useState<"all" | "selected">();
+  const driverScope = scope ?? (options.driverScope === "selected" ? "selected" : "all");
+  const selection = raceUpdateSelection(options, requestedFilter, modelAccess);
+  const visible = events ? filterEvents(events, { ...selection.options, driverScope }, selectedDrivers, currentTime) : undefined;
+  const filters = Object.entries(raceUpdateFilters);
+
+  return <>
+    <div className="insight-feed-controls" role="group" aria-label="Race update filters">
+      <select aria-label="Race update type" value={selection.filter} onChange={(event) => setFilter(event.target.value as RaceUpdateFilter)}>
+        {filters.filter(([, filter]) => !filter.usesModel).map(([key, filter]) => (
+          <option key={key} value={key}>{filter.label}</option>
+        ))}
+        {modelAccess ? <optgroup label="Model detections">
+          {filters.filter(([, filter]) => filter.usesModel).map(([key, filter]) => (
+            <option key={key} value={key}>{filter.label}</option>
+          ))}
+        </optgroup> : null}
+      </select>
+      <select aria-label="Race update driver scope" value={driverScope} onChange={(event) => setScope(event.target.value === "selected" ? "selected" : "all")}>
+        <option value="all">Everyone</option>
+        <option value="selected">Selected drivers</option>
+      </select>
+    </div>
+    {visible ? <>
+      <div className="insight-feed-summary">
+        <span>{visible.length ? `Latest ${Math.min(capacity, visible.length)} of ${visible.length}` : "No matching messages"}</span>
+        <span>{selection.includeCandidates ? "Model detections are unconfirmed" : "Race control and timing"}</span>
+      </div>
+      <EventList events={visible.slice(0, capacity)} name={name} />
+      {!visible.length ? <p className="insight-empty">No recent events match these filters at the selected time.</p> : null}
+      {truncated ? <small>The server event limit was reached and older messages are omitted.</small> : null}
+    </> : null}
+  </>;
+}
+
 export function InsightWidget({
   panelId,
   options = {},
@@ -245,8 +294,9 @@ export function InsightWidget({
 }) {
   const resource = useRaceEstimationResource();
   const timeLabel = useSessionTimeLabel();
-  const { workspace, query } = resource;
+  const { workspace, query, view } = resource;
   const size = useWidgetSize();
+  const showDriver = panelId !== "race-notifications";
   const [focusId, setFocusId] = useState("");
   const [compareId, setCompareId] = useState("");
   const catalog = useQuery({
@@ -295,20 +345,19 @@ export function InsightWidget({
   const name = (id: string | null) => {
     const entry = workspace.entries.find((item) => item.id === id);
     return (
-      (options.includeCandidates === false ? entry?.driver_name : entry?.driver_abbreviation) ??
+      (!showDriver || options.includeCandidates === false ? entry?.driver_name : entry?.driver_abbreviation) ??
       entry?.driver_name ??
       entry?.driver_abbreviation ??
       (entry ? `#${entry.car_number}` : "Race control")
     );
   };
   const capacity = notificationCapacity(size.height, options.maxItems);
-  const events = filterEvents(
+  const incidentEvents = panelId === "incident-watch" ? filterEvents(
     data?.events ?? [],
     options,
     workspace.selectedDriverIds,
     resource.currentTime,
-  );
-  const incidentEvents = events.filter((event) =>
+  ).filter((event) =>
     [
       "possible_incident",
       "stopped_car",
@@ -318,9 +367,7 @@ export function InsightWidget({
       "safety_car",
       "red_flag",
     ].includes(event.kind),
-  );
-  const showDriver = panelId !== "race-notifications";
-  const reportsOnly = !showDriver && options.includeCandidates === false;
+  ) : [];
   const pairs = (data?.pairs ?? []).filter(
     (pair) =>
       !workspace.selectedDriverIds.length ||
@@ -330,7 +377,7 @@ export function InsightWidget({
   return (
     <WidgetCard
       title={typeof options.title === "string" ? options.title : spec.title}
-      description={size.short ? undefined : reportsOnly ? "Flags, pit stops and passes from race timing and race control." : spec.description}
+      description={size.short ? undefined : !showDriver && view === "reports" ? "Flags and pit visits from race timing and race control." : spec.description}
       actions={
         showDriver && drivers.length > 1 ? (
           <DriverSelect
@@ -394,34 +441,10 @@ export function InsightWidget({
             retry; unsupported estimates remain unavailable.
           </p>
         ) : null}
-        {panelId === "race-notifications" && data ? (
-          <>
-            <div className="insight-feed-summary">
-              <span>
-                {events.length
-                  ? `Latest ${Math.min(capacity, events.length)} of ${events.length}`
-                  : "No matching messages"}
-              </span>
-              <span>
-                {options.includeCandidates === false
-                  ? "Race control and timing"
-                  : "Candidates included"}
-              </span>
-            </div>
-            <EventList events={events.slice(0, capacity)} name={name} />
-            {!events.length ? (
-              <p className="insight-empty">
-                {reportsOnly
-                  ? "There are no recent race updates at the selected time."
-                  : "No recent events match this panel's filters."}
-              </p>
-            ) : null}
-            {data.events_truncated ? (
-              <small>
-                The server event limit was reached; older messages are omitted.
-              </small>
-            ) : null}
-          </>
+        {panelId === "race-notifications" ? (
+          <RaceUpdatesFeed events={data?.events} options={options} modelAccess={view === "full"}
+            selectedDrivers={workspace.selectedDriverIds} currentTime={resource.currentTime}
+            capacity={capacity} name={name} truncated={Boolean(data?.events_truncated)} />
         ) : null}
         {data && showDriver && !focus ? (
           <p className="insight-empty">
@@ -704,7 +727,7 @@ export function InsightWidget({
             ) : null}
           </>
         ) : null}
-        {data && panelId !== "model-quality" && !reportsOnly ? (
+        {data && showDriver && panelId !== "model-quality" ? (
           <small className="insight-footer">
             Estimation model · expand values for evidence and assumptions.
           </small>

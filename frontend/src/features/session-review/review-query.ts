@@ -2,6 +2,8 @@ import { createContext, useContext } from "react";
 import { hashKey, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { apiClient } from "../../data/api/client";
+import { useAuthSessionQuery } from "../../data/queries/auth.queries";
+import { useMembership } from "../../data/queries/billing.queries";
 import { useReplayTime, useSessionWorkspace } from "../sessions/SessionWorkspaceContext";
 import { retainSnapshot } from "../sessions/snapshot-refresh";
 import { snapshotCutoff } from "../race-insights/presentation";
@@ -24,13 +26,15 @@ export function useReviewQuery(
   freshness?: boolean,
 ) {
   const workspace = useSessionWorkspace();
+  const { data: auth } = useAuthSessionQuery();
+  const level = useMembership().data?.plan.level ?? 0;
   const reviewTimeMs = useReplayTime("review");
   const cutoff =
     workspace.mode === "simulation"
       ? snapshotCutoff(reviewTimeMs)
       : parameters?.as_of_ms;
   const ids = [...workspace.selectedDriverIds].sort();
-  const scope = hashKey([workspace.mode, groups, ids, laps, parameters]);
+  const scope = hashKey([auth?.user_id, level, workspace.mode, groups, ids, laps, parameters]);
   return useQuery({
     queryKey: ["session-review", workspace.sessionId, scope, cutoff, freshness],
     queryFn: async ({ signal }) =>
@@ -47,7 +51,7 @@ export function useReviewQuery(
           { signal },
         )
       ).data,
-    enabled: enabled && groups.length > 0,
+    enabled: enabled && Boolean(auth?.user_id) && groups.length > 0,
     placeholderData: (previous, previousQuery) =>
       retainSnapshot(
         previous,

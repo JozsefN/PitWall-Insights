@@ -161,8 +161,9 @@ export const routes: RouteObject[] = [
         path: "system/health",
         element: (
           <RequireAuth
+            adminOnly
             title="System Diagnostics"
-            description="Sign in to inspect backend health, import jobs, and authenticated session diagnostics."
+            description="Sign in with an administrator account to inspect platform diagnostics."
           >
             <SystemHealthPage />
           </RequireAuth>

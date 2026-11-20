@@ -44,7 +44,7 @@ Example for a replay consumer:
 
 Omit `as_of_ms` for a final lookback. Supply `entry_ids` to filter driver output, while field comparisons retain field context. For `segments`, supply `laps` with `{ "entry_id": "…", "lap_number": 10 }` entries. Select a stored lap or request preparation from the panel. The review API reads stored car and position data, and preparation uses the existing telemetry worker.
 
-The **Qualifying review** factory layout includes the Qualifying Lap Map, driver cards, lap comparisons, radio and weather. **Race strategy review** combines passes, pit benchmarks, a field projection, contact and track limits, radio and weather. Most panels subscribe to a single response per dashboard. A selected lap, projection scenario or registered surface context can request its own group. Same-session replay requests use a five-second floor on the clock. All current panels are free.
+The **Qualifying review** factory layout includes the Qualifying Lap Map, driver cards, lap comparisons, radio and weather. **Race strategy review** combines passes, pit benchmarks, a field projection, contact and track limits, radio and weather. Most panels subscribe to a single response per dashboard. A selected lap, projection scenario or registered surface context can request its own group. Same-session replay requests use a five-second floor on the clock. Free includes the basic timing, radio and weather panels. Analyst and Pro unlock the advanced models and inferred Race Updates. [Subscription access](14-subscriptions.md)
 
 ### Qualifying lap map
 

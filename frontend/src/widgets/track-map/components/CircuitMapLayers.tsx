@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMembership } from "../../../data/queries/billing.queries";
 import type { CircuitDefinition } from "../../../features/circuits/circuit-catalog";
 import {
   useReplayTime,
@@ -41,16 +42,18 @@ export function CircuitMapLayers({
   lookbackFrame?: { timeMs: number; label: string };
   replayFrame?: (timeMs: number, animate?: boolean) => TrackMapData;
 }) {
-  const [layer, setLayer] = useState<TrackMapLayer>(
+  const [requestedLayer, setLayer] = useState<TrackMapLayer>(
     resolveTrackMapLayer(options.mapLayer),
   );
+  const surfaceAccess = (useMembership().data?.plan.level ?? 0) >= 1;
+  const layer = requestedLayer === "surface" && !surfaceAccess ? "track" : requestedLayer;
   const { session } = useSessionWorkspace();
   const timeLabel = useSessionTimeLabel();
   const registered = useCircuitRoad(circuit, data.outlinePoints);
   const pitMap = useCircuitPitMap();
   const conditions = useCircuitConditions(
     layer,
-    options.contextId?.trim(),
+    surfaceAccess ? options.contextId?.trim() : undefined,
     lookbackFrame?.timeMs,
   );
   const { overlay } = conditions;
@@ -66,6 +69,8 @@ export function CircuitMapLayers({
                 type="button"
                 className="track-map-control-button"
                 aria-pressed={key === layer}
+                disabled={key === "surface" && !surfaceAccess}
+                title={key === "surface" && !surfaceAccess ? "Requires Analyst or Pro" : undefined}
                 onClick={() => setLayer(key)}
               >
                 {label}

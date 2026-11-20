@@ -62,7 +62,10 @@ export function QualifyingLapWidget({
   options?: Record<string, unknown>;
 }) {
   const { sessionId, entries, qualifyingLap: choice, selectQualifyingLap: setChoice } = useSessionWorkspace();
-  const [mini, setMini] = useState(false);
+  const [miniRequested, setMini] = useState(false);
+  const canUseMinisectors = (useMembership().data?.plan.level ?? 0) >= 1;
+  const { data: auth } = useAuthSessionQuery();
+  const mini = miniRequested && canUseMinisectors;
   const [number, setNumber] = useState(1);
   const [missingShape, setMissingShape] = useState<Choice>();
   const fieldIds = entries.map((entry) => entry.id);
@@ -94,6 +97,7 @@ export function QualifyingLapWidget({
       choice,
       mini,
       mini ? field.ready : shape.ready,
+      auth?.user_id,
     ],
     queryFn: async ({ signal }) =>
       (
@@ -105,9 +109,9 @@ export function QualifyingLapWidget({
           },
         )
       ).data,
-    enabled: !mini || field.ready || field.isError,
+    enabled: Boolean(auth?.user_id) && (!mini || field.ready || field.isError),
     placeholderData: (previous, previousQuery) =>
-      previousQuery?.queryKey[1] === sessionId ? previous : undefined,
+      previousQuery?.queryKey[1] === sessionId && previousQuery.queryKey[4] === mini && previousQuery.queryKey[6] === auth?.user_id ? previous : undefined,
     staleTime: 60_000,
   });
   const data = query.data;
@@ -208,6 +212,8 @@ export function QualifyingLapWidget({
               type="button"
               className="button-secondary"
               aria-pressed={mini}
+              disabled={!canUseMinisectors}
+              title={canUseMinisectors ? undefined : "Requires Analyst or Pro"}
               onClick={() => {
                 setMini(true);
                 setNumber(1);
@@ -460,3 +466,5 @@ export function QualifyingLapWidget({
     </WidgetCard>
   );
 }
+import { useMembership } from "../../data/queries/billing.queries";
+import { useAuthSessionQuery } from "../../data/queries/auth.queries";

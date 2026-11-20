@@ -29,6 +29,8 @@ from modules.session_import.infrastructure import db_models as _session_import_d
 from modules.telemetry_materialization.infrastructure import db_models as _telemetry_materialization_db_models  # noqa: E402,F401
 from modules.feature_metrics.infrastructure import db_models as _feature_metrics_db_models  # noqa: E402,F401
 from modules.account_profile.infrastructure import db_models as _account_profile_models  # noqa: E402,F401
+from modules.billing.infrastructure import db_models as _billing_models  # noqa: E402,F401
+from modules.identity_auth.infrastructure import google_models as _google_models  # noqa: E402,F401
 from modules.provider_connections.infrastructure import db_models as _provider_connection_models  # noqa: E402,F401
 
 

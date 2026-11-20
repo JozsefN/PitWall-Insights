@@ -2,6 +2,36 @@ import { eventLabels } from "./contracts.ts";
 import type { EstimateValue, EventKind, RaceEvent } from "./contracts.ts";
 
 export const defaultEventTypes = Object.keys(eventLabels) as EventKind[];
+const modelEventTypes = new Set<EventKind>([
+  "braking_anomaly", "possible_incident", "traction_disruption", "stopped_car", "traffic_pressure", "overtake",
+]);
+export const reportedEventTypes = defaultEventTypes.filter((kind) => !modelEventTypes.has(kind));
+
+export const raceUpdateFilters = {
+  all: { label: "All updates", kinds: [], usesModel: false },
+  flags: { label: "Flags", kinds: ["yellow_flag", "green_flag", "safety_car", "red_flag"], usesModel: false },
+  pits: { label: "Pit stops", kinds: ["pit_stop", "pit_stop_delay"], usesModel: false },
+  braking: { label: "Braking anomalies", kinds: ["braking_anomaly"], usesModel: true },
+  incidents: { label: "Possible incidents", kinds: ["possible_incident"], usesModel: true },
+  stopped: { label: "Stopped car candidates", kinds: ["stopped_car"], usesModel: true },
+} as const satisfies Record<string, { label: string; kinds: readonly EventKind[]; usesModel: boolean }>;
+
+export type RaceUpdateFilter = keyof typeof raceUpdateFilters;
+
+export function raceUpdateSelection(
+  options: Record<string, unknown>,
+  requestedFilter: RaceUpdateFilter,
+  modelAccess: boolean,
+) {
+  const filter = !modelAccess && raceUpdateFilters[requestedFilter].usesModel ? "all" : requestedFilter;
+  const policy = raceUpdateFilters[filter];
+  const includeCandidates = modelAccess && (policy.usesModel || (filter === "all" && options.includeCandidates === true));
+  return {
+    filter,
+    includeCandidates,
+    options: { ...options, includeCandidates, eventTypes: filter === "all" ? options.eventTypes : policy.kinds },
+  };
+}
 export function snapshotCutoff(time: number) {
   return Math.max(0, Math.floor(time / 5000) * 5000);
 }

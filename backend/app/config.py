@@ -18,6 +18,21 @@ class Settings(BaseSettings):
     default_season_lookback: int = 1
     provider_credentials_key: SecretStr | None = None
     provider_credentials_key_file: str | None = None
+    stripe_test_secret_key: SecretStr | None = None
+    stripe_webhook_secret: SecretStr | None = None
+    stripe_analyst_month_price: str | None = None
+    stripe_analyst_year_price: str | None = None
+    stripe_pro_month_price: str | None = None
+    stripe_pro_year_price: str | None = None
+    stripe_portal_configuration: str | None = None
+    web_app_url: str = "http://localhost:5173"
+    google_client_id: str | None = None
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    smtp_from_email: str | None = None
+    smtp_implicit_tls: bool = False
 
     @field_validator("debug", mode="before")
     @classmethod

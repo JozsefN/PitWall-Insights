@@ -2,6 +2,7 @@ import { useState, type PropsWithChildren } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { apiClient } from "../../data/api/client";
+import { useAuthSessionQuery } from "../../data/queries/auth.queries";
 import { snapshotCutoff } from "../race-insights/presentation";
 import {
   useReplayTime,
@@ -24,6 +25,7 @@ export function StrategyReplayProvider({
 
 function ActiveStrategyReplay({ children }: PropsWithChildren) {
   const workspace = useSessionWorkspace();
+  const { data: auth } = useAuthSessionQuery();
   const [selection, setFocus] = useState("");
   const [scenario, setScenario] = useState<{
     session: string;
@@ -42,7 +44,7 @@ function ActiveStrategyReplay({ children }: PropsWithChildren) {
     ? selection
     : (selectedDriverIds[0] ?? entries[0]?.id ?? "");
   const query = useQuery({
-    queryKey: ["replay-strategy", sessionId, cutoff, weather],
+    queryKey: ["replay-strategy", sessionId, cutoff, weather, auth?.user_id],
     queryFn: async ({ signal }) =>
       (
         await apiClient.post<ReplayStrategy>(
@@ -51,13 +53,13 @@ function ActiveStrategyReplay({ children }: PropsWithChildren) {
           { signal },
         )
       ).data,
-    enabled: mode === "simulation" && replay.maxTimeMs > replay.minTimeMs,
+    enabled: Boolean(auth?.user_id) && mode === "simulation" && replay.maxTimeMs > replay.minTimeMs,
     staleTime: 25_000,
     gcTime: 70_000,
-    placeholderData: (previous) =>
+    placeholderData: (previous, previousQuery) =>
       retainSnapshot(
         previous,
-        JSON.stringify(previous?.crossover?.forecast ?? null) ===
+        previousQuery?.queryKey[4] === auth?.user_id && JSON.stringify(previous?.crossover?.forecast ?? null) ===
           JSON.stringify(weather),
         sessionId,
         cutoff,

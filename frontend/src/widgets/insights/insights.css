@@ -104,6 +104,11 @@
   color: var(--color-text-primary);
   padding: 5px 8px;
 }
+.insight-feed-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .insight-empty,
 .insight-notice {
   color: var(--color-text-secondary);

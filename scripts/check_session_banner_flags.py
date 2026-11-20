@@ -1,4 +1,5 @@
 """Check the host flag artwork on real saved sessions and narrow screens."""
+from local_test_accounts import seed_verified_account
 
 import json
 import secrets
@@ -76,7 +77,7 @@ def assert_banner_contrast(hero):
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"session-flag-e2e-{secrets.token_hex(6)}@example.com"
-    token = api("POST", "/api/auth/signup", payload={"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
+    token = seed_verified_account({"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
         races, seasons = check_calendar(token)

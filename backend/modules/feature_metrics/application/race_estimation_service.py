@@ -9,11 +9,15 @@ from sqlalchemy.dialects.postgresql import insert
 from modules.feature_metrics.domain.analysis.models import AnalysisRequest
 from modules.feature_metrics.domain.race_estimation.models import (
     MODEL_VERSION,
+    ModelAssumptions,
     RaceContext,
     RaceEstimateResponse,
 )
 from modules.feature_metrics.domain.source_clock import timed_rows
-from modules.feature_metrics.domain.race_estimation.engine import estimate_race
+from modules.feature_metrics.domain.snapshot import causal_snapshot
+from modules.feature_metrics.domain.race_estimation.engine import estimate_race, visible_context
+from modules.feature_metrics.domain.race_estimation.common import phase_at
+from modules.feature_metrics.domain.race_estimation.events import reported_events
 from modules.feature_metrics.domain.race_estimation.catalog import DEFINITIONS
 from modules.feature_metrics.infrastructure.analysis_input import AnalysisInputProvider
 from modules.feature_metrics.infrastructure.db_models import SessionAnalysisCacheRecord
@@ -29,6 +33,31 @@ class RaceEstimationService:
     def __init__(self, db):
         self.db = db
         self.provider = AnalysisInputProvider(db)
+
+    def reports(self, session_id, request):
+        session = self.provider.session(session_id)
+        self.provider.entries(session_id, request.entry_ids)
+        request = request.model_copy(update={"assumptions": ModelAssumptions()})
+        start = max(0, request.as_of_ms - request.lookback_ms)
+        data = self.provider.load(
+            session_id, AnalysisRequest(start_time_ms=start, end_time_ms=request.as_of_ms + 1),
+            required_inputs={"laps", "race_control", "track_status"}, as_of_ms=request.as_of_ms,
+        )
+        data = causal_snapshot(data, request.as_of_ms, request.lookback_ms)
+        context = RaceContext(
+            driver_ids={entry.car_number: entry.id for entry in data.entries},
+            pits=self._rows((session.source_details or {}).get("pit_stops", []), session),
+        )
+        context = visible_context(context, request.as_of_ms, request.assumptions.source_report_delay_ms)
+        events = sorted(reported_events(data, context, request), key=lambda item: (item.time_ms, item.id), reverse=True)
+        return RaceEstimateResponse(
+            session_id=session_id, as_of_ms=request.as_of_ms, start_ms=start,
+            fingerprint="", assumptions={}, drivers=[], pairs=[],
+            conditions={"track_status": phase_at(data.track_status, request.as_of_ms)},
+            events=events[:request.max_events], event_count=len(events),
+            events_truncated=len(events) > request.max_events, warnings=[],
+            interpretation="Published race-control and pit reports, plus recorded best laps.",
+        )
 
     def compute(self, session_id, request):
         session = self.provider.session(session_id)

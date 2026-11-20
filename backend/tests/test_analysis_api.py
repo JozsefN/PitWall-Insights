@@ -6,6 +6,7 @@ from sqlalchemy import event, select, func
 from app.bootstrap import create_app
 from modules.delivery_api.api.auth_dependencies import require_current_user
 from modules.identity_auth.domain.models import User
+from modules.identity_auth.infrastructure.db_models import UserRecord
 from modules.storage.infrastructure.db import get_db
 from modules.session_domain.infrastructure.db_models import (
     SessionEntryRecord,
@@ -17,7 +18,7 @@ from modules.normalization.application.service import NormalizationService
 from modules.feature_metrics.infrastructure.db_models import SessionAnalysisCacheRecord
 from modules.feature_metrics.domain.analysis.catalog import DEFINITIONS
 from modules.feature_metrics.application.analysis_service import _ANALYSIS_GATE
-from support import isolated_database, seed_session, source_bundle
+from support import isolated_database, paid_membership, seed_session, source_bundle
 
 
 class AnalysisApiTests(unittest.TestCase):
@@ -26,6 +27,10 @@ class AnalysisApiTests(unittest.TestCase):
         self.factory = self.database.__enter__()
         self.session_id = seed_session(self.factory, full=True)
         with self.factory() as db:
+            db.add(UserRecord(id="test", email="test@example.com", password_hash="fixture"))
+            db.flush()
+            paid_membership(db, "test")
+            db.commit()
             self.ids = list(
                 db.scalars(
                     select(SessionEntryRecord.id).order_by(

@@ -16,8 +16,9 @@ def root_health() -> dict:
 
 @router.get("/api/health")
 def api_health() -> dict:
+    database = db.health()
     return {
         "status": "ok",
         "service": "delivery_api",
-        "db": db.health(),
+        "db": {"status": database["status"], "driver": database["driver"]},
     }

@@ -2,16 +2,26 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert
 
 from modules.dashboard_layouts.infrastructure.db_models import UserDashboardLayoutRecord
 from modules.dashboard_layouts.infrastructure.db_models import UserLayoutFavoriteRecord
+from modules.identity_auth.infrastructure.db_models import UserRecord
 
 
 class DashboardLayoutRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
+
+    def lock_owner(self, user_id: str) -> None:
+        self.db.execute(select(UserRecord.id).where(UserRecord.id == user_id).with_for_update())
+
+    def count_for_user(self, user_id: str) -> int:
+        return self.db.scalar(select(func.count()).select_from(UserDashboardLayoutRecord).where(
+            UserDashboardLayoutRecord.owner_user_id == user_id,
+        ))
 
     def list_favorites(self, user_id: str) -> list[str]:
         return [row.layout_key for row in self.db.query(UserLayoutFavoriteRecord)

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.delivery_api.api.auth_dependencies import require_analyst_user, require_current_user
 from modules.storage.infrastructure.db import get_db
 from modules.feature_metrics.domain.strategy.models import (
     StrategyRequest,
@@ -53,14 +53,14 @@ def strategy_catalog():
 def evaluate(
     session_id: str,
     request: StrategyRequest,
-    user=Depends(require_current_user),
+    user=Depends(require_analyst_user),
     db: Session = Depends(get_db),
 ):
     return mapped(lambda: StrategyService(db).evaluate(session_id, user.id, request))
 
 
 @router.post(
-    "/sessions/{session_id}/replay", dependencies=[Depends(require_current_user)]
+    "/sessions/{session_id}/replay", dependencies=[Depends(require_analyst_user)]
 )
 def replay_strategy(
     session_id: str, request: ReplayStrategyRequest, db: Session = Depends(get_db)
@@ -72,7 +72,7 @@ def replay_strategy(
 def create_context(
     session_id: str,
     context: StrategyContext,
-    user=Depends(require_current_user),
+    user=Depends(require_analyst_user),
     db: Session = Depends(get_db),
 ):
     record = mapped(
@@ -90,7 +90,7 @@ def create_context(
 def get_context(
     session_id: str,
     context_id: str,
-    user=Depends(require_current_user),
+    user=Depends(require_analyst_user),
     db: Session = Depends(get_db),
 ):
     record, context = mapped(

@@ -11,10 +11,12 @@ export type F1Connection = {
 export type Profile = {
   user_id: string;
   email: string;
+  role: "member" | "admin";
+  email_verified: boolean;
   name: string | null;
   nickname: string | null;
   phone_number: string | null;
-  subscription: { plan: "free"; billing_available: boolean; upgrade_status: string };
+  subscription: { plan: "free" | "analyst" | "pro"; billing_available: boolean; upgrade_status: string };
 };
 
 export type F1Credentials = {

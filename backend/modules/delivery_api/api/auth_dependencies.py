@@ -5,6 +5,7 @@ from modules.identity_auth.application.security import decode_access_token
 from modules.identity_auth.domain.models import User
 from modules.identity_auth.infrastructure.repository import AuthRepository
 from modules.storage.infrastructure.db import get_db
+from modules.billing.application.entitlements import require_analyst
 
 
 def get_current_user(
@@ -38,4 +39,17 @@ def require_current_user(
             detail="Authentication required",
         )
 
+    return user
+
+
+def require_analyst_user(
+    user: User = Depends(require_current_user), db: Session = Depends(get_db),
+) -> User:
+    require_analyst(db, user.id)
+    return user
+
+
+def require_admin(user: User = Depends(require_current_user)) -> User:
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Administrator access required.")
     return user

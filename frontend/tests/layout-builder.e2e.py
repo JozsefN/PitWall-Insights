@@ -10,6 +10,10 @@ from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[2]
+
+import sys
+sys.path.insert(0, str(ROOT / 'scripts'))
+from local_test_accounts import seed_verified_account
 BASE = os.environ.get('PITWALL_FRONTEND_URL', 'http://127.0.0.1:5173')
 API = 'http://127.0.0.1:8000'
 ARTIFACTS = Path(tempfile.gettempdir()) / 'pitwall-layout-builder-e2e'
@@ -51,10 +55,27 @@ def pointer_drag(page, handle, dx, dy):
 created_ids = []
 email = f'builder-e2e-{secrets.token_hex(8)}@example.com'
 password = secrets.token_urlsafe(20)
-auth = api('POST', '/api/auth/signup', {'email': email, 'password': password})
+auth = seed_verified_account({'email': email, 'password': password})
 token = auth['access_token']
 created_ids.append(api('GET', '/api/auth/session', token=token)['user_id'])
 try:
+    membership_fixture = """
+from datetime import datetime, timedelta, timezone
+import sys
+from modules.billing.infrastructure.db_models import BillingAccountRecord
+from modules.identity_auth.infrastructure.db_models import UserRecord
+from modules.storage.infrastructure.db import SessionLocal
+with SessionLocal() as db:
+    user = db.get(UserRecord, sys.argv[1])
+    assert user.email.startswith('builder-e2e-')
+    db.add(BillingAccountRecord(user_id=user.id, plan_code='pro', status='active',
+                                paid_until=datetime.now(timezone.utc) + timedelta(hours=1)))
+    db.commit()
+"""
+    subprocess.run([str(ROOT/'backend/.venv/Scripts/python.exe'), '-c', membership_fixture, created_ids[0]], cwd=ROOT/'backend', check=True)
+    catalog = json.loads((ROOT/'shared/dashboard-widgets.json').read_text(encoding='utf-8'))['widgets']
+    lookback = [panel for panel in catalog.values() if panel['builderEnabled']
+                and 'session-lookback' in panel['supportedAudiences'] and 'race' in panel['sessionKinds']]
     with sync_playwright() as p:
         browser = p.chromium.launch()
         context = browser.new_context(viewport={'width': 1440, 'height': 1000})
@@ -63,7 +84,7 @@ try:
         page.on('request', lambda req: requests.append(req.url))
         login(page, email, password)
         page.goto(BASE + '/dashboard-builder')
-        expect(page.locator('.builder-layout-card')).to_have_count(5)
+        expect(page.locator('.builder-layout-card')).to_have_count(4)
         expect(page.get_by_role('button', name='Edit layout', exact=True)).to_have_count(0)
         expect(page.get_by_role('button', name='Delete', exact=True)).to_have_count(0)
         expect(card(page, 'Session Trends').locator('[data-preview-kind="track"]')).to_have_count(1)
@@ -79,13 +100,14 @@ try:
         page.get_by_label('Search widgets', exact=True).fill('no matching panel')
         expect(page.get_by_text('No matching widgets.', exact=False)).to_be_visible()
         page.get_by_label('Search widgets', exact=True).fill('')
-        for access in ['subscription', '1', '2', '3']:
+        for access in ['subscription', '1']:
             page.get_by_label('Widget access', exact=True).select_option(access)
-            expect(page.locator('.editor-library__widget')).to_have_count(0)
+            expect(page.locator('.editor-library__widget')).to_have_count(sum(panel['accessTier'] == 1 for panel in lookback))
         page.get_by_label('Widget access', exact=True).select_option('free')
-        expect(page.locator('.editor-library__widget')).to_have_count(15)
-        expect(page.locator('.editor-library__widget .widget-tier')).to_have_text(['Free'] * 15)
-        assert set(page.locator('.editor-library__thumbnail [data-preview-kind]').evaluate_all('(nodes)=>nodes.map(n=>n.dataset.previewKind)')) == {'trace','brake','pace','stints','laps','track','insights'}
+        free = [panel for panel in lookback if panel['accessTier'] == 0]
+        expect(page.locator('.editor-library__widget .widget-tier')).to_have_text(['Free'] * len(free))
+        assert set(page.locator('.editor-library__thumbnail [data-preview-kind]').evaluate_all('(nodes)=>nodes.map(n=>n.dataset.previewKind)')) == {panel['previewKind'] for panel in free}
+        page.get_by_label('Widget access', exact=True).select_option('all')
         page.get_by_label('Search widgets', exact=True).fill('Wake & traffic')
         expect(page.get_by_role('button', name='Add Wake & traffic', exact=True)).to_be_disabled()
         expect(page.locator('.editor-library__widget')).to_contain_text('Replay only')
@@ -261,7 +283,9 @@ try:
         print('PASS edit/reload, factory copy, favorites in session order, real lap/strategy rendering, per-panel compact/short adaptation and mobile stacking',flush=True)
         page.goto(BASE+'/dashboard-builder?audience=live-race')
         page.get_by_role('button',name='+ New layout',exact=True).click()
-        expect(page.locator('.editor-library__widget')).to_have_count(25)
+        replay = [panel for panel in catalog.values() if panel['builderEnabled']
+                  and 'live-race' in panel['supportedAudiences'] and 'race' in panel['sessionKinds']]
+        expect(page.locator('.editor-library__widget')).to_have_count(len(replay))
         page.get_by_role('button',name='Add Replay Track Map',exact=True).click()
         page.get_by_role('button',name='Configure Replay Track Map',exact=True).click()
         page.get_by_label('Default map layer',exact=True).select_option('weather')
@@ -285,7 +309,7 @@ try:
         page.goto(BASE+'/dashboard-builder')
         seed={key:persisted[key] for key in ['name','description','audience','schemaVersion','config']}
         for index in range(12):api('POST','/api/layouts',{**seed,'name':f'E2E extra {index}'},token)
-        page.reload(); expect(page.locator('.builder-layout-card')).to_have_count(19)
+        page.reload(); expect(page.locator('.builder-layout-card')).to_have_count(18)
         page.evaluate("window.scrollTo({top: document.body.scrollHeight, behavior: 'instant'})")
         assert page.evaluate('window.scrollY') > 300
         assert 0<=page.get_by_role('button',name='+ New layout',exact=True).bounding_box()['y']<=300
@@ -321,11 +345,11 @@ try:
             expect(page.locator('[data-review-panel="weather-history"]')).to_be_visible()
         print('PASS restricted library, explanatory replay block, switch to Lookback, and saved dual-mode conversion preserving the panel grid',flush=True)
         second_email=f'builder-e2e-{secrets.token_hex(8)}@example.com'; second_password=secrets.token_urlsafe(20)
-        second_auth=api('POST','/api/auth/signup',{'email':second_email,'password':second_password})
+        second_auth=seed_verified_account({'email':second_email,'password':second_password})
         created_ids.append(api('GET','/api/auth/session',token=second_auth['access_token'])['user_id'])
         page.locator('.app-header').get_by_role('button',name='Sign out',exact=True).click()
         login(page,second_email,second_password); page.goto(BASE+'/dashboard-builder')
-        expect(page.locator('.builder-layout-card')).to_have_count(5)
+        expect(page.locator('.builder-layout-card')).to_have_count(4)
         expect(page.locator('.layout-favorite.is-favorite')).to_have_count(0)
         assert not errors,errors
         print('PASS replay eligibility, discard/delete, sticky creation with a long library, account cache isolation, no browser runtime errors',flush=True)

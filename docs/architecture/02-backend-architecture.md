@@ -25,6 +25,7 @@ Business and delivery logic grouped by feature/module:
 - [Session Domain](../modules/session-domain.md)
 - [Session Import](../modules/session-import.md)
 - [Identity Auth](../modules/identity-auth.md)
+- [Billing and entitlements](14-subscriptions.md)
 - [Ingestion](../modules/ingestion.md)
 - [Normalization](../modules/normalization.md)
 - [Feature Metrics](../modules/feature-metrics.md)

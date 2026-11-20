@@ -1,15 +1,21 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from modules.identity_auth.application.schemas import (
     AuthSessionResponse,
+    AuthResult,
     AuthTokenResponse,
     LoginRequest,
     SignUpRequest,
+    VerificationChallengeRequest,
+    VerificationRequest,
+    VerificationRequired,
 )
-from modules.identity_auth.application.security import decode_access_token, create_access_token
-from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.identity_auth.application.email_verification import VerificationThrottled
+from modules.identity_auth.application.security import create_access_token
+from modules.delivery_api.api.auth_dependencies import get_current_user, require_admin, require_current_user
 from modules.identity_auth.domain.models import User
+from modules.identity_auth.infrastructure.mailer import MailUnavailable, mail_configured
 from modules.identity_auth.application.service import AuthService
 from modules.identity_auth.infrastructure.repository import AuthRepository
 from modules.storage.infrastructure.db import get_db
@@ -22,7 +28,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     return AuthService(repository=repository)
 
 
-@router.get("/health")
+@router.get("/health", dependencies=[Depends(require_admin)])
 def auth_health() -> dict:
     return {
         "module": "identity_auth",
@@ -30,58 +36,68 @@ def auth_health() -> dict:
     }
 
 
-@router.post("/signup", response_model=AuthTokenResponse)
+def client_address(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def auth_operation(operation, *, bad_request: int = 400):
+    try:
+        return operation()
+    except MailUnavailable as error:
+        raise HTTPException(503, str(error)) from error
+    except VerificationThrottled as error:
+        raise HTTPException(429, str(error)) from error
+    except ValueError as error:
+        raise HTTPException(bad_request, str(error)) from error
+
+
+@router.get("/config")
+def auth_config():
+    return {"email_verification_available": mail_configured()}
+
+
+@router.post("/signup", response_model=VerificationRequired, status_code=202)
 def signup(
     payload: SignUpRequest,
+    request: Request, response: Response,
     service: AuthService = Depends(get_auth_service),
-) -> AuthTokenResponse:
-    try:
-        token = service.signup(payload.email, payload.password)
-        return AuthTokenResponse(access_token=token)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+) -> VerificationRequired:
+    response.headers["Cache-Control"] = "no-store"
+    return auth_operation(lambda: service.signup(payload.email, payload.password, client_address(request)))
 
 
-@router.post("/login", response_model=AuthTokenResponse)
+@router.post("/login", response_model=AuthResult)
 def login(
     payload: LoginRequest,
+    request: Request, response: Response,
     service: AuthService = Depends(get_auth_service),
-) -> AuthTokenResponse:
-    try:
-        token = service.login(payload.email, payload.password)
-        return AuthTokenResponse(access_token=token)
-    except ValueError as exc:
-        raise HTTPException(status_code=401, detail=str(exc)) from exc
+) -> AuthResult:
+    response.headers["Cache-Control"] = "no-store"
+    return auth_operation(lambda: service.login(payload.email, payload.password, client_address(request)), bad_request=401)
+
+
+@router.post("/verify-email", response_model=AuthTokenResponse)
+def verify_email(payload: VerificationRequest, response: Response, service: AuthService = Depends(get_auth_service)):
+    response.headers["Cache-Control"] = "no-store"
+    return auth_operation(lambda: service.verification.verify(payload.challenge_id, payload.code))
+
+
+@router.post("/resend-code", response_model=VerificationRequired)
+def resend_code(payload: VerificationChallengeRequest, request: Request, response: Response,
+                service: AuthService = Depends(get_auth_service)):
+    response.headers["Cache-Control"] = "no-store"
+    return auth_operation(lambda: service.verification.resend(payload.challenge_id, client_address(request)))
 
 
 @router.get("/session", response_model=AuthSessionResponse)
 def get_auth_session(
-    authorization: str | None = Header(default=None),
-    service: AuthService = Depends(get_auth_service),
+    response: Response, user: User | None = Depends(get_current_user),
 ) -> AuthSessionResponse:
-    if authorization is None or not authorization.startswith("Bearer "):
-        return AuthSessionResponse(
-            authenticated=False,
-            user_id=None,
-            email=None,
-        )
-    token = authorization.removeprefix("Bearer ").strip()
-
-    try:
-        payload = decode_access_token(token)
-        user_id = payload.get("sub")
-        email = payload.get("email")
-        return AuthSessionResponse(
-            authenticated=True,
-            user_id=user_id,
-            email=email,
-        )
-    except ValueError:
-        return AuthSessionResponse(
-            authenticated=False,
-            user_id=None,
-            email=None,
-        )
+    response.headers["Cache-Control"] = "no-store"
+    if user is None:
+        return AuthSessionResponse(authenticated=False)
+    return AuthSessionResponse(authenticated=True, user_id=user.id, email=user.email,
+                               role=user.role, email_verified=user.email_verified)
 
 
 @router.post("/refresh", response_model=AuthTokenResponse)

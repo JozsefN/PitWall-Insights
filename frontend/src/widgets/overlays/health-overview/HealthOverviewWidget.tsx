@@ -9,12 +9,14 @@ import {
 } from "../../../data/queries/module-health.queries";
 
 import { mapHealthOverview } from "../../../data/mappers/health.mapper";
+import { useAuthSession } from "../../../features/auth/useAuthSession";
 
 export function HealthOverviewWidget() {
+  const admin = useAuthSession().data?.role === "admin";
   const api = useApiHealthQuery();
-  const auth = useAuthHealthQuery();
-  const ingestion = useIngestionHealthQuery();
-  const normalization = useNormalizationHealthQuery();
+  const auth = useAuthHealthQuery(admin);
+  const ingestion = useIngestionHealthQuery(admin);
+  const normalization = useNormalizationHealthQuery(admin);
 
   const isLoading =
     api.isLoading ||
@@ -24,9 +26,7 @@ export function HealthOverviewWidget() {
 
   const isError =
     api.isError ||
-    auth.isError ||
-    ingestion.isError ||
-    normalization.isError;
+    (admin && (auth.isError || ingestion.isError || normalization.isError));
 
   if (isLoading) {
     return (
@@ -54,7 +54,7 @@ export function HealthOverviewWidget() {
   return (
     <WidgetCard title="System Health" description="Current platform status.">
       <div className="metric-grid">
-        {model.items.map((item) => (
+        {model.items.filter((item) => admin || ["api", "database"].includes(item.key)).map((item) => (
           <div key={item.key} className="metric-tile">
             <span className="metric-tile__label">{item.label}</span>
             <strong className={`metric-tile__value status-${item.status}`}>

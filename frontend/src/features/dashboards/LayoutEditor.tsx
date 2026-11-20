@@ -1,6 +1,7 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { useBlocker } from "react-router-dom";
 import { isAxiosError } from "axios";
+import { useMembership } from "../../data/queries/billing.queries";
 import {
   useCreateLayoutMutation,
   useUpdateLayoutMutation,
@@ -59,6 +60,7 @@ export function LayoutEditor({
   onClose,
   onSaved,
 }: Props) {
+  const plan = useMembership().data?.plan;
   const [initial] = useState(() =>
     layout ? draftFromLayout(layout, copy) : emptyDraft(audience, sessionKind),
   );
@@ -126,12 +128,12 @@ export function LayoutEditor({
       setMessage(restriction);
       return;
     }
-    if (policy.accessTier > 0) {
-      setMessage("This widget requires a subscription.");
+    if (policy.accessTier > (plan?.level ?? 0)) {
+      setMessage("This panel requires Analyst or Pro.");
       return;
     }
-    if (draft.sections.flatMap((item) => item.widgets).length >= 100) {
-      setMessage("A layout supports at most 100 widgets.");
+    if (plan && panelCount >= plan.panels_per_layout) {
+      setMessage(`${plan.name} allows ${plan.panels_per_layout} panels per saved layout.`);
       return;
     }
     const placement = findSpace(group.widgets, requested, id);
@@ -221,7 +223,7 @@ export function LayoutEditor({
           <small>
             {modesText(modes)} · {draft.sections.length}{" "}
             {draft.sections.length === 1 ? "group" : "groups"} ·{" "}
-            {panelCount} {panelCount === 1 ? "panel" : "panels"} ·{" "}
+            {panelCount}{plan ? ` / ${plan.panels_per_layout}` : ""} {panelCount === 1 ? "panel" : "panels"} ·{" "}
             {dirty ? "Unsaved changes" : "No unsaved changes"}
           </small>
         </div>
@@ -391,6 +393,7 @@ export function LayoutEditor({
         ) : null}
         <div className="editor-body">
           <WidgetLibrary
+            planLevel={plan?.level ?? 0}
             modes={modes}
             compatibleKinds={compatibleKinds}
             target={
@@ -573,6 +576,7 @@ export function LayoutEditor({
                     {selected ? (
                       <PanelSettings
                         widget={selected}
+                        modelAccess={(plan?.level ?? 0) >= 1}
                         onPlace={(box) =>
                           place(group.id, selected.instanceId, box)
                         }

@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.billing.application.entitlements import require_analyst
+from modules.identity_auth.domain.models import User
 from modules.feature_metrics.application.calculation_guard import AnalysisBusyError
 from modules.feature_metrics.application.review_service import ReviewService
 from modules.feature_metrics.application.qualifying_lap_service import qualifying_lap_map
@@ -39,7 +41,10 @@ def qualifying_lap(
     lap_number: int | None = Query(default=None, ge=1, le=1000),
     minisectors: bool = False,
     db: Session = Depends(get_db),
+    user: User = Depends(require_current_user),
 ):
+    if minisectors:
+        require_analyst(db, user.id)
     try:
         return qualifying_lap_map(db, session_id, entry_id, lap_number, minisectors)
     except LookupError as error:
@@ -62,8 +67,11 @@ def review_catalog():
 
 @router.post("/sessions/{session_id}/review")
 def session_review(
-    session_id: str, payload: ReviewRequest, db: Session = Depends(get_db)
+    session_id: str, payload: ReviewRequest, db: Session = Depends(get_db),
+    user: User = Depends(require_current_user),
 ):
+    if set(payload.groups) - {"drivers", "radio", "weather", "flags"} or payload.laps or payload.context_id:
+        require_analyst(db, user.id)
     try:
         return ReviewService(db).compute(session_id, payload)
     except LookupError as error:

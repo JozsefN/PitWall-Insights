@@ -1,4 +1,5 @@
 """Verify the shared timing tower against archived sessions and the real browser UI."""
+from local_test_accounts import seed_verified_account
 
 from time import perf_counter
 from urllib.parse import urlencode
@@ -31,11 +32,7 @@ def main():
     artifacts = ROOT / "docs/testing/timing-tower"
     artifacts.mkdir(parents=True, exist_ok=True)
     email = f"tower-e2e-{secrets.token_hex(6)}@example.com"
-    token = api(
-        "POST",
-        "/api/auth/signup",
-        payload={"email": email, "password": secrets.token_urlsafe(20)},
-    )["access_token"]
+    token = seed_verified_account({"email": email, "password": secrets.token_urlsafe(20)})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
         sessions = {

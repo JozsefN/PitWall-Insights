@@ -10,7 +10,7 @@ A PitWall Insights böngészőben futó alkalmazás a Forma-1 nyilvános verseny
 
 Az alkalmazás az OpenF1 történeti adatait PostgreSQL-adatbázisban tárolja. A külön futó feldolgozó a kiválasztott pilótákhoz és nézethez készíti elő a részletes méréseket. A böngészőben ugyanazt a lejátszási időpontot követi a térkép, a sorrend és az elemzőfelület. A személyes panelelrendezések menthetők és eltérő típusú munkamenetekhez rendelhetők.
 
-A stratégiai modul köridőkből és szektorátlépésekből becsli a gumitempót, a kiállási időveszteséget és a közvetlen riválisokhoz várható viszonyt. Az incidensek történeti gyakorisága külön kerül a várható bokszköltségbe, az esőgumi-váltás pedig rövid távú összehasonlítást kap. A visszajátszási és mérési próbák rögzítik, hogy mely eredmény vezethető le az adott pillanat adataiból, és melyik marad feltételes. A jelen változat a megvalósított történeti funkciókat dokumentálja. Az előfizetés, az MI-alapú magyarázat és az automatikusan frissülő tartalmi oldalak a fejlesztési tervben szerepelnek.
+A stratégiai modul köridőkből és szektorátlépésekből becsli a gumitempót, a kiállási időveszteséget és a közvetlen riválisokhoz várható viszonyt. Az incidensek történeti gyakorisága külön kerül a várható bokszköltségbe, az esőgumi-váltás pedig rövid távú összehasonlítást kap. A visszajátszási és mérési próbák rögzítik, hogy mely eredmény vezethető le az adott pillanat adataiból, és melyik marad feltételes. A szerver a mentett elrendezések és a haladó vizsgálatok elérését három csomaghoz ellenőrzi. A fizetési és Google-integráció szolgáltatói próbája hátravan. Az MI-alapú magyarázat és az automatikusan frissülő tartalmi oldalak tervezettek.
 
 ## Abstract
 
@@ -18,7 +18,7 @@ PitWall Insights is a browser-based application for analysing public Formula 1 d
 
 The application stores historical OpenF1 records in PostgreSQL. A separate worker prepares detailed samples for the drivers and views that require them. The circuit map, running order and analysis panels use the same replay position. Personal dashboard layouts can be saved and limited to compatible session types.
 
-The strategy module estimates tyre pace, net pit-stop loss and the likely position relative to rivals from lap and sector timing. Historical incident frequencies inform expected pit costs, and weather transitions use a separate short-horizon comparison. Replay and measurement tests distinguish results supported by the data available at the decision cutoff from conditional estimates. This draft describes the historical workflows already implemented. Subscriptions, AI explanations and automatically refreshed content remain on the development roadmap.
+The strategy module estimates tyre pace, net pit-stop loss and the likely position relative to rivals from lap and sector timing. Historical incident frequencies inform expected pit costs, and weather transitions use a separate short-horizon comparison. Replay and measurement tests distinguish results supported by the data available at the decision cutoff from conditional estimates. The server enforces three plans for saved layouts and advanced analysis. Hosted payment and Google sign-in still require provider testing. AI explanations and automatically refreshed content remain planned.
 
 ## 1. Bevezetés
 
@@ -390,9 +390,11 @@ Az érvényesség határát jelenleg az eltérő forráslefedettség, a tényleg
 
 ### 8.2. További fejlesztések és eredeti ütemezés
 
-Az alábbi időablakok az eredeti féléves tervet rögzítik. A jelen munkaváltozatban ezek a fejlesztések nyitottak. A határidők a vállalt sorrendet adják, a funkciók készültségét az elfogadási próbák fogják igazolni.
+Az alábbi időablakok az eredeti féléves tervet rögzítik. A határidők a vállalt sorrendet adják. A szöveg az egyes feladatoknál jelzi a mostani készültséget.
 
-Október 26. és november 1. között az előfizetési rendszert terveztem elkészíteni. Az ingyenes, Analyst és Pro csomag a menthető elrendezések és panelek számában, továbbá a haladó elemzések és MI-funkciók elérésében különbözne. A tesztfizetéshez a szerver a fizetési szolgáltató visszaigazolt állapotából rendelné a jogosultságot a felhasználóhoz. Ehhez az árakat és a csomagok pontos korlátait még meg kell határozni.
+Az október 26. és november 1. közé tervezett előfizetés három csomagja a mentett elrendezések kapacitásában és az elérhető vizsgálatok részletességében tér el. A Free teljes hosszban használható visszajátszást és visszatekintést, megfigyelt etaptempót, valamint két saját elrendezést biztosít. Az Analyst a mérnöki és stratégiai modelleket is megnyitja, tíz elrendezéssel. A Pro harminc elrendezést ad és a tervezett teljes MI-eszköztár célcsomagja. Az Analyst tesztára 1 490 Ft havonta és 14 900 Ft évente, a Pro tesztára 2 490 Ft havonta és 24 900 Ft évente. Az árazás termékhipotézis.
+
+A PitWall PostgreSQL-ben tárolja a Stripe hivatkozásait és a jogosultsági vetületet. A kártyaadat és a számlázási cím a Stripe oldalán kezelhető. A szerver ellenőrzi az esemény aláírását és az aktuális előfizetési állapotot. A megújítás a profilból leállítható, a kifizetett időszak végéig a csomag használható. A Stripe- és Google-integráció szolgáltatói próbája, valamint az éles számlázási és elállási folyamat elfogadása hátravan. [Előfizetési architektúra](architecture/14-subscriptions.md)
 
 November 2. és 8. között az első két MI-panel, az összefoglaló és a versenyző-összehasonlító panel szerepelt a tervben. A panelek a már kiszámított adatokból adnának rövid magyarázatot. A felhasználó vissza tudná keresni, melyik kör, szektor vagy összehasonlító érték szolgált egy állítás alapjául.
 

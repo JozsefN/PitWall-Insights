@@ -1,4 +1,5 @@
 """Exercise full-grid widgets with stored OpenF1 telemetry and timing in Chromium."""
+from local_test_accounts import seed_verified_account
 from filter_controls import select_control
 
 import json
@@ -49,7 +50,7 @@ def visible_plot_fraction(widget, selector):
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"grid-widgets-{secrets.token_hex(6)}@example.com"
-    token = api("POST", "/api/auth/signup", payload={"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
+    token = seed_verified_account({"email": email, "password": secrets.token_urlsafe(24)})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     report = {}
     try:

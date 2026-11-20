@@ -1,4 +1,5 @@
 """Exercise the crossover panel and timed rain scenarios with stored OpenF1 races."""
+from local_test_accounts import seed_verified_account
 
 from datetime import datetime, timedelta
 import json
@@ -7,7 +8,7 @@ import subprocess
 from urllib.parse import urlencode
 
 from playwright.sync_api import expect, sync_playwright
-from check_session_review_browser import API, BASE, ROOT, api
+from check_session_review_browser import API, BASE, ROOT, api, seed_test_membership
 
 ARTIFACTS = ROOT / "docs/testing/replay-strategy"
 CASES = {
@@ -26,16 +27,13 @@ def cutoff(case, date):
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"crossover-e2e-{secrets.token_hex(6)}@example.com"
-    token = api(
-        "POST",
-        "/api/auth/signup",
-        payload={
+    token = seed_verified_account({
             "email": email,
             "password": secrets.token_urlsafe(24),
-        },
-    )["access_token"]
+        })["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
+        seed_test_membership(owner, "crossover-e2e-")
         sessions = {
             row["source_session_key"]: row["id"]
             for row in api("GET", "/api/sessions", token)

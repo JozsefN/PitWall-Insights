@@ -20,7 +20,7 @@ from modules.feature_metrics.infrastructure.db_models import (
     SessionAnalysisCacheRecord,
 )
 from modules.feature_metrics.application.calculation_guard import _ANALYSIS_GATE
-from support import isolated_database, seed_session
+from support import isolated_database, paid_membership, seed_session
 
 
 class StrategyApiTests(unittest.TestCase):
@@ -93,6 +93,9 @@ class StrategyApiTests(unittest.TestCase):
                     for user in self.users
                 ]
             )
+            db.flush()
+            for user in self.users:
+                paid_membership(db, user.id)
             db.execute(update(EntryLapRecord).values(track_status="1"))
             db.add(
                 SessionTrackStatusEventRecord(

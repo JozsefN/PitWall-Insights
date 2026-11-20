@@ -5,6 +5,8 @@ from modules.identity_auth.domain.models import User
 from modules.account_profile.application.schemas import ProfileUpdate
 from modules.account_profile.infrastructure.db_models import AccountProfileRecord
 from modules.storage.infrastructure.db import get_db
+from modules.billing.application.service import membership
+from modules.billing.infrastructure.db_models import BillingAccountRecord
 
 router = APIRouter(prefix="/api/profile", tags=["profile"])
 
@@ -12,9 +14,11 @@ router = APIRouter(prefix="/api/profile", tags=["profile"])
 @router.get("")
 def profile(user: User = Depends(require_current_user), db: Session = Depends(get_db)):
     row = db.get(AccountProfileRecord, user.id)
-    return {"user_id": user.id, "email": user.email,
+    billing = membership(db.get(BillingAccountRecord, user.id))
+    return {"user_id": user.id, "email": user.email, "role": user.role, "email_verified": user.email_verified,
             **{field: getattr(row, field, None) for field in ("name", "nickname", "phone_number")},
-            "subscription": {"plan": "free", "billing_available": False, "upgrade_status": "coming_later"}}
+            "subscription": {"plan": billing["plan"].code, "billing_available": billing["checkout_enabled"],
+                             "upgrade_status": "test_checkout" if billing["checkout_enabled"] else "unavailable"}}
 
 
 @router.patch("")

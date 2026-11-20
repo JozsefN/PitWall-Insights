@@ -1,12 +1,12 @@
+from typing import Literal
+
 from pydantic import BaseModel
+
+AccountRole = Literal["member", "admin"]
 
 
 class User(BaseModel):
     id: str
     email: str
-
-
-class UserSession(BaseModel):
-    authenticated: bool
-    user_id: str | None = None
-    email: str | None = None
+    role: AccountRole = "member"
+    email_verified: bool = False

@@ -14,7 +14,23 @@ from modules.normalization.application.service import NormalizationService
 from modules.session_domain.domain.models import SessionCatalogItem
 from modules.session_domain.infrastructure.repository import SessionRepository
 from modules.storage.infrastructure.base import Base
+from modules.billing.infrastructure.db_models import BillingAccountRecord
+from modules.identity_auth.application.security import hash_password
+from modules.identity_auth.infrastructure.db_models import UserRecord
 import modules.storage.infrastructure.db  # register all existing models
+
+
+def create_verified_test_account(db, email, password):
+    account = UserRecord(email=email, password_hash=hash_password(password),
+                         email_verified_at=datetime.now(timezone.utc))
+    db.add(account)
+    db.commit()
+    return account.id
+
+
+def paid_membership(db, user_id, plan="analyst"):
+    db.add(BillingAccountRecord(user_id=user_id, plan_code=plan, status="active",
+                                paid_until=datetime.now(timezone.utc) + timedelta(days=1)))
 
 
 @contextmanager

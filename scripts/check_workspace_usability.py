@@ -1,4 +1,5 @@
 """Browser workflow and visual checks using a fresh viewer account and real OpenF1 data."""
+from local_test_accounts import seed_verified_account
 
 import json
 import re
@@ -69,7 +70,7 @@ def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     email = f"viewer-e2e-{secrets.token_hex(6)}@example.com"
     password = secrets.token_urlsafe(20)
-    token = api("POST", "/api/auth/signup", payload={"email": email, "password": password})["access_token"]
+    token = seed_verified_account({"email": email, "password": password})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     checks, errors, ratios = [], [], {}
     try:

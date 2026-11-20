@@ -14,11 +14,13 @@ export function WidgetLibrary({
   modes,
   compatibleKinds,
   target,
+  planLevel,
   onAdd,
 }: {
   modes: DashboardAudience[];
   compatibleKinds: SessionKind[];
   target: string;
+  planLevel: number;
   onAdd: (id: WidgetId) => void;
 }) {
   const [search, setSearch] = useState("");
@@ -76,24 +78,22 @@ export function WidgetLibrary({
           <option value="all">All access levels</option>
           <option value="free">Free</option>
           <option value="subscription">Subscription</option>
-          <option value="1">Tier 1</option>
-          <option value="2">Tier 2</option>
-          <option value="3">Tier 3</option>
+          <option value="1">Analyst</option>
         </select>
       </label>
-      <small>All current analysis widgets are free.</small>
       <p className="editor-library__target">
         Add destination: <strong>{target}</strong>
       </p>
       <div className="editor-library__list">
         {available.map(([id, widget]) => {
-          const blocked = widgetBlockReason(id, modes, compatibleKinds);
+          const blocked = widgetBlockReason(id, modes, compatibleKinds) ??
+            (widget.accessTier > planLevel ? "Requires Analyst or Pro." : undefined);
           return (
             <article
               key={id}
               className="editor-library__widget"
               data-blocked={Boolean(blocked)}
-              draggable={!blocked && widget.accessTier === 0}
+              draggable={!blocked}
               onDragStart={(event) => {
                 event.dataTransfer.setData("application/x-pitwall-widget", id);
                 event.dataTransfer.effectAllowed = "copy";
@@ -125,7 +125,7 @@ export function WidgetLibrary({
                 className="button-secondary"
                 type="button"
                 aria-label={`Add ${widget.title}`}
-                disabled={Boolean(blocked) || widget.accessTier > 0}
+                disabled={Boolean(blocked)}
                 onClick={() => onAdd(id)}
               >
                 + Add

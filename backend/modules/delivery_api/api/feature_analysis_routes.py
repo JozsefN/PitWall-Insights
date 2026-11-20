@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from modules.delivery_api.api.auth_dependencies import require_current_user
+from modules.delivery_api.api.auth_dependencies import require_analyst_user, require_current_user
 from modules.storage.infrastructure.db import get_db
 from modules.feature_metrics.domain.analysis.catalog import DEFINITIONS
 from modules.feature_metrics.domain.analysis.models import (
@@ -44,7 +44,7 @@ def analytic_catalog():
     }
 
 
-@router.post("/sessions/{session_id}/analytics", response_model=AnalysisResponse)
+@router.post("/sessions/{session_id}/analytics", response_model=AnalysisResponse, dependencies=[Depends(require_analyst_user)])
 def session_analytics(
     session_id: str, request: AnalysisRequest, db: Session = Depends(get_db)
 ):

@@ -1,12 +1,12 @@
 # PitWall Insights handoff
 
-Checkpoint from 2026-11-20 on `main`. The app is a local full-stack prototype for historical F1 analysis, with OpenF1 as its active source. [Local setup](../README.md)
+Checkpoint from 2026-11-20 on `main`. The app is a local full-stack prototype for historical F1 analysis, with OpenF1 as its active source. [Fresh-machine setup](setup.md)
 
 ## Start here on a new machine
 
 1. Clone the repository and open its root in VS Code. The root `AGENTS.md` points new Codex sessions to this page.
-2. Install Python 3.12, Node.js 24 and Docker with Compose. Follow the Windows startup steps in the README to start PostgreSQL, migrate it, launch the API and start the separate worker. Run Vite in another terminal.
-3. Register a new local app account. Open **Sessions**, import an archived Grand Prix such as the 2025 Emilia Romagna GP, choose **Replay Focus** or **Race strategy**, and select drivers. Wait for the required telemetry before starting Replay. The 2025 Australian and Bahrain GPs are useful for weather and strategy checks.
+2. Install Python 3.12, Node.js 24 and Docker with Compose. Follow the [setup tutorial](setup.md) to start PostgreSQL, the API, the worker and Vite, then verify the running services.
+3. Sign in as a local administrator or register a member with [email verification or Google](setup.md#enable-optional-integrations). Open **Sessions**, import an archived Grand Prix such as the 2025 Emilia Romagna GP, choose **Replay Focus**, and select drivers. Wait for the required telemetry before starting Replay. With Analyst or Pro, use **Race strategy** to check the 2025 Australian and Bahrain GPs.
 4. The database, downloaded telemetry, app accounts, favorites and user layouts are local state. A new checkout re-imports public race data. Transfer a private database backup separately when you need the same accounts or custom layouts.
 
 ## Implemented paths
@@ -17,20 +17,31 @@ Checkpoint from 2026-11-20 on `main`. The app is a local full-stack prototype fo
 | Replay and session review | Shared replay clock, map and pit lane, team radio, driver cards, qualifying and practice review, full-field timing tower | [Session review](architecture/13-session-review.md), [Timing tower test](testing/timing-tower/results.json) |
 | Layouts | Built-in layouts with session and mode restrictions, profile-owned layouts and favorites, resizable panels and previews | [Builder architecture](architecture/07-dashboard-builder-foundation.md), [Widget runbook](architecture/widget-creation-runbook.md) |
 | Race strategy | Grand Prix Replay strategy, tyre usage, rival scenarios, forecast probability and pit loss, sector-based weather crossover | [Strategy specification](architecture/10-strategy-foundation.md), [Validation and real races](testing/replay-strategy/README.md) |
+| Subscriptions | Free, Analyst and Pro access policy, layout quotas, Stripe Sandbox checkout, cancellation and webhook handling | [Design and sandbox setup](architecture/14-subscriptions.md) |
+| Accounts | Password signup with email verification, Google sign-in and profile linking, local administrator provisioning and role-gated diagnostics | [Account module](modules/identity-auth.md), [Provider setup](setup.md#enable-optional-integrations) |
 | Thesis | Hungarian Markdown, HTML, Word and PDF working drafts, with diagrams and actual browser captures | [Draft source](PitWall-Insights-szakdolgozat-munkavaltozat.md), [Editorial notes](PitWall-Insights-szakdolgozat-szerkesztesi-jegyzet.md) |
 
-The last thesis export is 42 pages before the 12-page appendix, which leaves eight pages under the 50-page cap. The appendix contains the builder, race and qualifying views, close-up and full-grid maps, race updates and extra diagrams. Section 2.3 covers the technology choices, 5.2 covers replay, 5.4 covers strategy and 8.2 records the original plan as pending work. Use the Markdown as the editing source. [PDF](PitWall-Insights-szakdolgozat-munkavaltozat.pdf) · [Export validation](testing/thesis-draft-validation.json)
+The last full thesis export is 42 pages before the 12-page appendix, which leaves eight pages under the 50-page cap. The Markdown draft includes the later subscription work and is the editing source. The separate subscription design document has its own UML diagrams and PDF. [Full thesis PDF](PitWall-Insights-szakdolgozat-munkavaltozat.pdf) · [Export validation](testing/thesis-draft-validation.json) · [Subscription design PDF](PitWall-Insights-elofizetes-fejlesztoi-dokumentacio.pdf)
+
+## Next session: verify email and Google sign-in with real accounts
+
+The account and billing code ships in this checkpoint. Automated tests use provider fixtures. Sending a real verification email, completing a Google sign-in and completing hosted Stripe Sandbox checkout are still pending.
+
+1. Follow the [fresh-machine setup](setup.md) and apply the current migrations. Provision an administrator using the [local CLI](setup.md#local-administrator) if you need diagnostics. The role is stored in the database, so a fresh clone needs a new account or a private backup.
+2. Configure a sending mailbox in the ignored `backend/.env`, then restart the API. Gmail SMTP uses an app password and STARTTLS on port 587. Open **Sign up** with a test mailbox you can read, enter the six-digit code, then sign out and verify password login. A non-Gmail recipient also tests cross-provider delivery. [Email verification setup](setup.md#email-verification)
+3. Create or reuse the project's Google OAuth Web client, register the exact frontend origin, and set `GOOGLE_CLIENT_ID` in the same local env file. Restart the API, then use **Continue with Google** in a signed-out browser. Verify that a returning Google user reaches the same account and that a verified password user can link Google under **Profile → Sign-in methods**. Use separate test accounts for the direct signup and linking checks. [Google sign-in setup](setup.md#google-sign-in)
+4. Sign in as both a member and an administrator. Check that the administrator can open **Admin** and read module diagnostics, and that a member receives HTTP 403 from `GET /api/auth/health`. Record observed outcomes and any provider error without publishing mailbox addresses, tokens, codes or credentials.
 
 ## Limits that matter when continuing
 
 - As-of calculations use stored event timestamps and earlier completed sessions. Historical OpenF1 revisions lack an original arrival-time log. Preserve as-of behavior on seeks and rewinds.
 - Strategy outputs are conditional estimates. Tyre inventory, wheel speeds and independent radar are unavailable. Rain scenarios need supplied forecasts. The model consumes observed sector timing and circuit-wide rainfall. Scope restrictions differ by session type.
 - The documented 180-second startup target refers to full-grid preparation on the active provider. The comparable source-cache measurements in the thesis cover three drivers. A full-grid benchmark under those same conditions is open.
-- Full-grid timing and strategy checks are recorded in the browser reports. The publication checkpoint passed 213 backend tests including the migration test and 65 frontend tests, plus frontend lint and build. Treat these as dated results and rerun targeted tests after changes.
+- Full-grid timing and strategy checks are recorded in the browser reports. This checkpoint passed 221 backend tests and 66 frontend tests, plus frontend lint and build. Treat these as dated results and rerun targeted tests after changes.
 
 ## Pending product work
 
-1. Implement Free, Analyst and Pro entitlements around layouts, panels and advanced analysis, with test checkout and server-side access enforcement. Pricing and quotas still need decisions.
+1. Complete the account-provider tests above, then run hosted Stripe checkout in the project's Sandbox. Before a live payment launch, complete withdrawal, tax, invoicing and privacy obligations for the intended markets. [Subscription design](architecture/14-subscriptions.md)
 2. Add the AI summary and driver comparison using existing calculations with links back to laps, sectors and values. Apply the selected replay cutoff to the context.
 3. Add session Q&A and optional replay lap summaries. Natural-language catalog search can follow later.
 4. Replace homepage placeholder content, implement automatically updated championship standings and a source-linked news feed. Provisional in-race standings and AI news summaries are optional follow-ups.

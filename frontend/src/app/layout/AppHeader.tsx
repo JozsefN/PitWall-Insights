@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { logout } from "../../data/api/auth.api";
+import { signedOutSession } from "../../data/queries/auth.queries";
 import { useAuthSession } from "../../features/auth/useAuthSession";
 import { ThemeToggle } from "../../features/theme/ThemeToggle";
 
@@ -13,14 +14,8 @@ export function AppHeader() {
 
   async function handleLogout() {
     logout();
-    queryClient.removeQueries({ queryKey: ["profile"] });
-
-    await queryClient.setQueryData(["auth-session"], {
-      authenticated: false,
-      user_id: null,
-      email: null,
-    });
-
+    queryClient.clear();
+    queryClient.setQueryData(["auth-session"], signedOutSession);
     await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 
     navigate("/login");
@@ -65,12 +60,12 @@ export function AppHeader() {
               >
                 <span className="app-header__identity">{data.email}</span><span className="app-header__profile-label">Profile</span>
               </Link>
-              <Link
+              {data.role === "admin" ? <Link
                 to="/system/health"
                 className="button-secondary app-header__diagnostics"
               >
-                Diagnostics
-              </Link>
+                Admin
+              </Link> : null}
               <button onClick={handleLogout} className="button-secondary">
                 Sign out
               </button>

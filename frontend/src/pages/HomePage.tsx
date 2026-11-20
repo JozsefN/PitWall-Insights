@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../data/api/auth.api";
+import { signedOutSession } from "../data/queries/auth.queries";
 import { useAuthSession } from "../features/auth/useAuthSession";
 import "./home-page.css";
 
@@ -331,11 +332,8 @@ export function HomePage() {
   async function handleLogout() {
     logout();
 
-    queryClient.setQueryData(["auth-session"], {
-      authenticated: false,
-      user_id: null,
-      email: null,
-    });
+    queryClient.clear();
+    queryClient.setQueryData(["auth-session"], signedOutSession);
 
     await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 

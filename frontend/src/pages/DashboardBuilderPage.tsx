@@ -8,6 +8,8 @@ import {
   useSetLayoutFavoriteMutation,
 } from "../data/queries/layouts.queries";
 import { resolveWorkspaceLayouts } from "../features/dashboards/layout-catalog";
+import { useMembership } from "../data/queries/billing.queries";
+import { layoutPlanRestriction } from "../features/dashboards/plan-access";
 import { LayoutPreview } from "../features/dashboards/LayoutPreview";
 import { draftFromLayout } from "../features/dashboards/editor-model";
 import { LayoutEditor } from "../features/dashboards/LayoutEditor";
@@ -58,6 +60,9 @@ export function DashboardBuilderPage() {
   const [notice, setNotice] = useState("");
   const [preview, setPreview] = useState<LayoutRecord | null>(null);
   const layoutsQuery = useLayoutsQuery();
+  const plan = useMembership().data?.plan;
+  const layoutCount = layoutsQuery.data?.length ?? 0;
+  const slotsFull = Boolean(plan && layoutCount >= plan.saved_layouts);
   const favoritesQuery = useLayoutFavoritesQuery();
   const favoriteMutation = useSetLayoutFavoriteMutation();
   const deleteMutation = useDeleteLayoutMutation();
@@ -84,7 +89,7 @@ export function DashboardBuilderPage() {
           widgetIds(layout.config),
           layout.config.sessionKind,
         ).includes(sessionKind)),
-  );
+  ).map(layout => ({ ...layout, planRestriction: layoutPlanRestriction(layout, plan, layoutsQuery.data) }));
   const selectedLayout = visibleLayouts.find(
     (layout) => layout.id === selectedId,
   );
@@ -172,9 +177,11 @@ export function DashboardBuilderPage() {
               type="button"
               className="button-primary"
               onClick={() => openEditor()}
+              disabled={slotsFull}
             >
               + New layout
             </button>
+            {plan ? <Link to="/profile?tab=subscription">{layoutCount} / {plan.saved_layouts} saved layouts</Link> : null}
             <div
               className="builder-mode-switch"
               role="group"
@@ -361,6 +368,7 @@ export function DashboardBuilderPage() {
                     }}
                   >
                     <strong>{layout.name}</strong>
+                    {layout.planRestriction ? <small>{layout.planRestriction}</small> : null}
                     <LayoutPreview config={layout.config} compact lead />
                     <Availability
                       modes={layoutModes(layout)}
@@ -392,7 +400,7 @@ export function DashboardBuilderPage() {
                         <button
                           className="button-secondary"
                           type="button"
-                          disabled={![1, 2].includes(layout.schemaVersion)}
+                          disabled={![1, 2].includes(layout.schemaVersion) || slotsFull}
                           onClick={() => openEditor(layout, true)}
                         >
                           Copy layout
@@ -410,7 +418,7 @@ export function DashboardBuilderPage() {
                       <button
                         className="button-secondary"
                         type="button"
-                        disabled={!layout.isValid}
+                        disabled={!layout.isValid || slotsFull || Boolean(layout.planRestriction)}
                         onClick={() => openEditor(layout, true)}
                       >
                         Use template

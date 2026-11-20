@@ -9,6 +9,8 @@ import { useImportJobQuery } from "../data/queries/session-import.queries";
 import { useSessionEntriesQuery, useSessionQuery, useSessionReplayTimelineQuery } from "../data/queries/sessions.queries";
 import { useTelemetryMaterializationJobsQuery } from "../data/queries/telemetry-materialization.queries";
 import { useAuthSession } from "../features/auth/useAuthSession";
+import { useMembership } from "../data/queries/billing.queries";
+import { layoutPlanRestriction } from "../features/dashboards/plan-access";
 import { clearTelemetryWarmupJobId } from "../features/sessions/session-import-warmup";
 import { writeStoredSessionWorkspace } from "../features/sessions/session-resume";
 import { sessionHostFlag } from "../features/circuits/circuit-catalog";
@@ -52,17 +54,25 @@ export function SessionWorkspacePage() {
   const sessionQuery = useSessionQuery(sessionId, true, telemetryWarmupActive ? 3000 : false);
   const entriesQuery = useSessionEntriesQuery(sessionId);
   const authSession = useAuthSession();
+  const membership = useMembership();
+  const plan = membership.data?.plan;
   const searchState = parseSessionWorkspaceSearchParams(searchParams);
   const audience = getAudienceForMode(searchState.mode);
   const layoutsQuery = useLayoutsQuery(authSession.data?.authenticated === true);
   const favoritesQuery = useLayoutFavoritesQuery();
   const favoriteMutation = useSetLayoutFavoriteMutation();
   const kind = sessionQuery.data && classifySession(sessionQuery.data);
-  const allLayouts = resolveAllLayouts(layoutsQuery.data, favoritesQuery.data);
+  const allLayouts = resolveAllLayouts(layoutsQuery.data, favoritesQuery.data).map(layout => {
+    const planRestriction = layoutPlanRestriction(layout, plan, layoutsQuery.data);
+    return planRestriction ? { ...layout, planRestriction, isValid: false, invalidReason: planRestriction } : { ...layout, planRestriction };
+  });
   const evaluatedLayouts = allLayouts.map(layout => checkLayoutInSession(layout, audience, kind));
   const resolvedLayouts = evaluatedLayouts.filter(layout => layout.isValid).sort(sortLayoutsForSession(audience, kind, favoritesQuery.data));
-  const unavailableLayouts = evaluatedLayouts.filter(layout => !layout.isValid && (layout.source === "user" || layout.id === searchState.layoutId));
-  const selectedLayout = getResolvedLayoutById(searchState.layoutId, evaluatedLayouts);
+  const unavailableLayouts = evaluatedLayouts.filter((layout, index) => !layout.isValid && (layout.source === "user" || layout.id === searchState.layoutId ||
+    (allLayouts[index].planRestriction && layout.invalidReason === allLayouts[index].planRestriction)));
+  const requestedLayout = getResolvedLayoutById(searchState.layoutId, evaluatedLayouts);
+  const accessRestriction = allLayouts.find(layout => layout.id === requestedLayout?.id)?.planRestriction;
+  const selectedLayout = accessRestriction && membership.isSuccess ? resolvedLayouts[0] ?? requestedLayout : requestedLayout;
   const alternativeAudience = audience === "live-race" ? "session-lookback" : "live-race";
   const originalSelection = getResolvedLayoutById(searchState.layoutId, allLayouts);
   const alternateLayout = originalSelection && checkLayoutInSession(originalSelection, alternativeAudience, kind);
@@ -335,6 +345,9 @@ export function SessionWorkspacePage() {
                 </div>
 
                 {favoriteMutation.isError ? <p role="alert">Could not update favorites. Please try again.</p> : null}
+                {accessRestriction && selectedLayout?.id !== requestedLayout?.id ? (
+                  <p role="status">{requestedLayout?.name}: {accessRestriction} Opened {selectedLayout?.name}.</p>
+                ) : null}
                 {layoutsLoading ? (
                   <div className="sessions-empty-state">Loading layouts...</div>
                 ) : resolvedLayouts.length === 0 ? (
@@ -348,9 +361,9 @@ export function SessionWorkspacePage() {
                       <div className="sessions-layout-item" key={layout.id}>
                       <button
                         type="button"
-                        className={`sessions-layout-card${searchState.layoutId === layout.id ? " is-active" : ""}${recommended ? " is-recommended" : ""}`}
+                        className={`sessions-layout-card${selectedLayout?.id === layout.id ? " is-active" : ""}${recommended ? " is-recommended" : ""}`}
                         aria-label={layout.name}
-                        aria-pressed={searchState.layoutId === layout.id}
+                        aria-pressed={selectedLayout?.id === layout.id}
                         onClick={() => updateSearchState(searchState, setSearchParams, {
                           layoutId: layout.id,
                           driverIds: recommended && validDriverIds.length === 0 ? starterDrivers(entries) : validDriverIds,
@@ -378,6 +391,7 @@ export function SessionWorkspacePage() {
                         <li key={layout.id}>
                           <strong>{layout.name}</strong>
                           <p>{layout.invalidReason}</p>
+                          {allLayouts.find(item => item.id === layout.id)?.planRestriction ? <Link to="/profile?tab=subscription">Compare plans</Link> : null}
                           {layout.source === "user" ? (
                             <Link to={`/dashboard-builder?${new URLSearchParams({ audience: layout.audience, layout: layout.id })}`}>
                               View in Dashboard Builder

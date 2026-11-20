@@ -42,15 +42,17 @@ export function classifySession(session: {
   return "other";
 }
 
-export function widgetIds(config: DashboardConfig): WidgetId[] {
+export function widgetInstances(config: DashboardConfig): WidgetId[] {
   function collect(node: SectionLayoutNode): WidgetId[] {
     return node.type === "group"
       ? node.children.flatMap(collect)
       : [node.widgetId];
   }
-  return [
-    ...new Set(config.sections.flatMap((section) => collect(section.layout))),
-  ];
+  return config.sections.flatMap((section) => collect(section.layout));
+}
+
+export function widgetIds(config: DashboardConfig): WidgetId[] {
+  return [...new Set(widgetInstances(config))];
 }
 
 export function layoutModes(

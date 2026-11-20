@@ -1,6 +1,8 @@
 import { hashKey, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { apiClient } from "../../data/api/client";
+import { useMembership } from "../../data/queries/billing.queries";
+import { useAuthSessionQuery } from "../../data/queries/auth.queries";
 import { useSessionReplayTimelineQuery } from "../../data/queries/sessions.queries";
 import { useReplayTime, useSessionWorkspace } from "../sessions/SessionWorkspaceContext";
 import { useTelemetryMaterializationReadiness } from "../sessions/session-data.hooks";
@@ -11,6 +13,9 @@ import { snapshotCutoff } from "./presentation";
 // Identical keys across all panels share a single in-flight request and cache.
 export function useRaceEstimates(enabled = true) {
   const workspace = useSessionWorkspace();
+  const membership = useMembership();
+  const { data: auth } = useAuthSessionQuery();
+  const view = (membership.data?.plan.level ?? 0) >= 1 ? "full" : "reports";
   const reviewTimeMs = useReplayTime("review");
   const timeline = useSessionReplayTimelineQuery(
     workspace.sessionId,
@@ -19,7 +24,7 @@ export function useRaceEstimates(enabled = true) {
   const ids = [...workspace.selectedDriverIds].sort();
   // The lookback insight panels use completed lap and timing records.
   const needsReplayTelemetry =
-    enabled && workspace.mode === "simulation" && ids.length > 0;
+    enabled && view === "full" && workspace.mode === "simulation" && ids.length > 0;
   const car = useTelemetryMaterializationReadiness({
     entryIds: ids,
     kind: "car",
@@ -37,7 +42,7 @@ export function useRaceEstimates(enabled = true) {
       ? reviewTimeMs
       : (timeline.data?.at(-1)?.session_time_ms ?? 0);
   const cutoff = snapshotCutoff(currentTime);
-  const scope = hashKey([workspace.mode, ids]);
+  const scope = hashKey([auth?.user_id, workspace.mode, ids, view]);
   const query = useQuery({
     queryKey: [
       "race-estimates",
@@ -57,11 +62,11 @@ export function useRaceEstimates(enabled = true) {
           sample_interval_ms: 500,
           max_events: 500,
         },
-        { signal },
+        { signal, params: { view } },
       );
       return data;
     },
-    enabled: enabled && (workspace.mode === "simulation" || timeline.isSuccess),
+    enabled: enabled && Boolean(auth?.user_id) && (workspace.mode === "simulation" || timeline.isSuccess),
     placeholderData: (previous, previousQuery) =>
       retainSnapshot(
         previous,
@@ -86,6 +91,7 @@ export function useRaceEstimates(enabled = true) {
   return {
     workspace,
     query,
+    view,
     currentTime,
     cutoff,
     errorMessage: timeline.isError

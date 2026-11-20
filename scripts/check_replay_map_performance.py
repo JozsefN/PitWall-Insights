@@ -1,4 +1,5 @@
 """Measure real full-grid replay on a saved race and exercise the Imola close-up fixture."""
+from local_test_accounts import seed_verified_account
 from filter_controls import select_control
 
 import json
@@ -271,7 +272,7 @@ def check_map_controls(page, panel, entries, throttle):
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     account = f"replay-map-check-{secrets.token_hex(6)}@example.com"
-    token = api("POST", "/api/auth/signup", payload={"email": account, "password": secrets.token_urlsafe(24)})["access_token"]
+    token = seed_verified_account({"email": account, "password": secrets.token_urlsafe(24)})["access_token"]
     owner = api("GET", "/api/auth/session", token)["user_id"]
     try:
         imola_fixture = SESSION_KEY == "9987"
